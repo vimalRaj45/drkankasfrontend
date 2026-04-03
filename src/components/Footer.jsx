@@ -21,6 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import Logo from "../assets/dr_kanaks_logo.png";
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
@@ -36,8 +38,8 @@ const Footer = () => {
           {/* Brand & Mission Column */}
           <div className="lg:col-span-1 space-y-8">
             <Link to="/" className="flex items-center gap-3 decoration-none group">
-              <div className="bg-primary p-2 rounded-xl shadow-xl shadow-primary/20 transition-transform group-hover:scale-110">
-                <Heart className="w-6 h-6 text-white fill-white/20" />
+              <div className="bg-white p-1 rounded-xl shadow-xl transition-transform group-hover:scale-110 border border-white/10">
+                <img src={Logo} className="w-8 h-8 object-contain" alt="Dr. Kanak's Clinic" />
               </div>
               <span className="text-2xl font-extrabold text-white tracking-tighter">
                 Dr. Kanak's <br />

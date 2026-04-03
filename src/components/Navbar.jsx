@@ -6,6 +6,8 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
+import Logo from "../assets/dr_kanaks_logo.png";
+
 const navLinks = [
   { name: "Home", href: "/", icon: <Layout className="w-4 h-4" /> },
   { name: "About", href: "/about", icon: <Heart className="w-4 h-4" /> },
@@ -69,8 +71,8 @@ const Navbar = () => {
           to="/" 
           className="flex items-center gap-2 group decoration-none"
         >
-          <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
-            <Heart className="w-6 h-6 text-white fill-white/20" />
+          <div className="bg-white p-1 rounded-xl shadow-lg transition-transform group-hover:scale-110 border border-border">
+            <img src={Logo} className="w-8 h-8 object-contain" alt="Dr. Kanak's Clinic" />
           </div>
           <span className="text-2xl font-black tracking-tight text-foreground">
             Dr. Kanak's
@@ -128,8 +130,8 @@ const Navbar = () => {
             <SheetContent side="right" className="w-[280px] p-0 border-l-0 dark:bg-slate-950 flex flex-col h-full overflow-hidden">
               <SheetHeader className="text-left py-4 px-6 border-b border-border bg-slate-50 dark:bg-slate-900/50">
                 <SheetTitle className="flex items-center gap-3">
-                  <div className="bg-primary p-1.5 rounded-lg">
-                    <Heart className="w-4 h-4 text-white" />
+                  <div className="bg-white p-1 rounded-lg border border-border">
+                    <img src={Logo} className="w-5 h-5 object-contain" alt="Logo" />
                   </div>
                   <span className="font-black text-sm uppercase tracking-widest text-slate-800 dark:text-white">Clinical Menu</span>
                 </SheetTitle>

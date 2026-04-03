@@ -28,26 +28,37 @@ self.addEventListener('notificationclick', function(event) {
   
   let targetUrl = event.notification.data.url;
   
-  // Handle action button clicks if any
+  // Handle action button clicks
   if (event.action === 'view-profile') {
     targetUrl = 'https://drkanaks.com/profile';
   } else if (event.action === 'book-new') {
     targetUrl = 'https://drkanaks.com/book';
   }
 
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      for (let i = 0; i < windowClients.length; i++) {
-        const client = windowClients[i];
-        if (client.url === targetUrl && 'focus' in client) {
-          return client.focus();
+  const urlToOpen = new URL(targetUrl, self.location.origin).href;
+
+  const promiseChain = clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true
+  }).then((windowClients) => {
+    let matchingClient = null;
+
+    for (let i = 0; i < windowClients.length; i++) {
+        const windowClient = windowClients[i];
+        if (windowClient.url === urlToOpen) {
+            matchingClient = windowClient;
+            break;
         }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(targetUrl);
-      }
-    })
-  );
+    }
+
+    if (matchingClient) {
+        return matchingClient.focus();
+    } else {
+        return clients.openWindow(urlToOpen);
+    }
+  });
+
+  event.waitUntil(promiseChain);
 });
 
 // Required for PWA: A valid service worker must have a fetch event handler. Wait, for strict PWA wrapping as an App instead of a shortcut, we're returning an active network fetch.

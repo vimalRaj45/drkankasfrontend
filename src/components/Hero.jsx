@@ -25,6 +25,7 @@ import {
   Zap as ZapIcon
 } from "lucide-react";
 import { getPublicStats } from "../services/api";
+import Logo from "../assets/dr_kanaks_logo.png";
 
 const Hero = () => {
   const [activeCard, setActiveCard] = useState(0);
@@ -190,7 +191,10 @@ const Hero = () => {
               className="rounded-full px-8 py-6 text-base shadow-xl shadow-blue-500/25 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 group"
               asChild
             >
-              <a href="/appointment">
+              <a href="/appointment" className="flex items-center gap-3">
+                <div className="bg-white p-1 rounded-lg">
+                   <img src={Logo} className="w-5 h-5 object-contain" alt="" />
+                </div>
                 Book Consultation
                 <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
               </a>

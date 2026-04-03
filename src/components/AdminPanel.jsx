@@ -44,6 +44,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'react-hot-toast';
+
+import Logo from "../assets/dr_kanaks_logo.png";
 import {
   Dialog,
   DialogContent,
@@ -173,8 +175,8 @@ const AdminPanel = () => {
         <div className="bg-slate-900 dark:bg-slate-950 text-white p-10 flex items-center justify-between relative overflow-hidden">
            <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
-                 <div className="bg-primary/20 p-2 rounded-xl">
-                   <LayoutDashboard className="w-6 h-6 text-primary" />
+                 <div className="bg-white p-1 rounded-xl shadow-lg border border-white/10">
+                    <img src={Logo} className="w-8 h-8 object-contain" alt="Logo" />
                  </div>
                  <h2 className="text-3xl font-extrabold tracking-tighter">Clinical Dashboard V4.0</h2>
               </div>

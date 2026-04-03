@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShieldCheck, Sparkles, Activity } from "lucide-react";
 
+import Logo from "../assets/dr_kanaks_logo.png";
+
 const LoadingScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -30,8 +32,8 @@ const LoadingScreen = () => {
             className="relative"
           >
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <div className="bg-primary p-6 rounded-[2rem] shadow-2xl relative z-10">
-              <Heart className="w-16 h-16 text-white fill-white/20" />
+            <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl relative z-10 border border-slate-100">
+              <img src={Logo} className="w-16 h-16 object-contain" alt="Dr. Kanak's Clinic" />
             </div>
             
             {/* Spinning Ring */}
