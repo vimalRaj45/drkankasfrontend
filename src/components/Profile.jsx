@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   User,
@@ -60,6 +60,7 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Sync from backend every 10 seconds
   useEffect(() => {
@@ -106,6 +107,7 @@ const Profile = () => {
     toast.success("Logged Out Successfully. Your clinical session has been completely reset for your security.", {
       icon: "🔒"
     });
+    navigate('/');
   };
 
   if (!user) return null;
