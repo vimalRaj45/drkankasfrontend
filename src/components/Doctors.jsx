@@ -18,10 +18,10 @@ import {
 
 const doctors = [
   {
-    name: "Dr. Kanak S.",
+    name: "Dr. Kanakaraj S.",
     specialization: "Dermatologist & Hair Restoration",
     experience: "10+ Years Experience",
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=2070&auto=format&fit=crop",
+    image: "/dr_kanakaraj_crossed_arms.png",
     rating: "4.9",
     reviews: "2.5k+",
     clinics: "Mumbai, Bangalore",
