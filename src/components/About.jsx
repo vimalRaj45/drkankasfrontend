@@ -2,7 +2,7 @@
 import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/SectionHeading.jsx";
 import { Award, BookOpen, Heart, Users, GraduationCap, Microscope, BadgeCheck, Stethoscope, TrendingUp } from "lucide-react";
-const doctorImg = "/dr_kanakaraj_sofa.png";
+const doctorImg = "/dr_kanakaraj_crossed_arms.png";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
