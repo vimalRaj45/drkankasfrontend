@@ -14,7 +14,7 @@ const reasons = [
   {
     icon: Shield,
     title: "Expert Care",
-    desc: "15+ years of specialized dermatology experience with proven results"
+    desc: "13+ years of specialized dermatology experience with proven results"
   },
   {
     icon: Sparkles,

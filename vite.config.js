@@ -14,4 +14,21 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    allowedHosts: true,
+    proxy: {
+      '/api': 'http://localhost:3000',
+      '/check-user': 'http://localhost:3000',
+      '/create-user': 'http://localhost:3000',
+      '/book': 'http://localhost:3000',
+      '/appointments': 'http://localhost:3000',
+      '/update-status': 'http://localhost:3000',
+      '/my-appointments': 'http://localhost:3000',
+      '/subscribe': 'http://localhost:3000',
+      '/feedback': 'http://localhost:3000',
+      '/broadcast-push': 'http://localhost:3000',
+      '/public-stats': 'http://localhost:3000',
+      '/settings': 'http://localhost:3000',
+    },
+  },
 })

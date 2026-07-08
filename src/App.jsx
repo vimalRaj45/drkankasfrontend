@@ -70,7 +70,12 @@ function App() {
       const subscriptionJSON = subscription.toJSON();
 
       const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
-      const userId = savedUser?.id || `GUEST_${Date.now()}`;
+      const userId = savedUser?.id;
+
+      if (!userId || userId.startsWith('GUEST_')) {
+        console.log("Push System: No registered user ID found. Deferring backend sync.");
+        return;
+      }
 
       console.log(`Push System: Syncing with Backend (${userId})...`);
       const res = await subscribeUser(userId, subscriptionJSON);
@@ -184,7 +189,7 @@ function App() {
 
       <Footer />
       <Toaster 
-        position="top-center" 
+        position="bottom-right" 
         reverseOrder={false}
         toastOptions={{
           className: 'font-bold text-sm bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-primary/20 shadow-2xl rounded-2xl p-4',

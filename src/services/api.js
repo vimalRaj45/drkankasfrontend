@@ -1,5 +1,5 @@
-export const API_URL = window.location.origin.includes('localhost') 
-  ? "http://localhost:3000" 
+export const API_URL = (window.location.origin.includes('localhost') || window.location.origin.includes('trycloudflare.com')) 
+  ? window.location.origin 
   : "https://drkanaksbackend.onrender.com";
 /* ---------------- HELPER ---------------- */
 
@@ -166,12 +166,12 @@ export const submitGoogleFeedback = async (rating, feedback, name = "") => {
   }
 };
 
-export const broadcastPush = async (title, body, url, adminToken = "CHANGE_THIS_SECRET") => {
+export const broadcastPush = async (title, body, url, image = "", sendNativePush = true, adminToken = "CHANGE_THIS_SECRET") => {
   try {
     const response = await fetch(`${API_URL}/broadcast-push`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ title, body, url, admin_token: adminToken })
+      body: JSON.stringify({ title, body, url, image, send_native_push: sendNativePush, admin_token: adminToken })
     });
     const data = await response.json();
     return {
@@ -180,6 +180,74 @@ export const broadcastPush = async (title, body, url, adminToken = "CHANGE_THIS_
     };
   } catch (error) {
     console.error("Error broadcasting push:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const uploadImage = async (base64Image, adminToken = "CHANGE_THIS_SECRET") => {
+  try {
+    const response = await fetch(`${API_URL}/api/upload`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ image: base64Image, admin_token: adminToken })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      url: data.url,
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getNotifications = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/notifications`);
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      data: data.data || []
+    };
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return { success: false, data: [] };
+  }
+};
+
+export const updateNotification = async (id, title, body, url, image, adminToken = "CHANGE_THIS_SECRET") => {
+  try {
+    const response = await fetch(`${API_URL}/api/notifications/${id}`, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify({ title, body, url, image_url: image, admin_token: adminToken })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error updating notification:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const deleteNotification = async (id, adminToken = "CHANGE_THIS_SECRET") => {
+  try {
+    const response = await fetch(`${API_URL}/api/notifications/${id}?admin_token=${adminToken}`, {
+      method: "DELETE",
+      headers
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error deleting notification:", error);
     return { success: false, error: error.message };
   }
 };
@@ -244,5 +312,37 @@ export const getPublicStats = async () => {
   } catch (error) {
     console.error("Error fetching stats:", error);
     return { success: false, data: { total_patients: 10000, success_rate: 98 } };
+  }
+};
+
+export const getSetting = async (key) => {
+  try {
+    const response = await fetch(`${API_URL}/api/settings/${key}`);
+    const data = await response.json();
+    return {
+      success: data.success ?? false,
+      value: data.value ?? ""
+    };
+  } catch (error) {
+    console.error(`Error fetching setting ${key}:`, error);
+    return { success: false, value: "" };
+  }
+};
+
+export const saveSetting = async (key, value, admin_token) => {
+  try {
+    const response = await fetch(`${API_URL}/api/settings`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ key, value, admin_token })
+    });
+    const data = await response.json();
+    return {
+      success: data.success ?? false,
+      message: data.message ?? ""
+    };
+  } catch (error) {
+    console.error(`Error saving setting ${key}:`, error);
+    return { success: false, error: error.message };
   }
 };

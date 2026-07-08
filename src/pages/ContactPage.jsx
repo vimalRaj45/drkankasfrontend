@@ -15,7 +15,7 @@ const ContactPage = () => {
     >
       <div className="container mx-auto px-4 pt-12">
         <h1 className="text-4xl md:text-6xl font-black text-center mb-4 tracking-tight text-foreground">
-          Reach <span className="text-primary italic">Dr. Kanak's</span>_
+          Reach <span className="text-primary italic">Dr. Kanaks</span>_
         </h1>
         <p className="text-center text-muted-foreground font-medium mb-12">
           We're here to assist you with your clinical health and aesthetic journey.

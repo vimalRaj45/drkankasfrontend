@@ -14,7 +14,7 @@ const blogPosts = [
     excerpt: "Everything from consultation to recovery - understand the entire hair transplant journey with expert insights.",
     image: "/haire2.jpg",
     category: "Hair Transplant",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "March 15, 2024",
     readTime: "8 min read"
   },
@@ -24,7 +24,7 @@ const blogPosts = [
     excerpt: "Early intervention is key to preventing permanent hair loss. Learn the warning signs that require professional attention.",
     image: "/hairloss2222.jpg",
     category: "Hair Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "March 10, 2024",
     readTime: "5 min read"
   },
@@ -34,7 +34,7 @@ const blogPosts = [
     excerpt: "Separating myths from facts - evidence-based natural approaches to managing acne breakouts effectively.",
     image: "/nature2.jpg",
     category: "Skin Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "Feb 28, 2024",
     readTime: "7 min read"
   }

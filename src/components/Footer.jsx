@@ -11,9 +11,6 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  ShieldCheck, 
-  Award, 
-  Star,
   ArrowRight,
   Send,
   CalendarCheck
@@ -37,14 +34,8 @@ const Footer = () => {
           
           {/* Brand & Mission Column */}
           <div className="lg:col-span-1 space-y-8">
-            <Link to="/" className="flex items-center gap-3 decoration-none group">
-              <div className="bg-white p-1 rounded-xl shadow-xl transition-transform group-hover:scale-110 border border-white/10">
-                <img src={Logo} className="w-8 h-8 object-contain" alt="Dr. Kanak's Clinic" />
-              </div>
-              <span className="text-2xl font-extrabold text-white tracking-tighter">
-                Dr. Kanak's <br />
-                <span className="text-xs text-primary font-bold uppercase tracking-widest leading-none block mt-1">Speciality Clinic</span>
-              </span>
+            <Link to="/" className="flex items-center decoration-none group">
+              <img src={Logo} className="h-14 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105" alt="Dr. Kanaks Clinic" />
             </Link>
             
             <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs italic">
@@ -144,25 +135,11 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Global Certifications Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-12 sm:mb-20">
-          {[
-            { label: "ISO Certified 9001", icon: <ShieldCheck className="w-6 h-6 text-slate-500" /> },
-            { label: "US FDA Approved", icon: <Award className="w-6 h-6 text-slate-500" /> },
-            { label: "IAHRS Member", icon: <Star className="w-6 h-6 text-slate-500" /> },
-            { label: "Board Certified", icon: <Star className="w-6 h-6 text-slate-500" /> }
-          ].map(cert => (
-            <div key={cert.label} className="bg-white/5 border border-white/10 p-5 rounded-2xl flex items-center justify-center gap-4 hover:bg-white/10 transition-colors">
-              {cert.icon}
-              <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">{cert.label}</span>
-            </div>
-          ))}
-        </div>
 
         {/* Bottom Bar: Copyright & Accessibility */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-slate-500 text-xs font-medium">
-             &copy; {currentYear} Dr. Kanak's Speciality Clinic. All Rights Reserved. &middot; <a href="#" className="hover:text-primary decoration-none">Privacy Policy</a>
+             &copy; {currentYear} Dr. Kanaks Speciality Clinic. All Rights Reserved. &middot; <a href="#" className="hover:text-primary decoration-none">Privacy Policy</a>
           </p>
           
           <div className="flex items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">

@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 const steps = [
   {
     title: "Clinical Consultation",
-    desc: "A comprehensive assessment of your medical history and current conditions by Dr. Kanagaraj.",
+    desc: "A comprehensive assessment of your medical history and current conditions by Dr. (Major) R. Kanagaraj.",
     icon: <Stethoscope className="w-6 h-6" />,
     color: "bg-blue-100 text-blue-600"
   },

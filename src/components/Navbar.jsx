@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Logo from "../assets/dr_kanaks_logo.png";
+import NotificationCenter from "./NotificationCenter";
 
 const navLinks = [
   { name: "Home", href: "/", icon: <Layout className="w-4 h-4" /> },
@@ -69,14 +70,9 @@ const Navbar = () => {
         {/* Logo */}
         <Link 
           to="/" 
-          className="flex items-center gap-2 group decoration-none"
+          className="flex items-center group decoration-none py-1"
         >
-          <div className="bg-white p-1 rounded-xl shadow-lg transition-transform group-hover:scale-110 border border-border">
-            <img src={Logo} className="w-8 h-8 object-contain" alt="Dr. Kanak's Clinic" />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-foreground">
-            Dr. Kanak's
-          </span>
+          <img src={Logo} className="h-9 sm:h-14 w-auto object-contain transition-transform group-hover:scale-105" alt="Dr. Kanaks Clinic" />
         </Link>
 
         {/* Desktop Links */}
@@ -99,11 +95,13 @@ const Navbar = () => {
         </nav>
 
         {/* CTA & Mobile Menu & Theme Toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3">
+          <NotificationCenter />
+          
           <Button 
             variant="ghost" 
             size="icon" 
-            className="rounded-full h-11 w-11 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-full h-9 w-9 sm:h-11 sm:w-11 hover:bg-slate-100 dark:hover:bg-slate-800"
             onClick={toggleTheme}
           >
             {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-foreground/70" />}
@@ -123,7 +121,7 @@ const Navbar = () => {
           {/* Mobile Menu */}
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden rounded-xl h-11 w-11">
+              <Button variant="ghost" size="icon" className="lg:hidden rounded-xl h-9 w-9 sm:h-11 sm:w-11">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>

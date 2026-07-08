@@ -57,7 +57,7 @@ const blogPostsData = {
       <p>Before considering a hair transplant, it's important to understand the root cause of your hair loss. Male and female pattern baldness (androgenetic alopecia) is the most common cause, affecting millions worldwide. Other factors include stress, hormonal changes, nutritional deficiencies, and certain medical conditions.</p>
       
       <h2>The Consultation Process</h2>
-      <p>Your hair transplant journey begins with a thorough consultation. During this visit, Dr. Kanagaraj will:</p>
+      <p>Your hair transplant journey begins with a thorough consultation. During this visit, Dr. (Major) R. Kanagaraj will:</p>
       <ul>
         <li>Evaluate your hair loss pattern and donor area quality</li>
         <li>Discuss your medical history and any underlying conditions</li>
@@ -102,11 +102,11 @@ const blogPostsData = {
         <li>Natural-looking results that blend seamlessly with your existing hair</li>
       </ul>
       
-      <p>Ready to take the first step toward restoring your hair and confidence? Schedule a consultation with Dr. Kanagaraj today to discuss your hair restoration goals.</p>
+      <p>Ready to take the first step toward restoring your hair and confidence? Schedule a consultation with Dr. (Major) R. Kanagaraj today to discuss your hair restoration goals.</p>
     `,
     image: "/haire2.jpg",
     category: "Hair Transplant",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "March 15, 2024",
     readTime: "8 min read",
     views: "12.5k",
@@ -140,7 +140,7 @@ const blogPostsData = {
     `,
     image: "/hairloss2222.jpg",
     category: "Hair Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "March 10, 2024",
     readTime: "5 min read",
     views: "8.2k",
@@ -168,7 +168,7 @@ const blogPostsData = {
     `,
     image: "https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=2070&auto=format&fit=crop",
     category: "Treatments",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "March 5, 2024",
     readTime: "6 min read",
     views: "9.4k",
@@ -199,7 +199,7 @@ const blogPostsData = {
     `,
     image: "/nature2.jpg",
     category: "Skin Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "February 28, 2024",
     readTime: "7 min read",
     views: "15.3k",
@@ -236,7 +236,7 @@ const blogPostsData = {
     `,
     image: "/follicle.jpg",
     category: "Hair Transplant",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "February 20, 2024",
     readTime: "10 min read",
     views: "11.7k",
@@ -270,7 +270,7 @@ const blogPostsData = {
     `,
     image: "/haircare.jpg",
     category: "Aftercare",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "February 15, 2024",
     readTime: "6 min read",
     views: "7.8k",
@@ -306,7 +306,7 @@ const blogPostsData = {
     `,
     image: "/pigmen.jpg",
     category: "Skin Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "February 10, 2024",
     readTime: "7 min read",
     views: "10.2k",
@@ -334,7 +334,7 @@ const blogPostsData = {
     `,
     image: "/routine.jpg",
     category: "Aftercare",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "February 5, 2024",
     readTime: "5 min read",
     views: "6.9k",
@@ -380,7 +380,7 @@ const blogPostsData = {
     `,
     image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=2070&auto=format&fit=crop",
     category: "Skin Care",
-    author: "Dr. Kanagaraj",
+    author: "Dr. (Major) R. Kanagaraj",
     date: "January 28, 2024",
     readTime: "8 min read",
     views: "18.4k",
@@ -568,7 +568,7 @@ const BlogPostDetail = ({ post, onBack }) => {
             <h4 className="font-display font-bold text-lg mb-1">{post.author}</h4>
             <p className="text-sm text-primary mb-2">MBBS., MD (DVL) | Dermatologist & Hair Transplant Specialist</p>
             <p className="text-muted-foreground text-sm">
-              With over 15 years of experience in dermatology and hair restoration, Dr. Kanagaraj has helped thousands of patients achieve their hair and skin goals.
+              With over 13 years of experience in dermatology and hair restoration, Dr. (Major) R. Kanagaraj has helped thousands of patients achieve their hair and skin goals.
             </p>
           </div>
         </div>
@@ -605,7 +605,7 @@ const BlogPostDetail = ({ post, onBack }) => {
       {/* CTA */}
       <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 text-center">
         <h3 className="font-display font-bold text-2xl mb-2">Ready to Transform Your Skin or Hair?</h3>
-        <p className="text-muted-foreground mb-6">Book a consultation with Dr. Kanagaraj today</p>
+        <p className="text-muted-foreground mb-6">Book a consultation with Dr. (Major) R. Kanagaraj today</p>
         <Link to="/appointment">
           <Button className="rounded-full px-8 py-6 h-auto">
             Book Appointment

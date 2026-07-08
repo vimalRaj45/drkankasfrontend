@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Star, 
-  ShieldCheck, 
   ThumbsUp, 
   ThumbsDown,
   X,
@@ -11,7 +10,6 @@ import {
   Sparkles,
   MessageSquare,
   ArrowRight,
-  CheckCircle2,
   Quote,
   Heart
 } from "lucide-react";
@@ -50,13 +48,37 @@ const Testimonials = () => {
     const observer = new MutationObserver(checkTheme);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-    // Ensure Common Ninja re-triggers if needed (some versions of the SDK require this)
-    if (window.CommonNinja && typeof window.CommonNinja.reload === 'function') {
-      window.CommonNinja.reload();
+    // Ensure Common Ninja re-triggers and initializes correctly
+    const initCommonNinja = () => {
+      if (window.CommonNinja) {
+        if (typeof window.CommonNinja.init === 'function') {
+          window.CommonNinja.init();
+        } else if (typeof window.CommonNinja.reload === 'function') {
+          window.CommonNinja.reload('46e44528-7b7e-4e9d-9070-79d0dffba4d4');
+        }
+      }
+    };
+
+    let script = document.querySelector('script[src*="commonninja.js"]');
+    if (script) {
+      if (window.CommonNinja) {
+        initCommonNinja();
+      } else {
+        script.addEventListener('load', initCommonNinja);
+      }
+    } else {
+      script = document.createElement("script");
+      script.src = "https://cdn.commonninja.com/sdk/latest/commonninja.js?widgetIds=46e44528-7b7e-4e9d-9070-79d0dffba4d4";
+      script.defer = true;
+      script.onload = initCommonNinja;
+      document.body.appendChild(script);
     }
 
     return () => {
       observer.disconnect();
+      if (script) {
+        script.removeEventListener('load', initCommonNinja);
+      }
     };
   }, []);
 
@@ -199,16 +221,7 @@ const Testimonials = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3 sm:gap-4 mt-auto relative z-10">
-               <span className="flex items-center gap-2 text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest bg-white dark:bg-white/5 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm">
-                 <ShieldCheck className="w-4 h-4 text-primary" />
-                 ISO 9001
-               </span>
-               <span className="flex items-center gap-2 text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest bg-white dark:bg-white/5 px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-white/5 shadow-sm">
-                 <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                 Certified
-               </span>
-            </div>
+
           </motion.div>
 
           {/* Page Card: Right (Interactive) */}
@@ -240,8 +253,16 @@ const Testimonials = () => {
         {/* Common Ninja Integration - Follows Action Grid */}
         <div className="mb-20 sm:mb-32 relative">
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-[2.5rem] sm:rounded-[4rem] blur-3xl opacity-20 pointer-events-none" />
-          <div className="relative bg-slate-50 dark:bg-slate-900/60 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3.5rem] p-4 sm:p-12 shadow-xl min-h-[400px] overflow-x-hidden">
-             <div className="commonninja_component pid-46e44528-7b7e-4e9d-9070-79d0dffba4d4"></div>
+          <div className="relative bg-slate-50 dark:bg-slate-900/60 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3.5rem] p-3 sm:p-12 shadow-xl min-h-[500px] sm:min-h-[650px] overflow-hidden">
+             <iframe 
+               src="https://commonninja.site/7dd46ef0-d2df-48d2-8f8d-e45995ff3e45" 
+               width="100%" 
+               height="100%" 
+               frameBorder="0" 
+               scrolling="auto"
+               className="w-full min-h-[500px] sm:min-h-[650px] border-none"
+               title="Google Reviews"
+             ></iframe>
           </div>
         </div>
 
@@ -303,7 +324,7 @@ const Testimonials = () => {
                 <div className="text-center space-y-2">
                   <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Your Experience?</h3>
                   <p className="text-slate-500 dark:text-slate-400 font-medium text-sm leading-relaxed max-w-[280px]">
-                    Share your clinical journey with Dr. Kanak's expert team.
+                    Share your clinical journey with Dr. Kanaks expert team.
                   </p>
                 </div>
 

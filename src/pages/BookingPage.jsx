@@ -48,7 +48,7 @@ const BookingPage = () => {
                   <span className="text-primary italic">Priority Consultation</span>
                 </h1>
                 <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-xl">
-                  Take the first step towards your transformation. Please provide your clinical requirements below to request a session with Dr. Kanagaraj.
+                  Take the first step towards your transformation. Please provide your clinical requirements below to request a session with Dr. (Major) R. Kanagaraj.
                 </p>
              </motion.div>
           </div>

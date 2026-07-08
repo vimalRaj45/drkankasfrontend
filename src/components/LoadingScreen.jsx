@@ -32,9 +32,7 @@ const LoadingScreen = () => {
             className="relative"
           >
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl relative z-10 border border-slate-100">
-              <img src={Logo} className="w-16 h-16 object-contain" alt="Dr. Kanak's Clinic" />
-            </div>
+            <img src={Logo} className="h-20 sm:h-28 w-auto object-contain relative z-10" alt="Dr. Kanaks Clinic" />
             
             {/* Spinning Ring */}
             <motion.div
@@ -52,7 +50,7 @@ const LoadingScreen = () => {
             className="mt-12 text-center"
           >
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tighter mb-2">
-              Dr. Kanak's <span className="text-primary italic">Clinic</span>
+              Dr. Kanaks <span className="text-primary italic">Clinic</span>
             </h2>
             <div className="flex items-center gap-3 justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">
               <ShieldCheck className="w-3 h-3 text-primary" />

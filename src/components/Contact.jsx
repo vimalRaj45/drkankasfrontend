@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Phone, 
@@ -17,11 +17,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getSetting } from "../services/api";
 
 const contactDetails = [
   {
     title: "Clinic Address",
-    content: "10/18, 1st Floor, Lakshmi complex, Swarnapuri, Salem, TN 636004",
+    content: "1/11A-3, Anna Salai, Swarnapuri, Salem, Tamil Nadu 636004",
     icon: <MapPin className="w-4 h-4" />,
     color: "bg-blue-100 text-blue-600"
   },
@@ -33,7 +34,7 @@ const contactDetails = [
   },
   {
     title: "Official Website",
-    content: "www.drkanaksskinandhairclinic.com",
+    content: "www.drkanaks.com",
     icon: <Mail className="w-4 h-4" />,
     color: "bg-secondary/10 text-secondary"
   },
@@ -46,6 +47,23 @@ const contactDetails = [
 ];
 
 const Contact = () => {
+  const [workingHours, setWorkingHours] = useState("Mon – Sat: 10:30 AM – 8:30 PM (Sunday Closed)");
+
+  useEffect(() => {
+    getSetting("working_hours").then(res => {
+      if (res.success && res.value) {
+        setWorkingHours(res.value);
+      }
+    });
+  }, []);
+
+  const dynamicContactDetails = contactDetails.map(item => {
+    if (item.title === "Working Hours") {
+      return { ...item, content: workingHours };
+    }
+    return item;
+  });
+
   const navigationUrl = "https://www.google.com/maps/dir//Dr+Kanaks+Skin+Hair+And+Cosmetology+Clinic+Swarnapuri+Salem+Tamil+Nadu+636004/@11.66858,78.14083,15z";
 
   return (
@@ -79,7 +97,7 @@ const Contact = () => {
 
           {/* Left: Contact Info Cards */}
           <div className="lg:col-span-2 space-y-3 sm:space-y-4">
-            {contactDetails.map((item, index) => (
+            {dynamicContactDetails.map((item, index) => (
               <motion.div
                 key={item.title}
                 initial={{ opacity: 0, y: 20 }}

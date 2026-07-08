@@ -56,27 +56,42 @@ const QueueProgress = ({ date }) => {
   );
 };
 
+const formatApptDateTime = (dateStr, timeStr) => {
+  if (!dateStr) return "";
+  try {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const parts = dateStr.split('-');
+    const y = parseInt(parts[0]);
+    const mIdx = parseInt(parts[1]) - 1;
+    const d = parseInt(parts[2]);
+    const m = months[mIdx] || "";
+    
+    let displayTime = timeStr || "";
+    if (timeStr && timeStr.includes(':')) {
+      const timeParts = timeStr.split(':');
+      let h = parseInt(timeParts[0]);
+      let mins = timeParts[1];
+      if (!timeStr.toUpperCase().includes('AM') && !timeStr.toUpperCase().includes('PM')) {
+        const suffix = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        displayTime = `${h}:${mins.substring(0,2)} ${suffix}`;
+      } else {
+        const suffix = timeStr.toUpperCase().includes('PM') ? 'PM' : 'AM';
+        h = parseInt(timeStr.split(':')[0]);
+        displayTime = `${h}:${mins.split(' ')[0]} ${suffix}`;
+      }
+    }
+    return `${d} ${m} ${y} ${displayTime}`;
+  } catch (e) {
+    return `${dateStr} ${timeStr}`;
+  }
+};
+
 const Profile = () => {
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Sync from backend every 10 seconds
-  useEffect(() => {
-    const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
-    if (savedUser) {
-      setUser(savedUser);
-      // Initial fetch
-      syncAppointments(savedUser.phone);
-
-      const interval = setInterval(() => {
-        syncAppointments(savedUser.phone);
-      }, 10000);
-
-      return () => clearInterval(interval);
-    }
-  }, []);
 
   const syncAppointments = async (phone) => {
     if (!phone) return;
@@ -95,10 +110,27 @@ const Profile = () => {
         }
       });
 
-      setAppointments(result.data);
+      // Update local storage representation and local state
       localStorage.setItem('clinic_appointments', JSON.stringify(result.data));
+      setAppointments(result.data);
     }
   };
+
+  // Sync from backend every 10 seconds
+  useEffect(() => {
+    const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
+    if (savedUser) {
+      setUser(savedUser);
+      // Initial fetch
+      syncAppointments(savedUser.phone);
+
+      const interval = setInterval(() => {
+        syncAppointments(savedUser.phone);
+      }, 10000);
+
+      return () => clearInterval(interval);
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -272,13 +304,9 @@ const Profile = () => {
 
                           <div className="md:col-span-1 flex items-center gap-8 md:justify-center">
                             <div className="flex flex-col">
-                              <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
-                                <CalendarCheck className="w-4 h-4 text-slate-400" />
-                                {apt.date}
-                              </div>
-                              <div className="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300 mt-1">
-                                <Clock className="w-4 h-4 text-slate-400" />
-                                {apt.time}
+                              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                                <CalendarCheck className="w-4 h-4 text-primary" />
+                                {formatApptDateTime(apt.date, apt.time)}
                               </div>
                             </div>
                           </div>

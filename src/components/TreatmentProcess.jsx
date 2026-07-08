@@ -18,7 +18,7 @@ const TreatmentProcess = () => {
     {
       step: 2,
       title: 'Customized Treatment Plan',
-      desc: 'Based on your diagnosis, Dr. Kanagaraj crafts a bespoke, evidence-based plan. You get full transparency regarding the procedure, timeline, expected outcomes, and post-care.',
+      desc: 'Based on your diagnosis, Dr. (Major) R. Kanagaraj crafts a bespoke, evidence-based plan. You get full transparency regarding the procedure, timeline, expected outcomes, and post-care.',
       icon: 'bi-card-checklist',
       color: '#f59e0b', // Amber/Yellow
     },

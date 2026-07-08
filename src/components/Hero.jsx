@@ -6,30 +6,38 @@ import {
   ShieldCheck, 
   Clock, 
   Award, 
-  Star, 
   ArrowRight, 
   ChevronRight,
   Sparkles,
-  Droplets,
-  Scissors,
-  Heart,
-  Shield,
-  Phone,
   TrendingUp,
-  CheckCircle,
-  Zap,
-  Activity,
-  Calendar,
-  ThumbsUp,
-  Users,
-  Zap as ZapIcon
+  ChevronLeft
 } from "lucide-react";
 import { getPublicStats } from "../services/api";
 import Logo from "../assets/dr_kanaks_logo.png";
 
+const flyers = [
+  { id: 1, src: "/flyer1.jpg" },
+  { id: 2, src: "/flyer2.jpg" },
+  { id: 3, src: "/flyer3.jpg" },
+  { id: 4, src: "/flyer4.jpg" },
+  { id: 5, src: "/flyer5.jpg" }
+];
+
+const words = [
+  "Your Skin, Hair & Confidence Our Priority",
+  "Pioneering Clinical Excellence in Salem",
+  "Advanced Skin Treatments & Cosmetology",
+  "US FDA Approved Technologies & Care",
+  "Trusted Hair Restoration & Transplant"
+];
+
 const Hero = () => {
-  const [activeCard, setActiveCard] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [liveStats, setLiveStats] = useState({ total_patients: 10000, success_rate: 98 });
+  const [wordIndex, setWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [speed, setSpeed] = useState(50);
   
   // Fetch live stats
   useEffect(() => {
@@ -38,83 +46,53 @@ const Hero = () => {
     });
   }, []);
   
-  // Treatment cards data with more content
-  const treatmentCards = [
-    {
-      title: "Hair Transplant",
-      description: "Advanced FUE & FUT techniques for natural results",
-      icon: Scissors,
-      gradientFrom: "from-blue-600",
-      gradientTo: "to-blue-400",
-      stats: "95% Success Rate",
-      patients: "2,500+ Treated",
-      recovery: "7-10 Days",
-      details: "Permanent solution with minimal scarring"
-    },
-    {
-      title: "Acne Treatment",
-      description: "Clear skin solutions for all skin types",
-      icon: Sparkles,
-      gradientFrom: "from-blue-500",
-      gradientTo: "to-sky-400",
-      stats: "98% Improvement",
-      patients: "3,200+ Treated",
-      recovery: "4-6 Weeks",
-      details: "Customized treatment plans"
-    },
-    {
-      title: "PRP Therapy",
-      description: "Natural hair restoration using your own platelets",
-      icon: Droplets,
-      gradientFrom: "from-blue-600",
-      gradientTo: "to-cyan-400",
-      stats: "90% Results",
-      patients: "1,800+ Treated",
-      recovery: "No Downtime",
-      details: "Stimulates natural hair growth"
-    },
-    {
-      title: "Anti-Aging",
-      description: "Youthful skin revival with advanced treatments",
-      icon: Heart,
-      gradientFrom: "from-blue-500",
-      gradientTo: "to-indigo-400",
-      stats: "100% Satisfaction",
-      patients: "4,000+ Treated",
-      recovery: "Minimal",
-      details: "Turn back the clock naturally"
-    },
-    {
-      title: "Pigmentation",
-      description: "Even tone restoration for radiant skin",
-      icon: Shield,
-      gradientFrom: "from-blue-600",
-      gradientTo: "to-sky-400",
-      stats: "92% Success",
-      patients: "1,500+ Treated",
-      recovery: "2-3 Sessions",
-      details: "Advanced laser technology"
-    },
-    {
-      title: "Laser Treatment",
-      description: "State-of-the-art laser technology",
-      icon: Zap,
-      gradientFrom: "from-blue-500",
-      gradientTo: "to-cyan-400",
-      stats: "99% Results",
-      patients: "5,000+ Treated",
-      recovery: "24-48 Hours",
-      details: "Painless & effective"
-    }
-  ];
-
-  // Auto-rotate cards every 4 seconds
+  // Auto-rotate flyers every 5 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveCard((prev) => (prev + 1) % treatmentCards.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [treatmentCards.length]);
+    const timer = setInterval(() => {
+      handleNext();
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Typewriter typography effect logic
+  useEffect(() => {
+    let timer;
+    const activeWord = words[wordIndex];
+
+    const handleType = () => {
+      if (!isDeleting) {
+        const nextText = activeWord.substring(0, currentText.length + 1);
+        setCurrentText(nextText);
+        setSpeed(50); // Snappy typing speed
+
+        if (nextText === activeWord) {
+          setIsDeleting(true);
+          setSpeed(1200); // 1.2s pause on complete phrase
+        }
+      } else {
+        const nextText = activeWord.substring(0, currentText.length - 1);
+        setCurrentText(nextText);
+        setSpeed(25); // Faster deleting speed
+
+        if (nextText === "") {
+          setIsDeleting(false);
+          setWordIndex((prev) => (prev + 1) % words.length);
+          setSpeed(300); // Quick 0.3s pause before typing the next phrase
+        }
+      }
+    };
+
+    timer = setTimeout(handleType, speed);
+    return () => clearTimeout(timer);
+  }, [currentText, isDeleting, wordIndex, speed]);
+
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % flyers.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + flyers.length) % flyers.length);
+  };
 
   return (
     <section 
@@ -140,7 +118,7 @@ const Hero = () => {
         />
       </div>
 
-      <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      <div className="container mx-auto px-4 grid lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
         {/* Left Side Content */}
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
@@ -148,51 +126,28 @@ const Hero = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative z-10"
         >
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full mb-6"
-          >
-            <ShieldCheck className="w-4 h-4 text-blue-600" />
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Certified Dermatology Specialist</span>
-            <motion.span
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <Sparkles className="w-3 h-3 text-blue-500" />
-            </motion.span>
-          </motion.div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] mb-6 text-foreground">
-            Your Skin, Hair & <br />
-            <span className="relative inline-block">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500">
-                Confidence
-              </span>
-              <motion.div 
-                className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-sky-500 rounded-full"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-              />
-            </span>{" "}
-            <span className="text-foreground">Our Priority</span>
+
+          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] mb-6 text-foreground tracking-tight">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-600 to-slate-900 dark:from-white dark:via-blue-400 dark:to-white">
+              {currentText}
+            </span>
+            <span className="w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
           </h1>
 
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
-            Expert dermatological care by Dr. Kanagaraj MBBS., MD (DVL). Specialized in advanced skin treatments, 
+            Expert dermatological care by Dr. (Major) R. Kanagaraj MBBS., MD (DVL). Specialized in advanced skin treatments, 
             hair restoration & cosmetic procedures. Trusted by 10,000+ happy patients.
           </p>
 
-          <div className="flex flex-wrap gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full sm:w-auto">
             <Button 
               size="lg" 
-              className="rounded-full px-8 py-6 text-base shadow-xl shadow-blue-500/25 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 group"
+              className="rounded-full px-8 py-6 text-base shadow-xl shadow-blue-500/25 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 group w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98] transition-all"
               asChild
             >
-              <a href="/appointment" className="flex items-center gap-3">
-                <div className="bg-white p-1 rounded-lg">
+              <a href="/appointment" className="flex items-center justify-center gap-3">
+                <div className="bg-white p-1 rounded-lg shrink-0">
                    <img src={Logo} className="w-5 h-5 object-contain" alt="" />
                 </div>
                 Book Consultation
@@ -202,240 +157,108 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="rounded-full px-8 py-6 text-base border-2 border-blue-500/30 hover:border-blue-500 hover:bg-blue-500/5 transition-all group"
+              className="rounded-full px-8 py-6 text-base border-2 border-blue-500/30 hover:border-blue-500 hover:bg-blue-500/5 transition-all group w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
               asChild
             >
-              <a href="#services">
+              <a href="#services" className="flex items-center justify-center">
                 Explore Treatments
                 <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
               </a>
             </Button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 pt-6 border-t border-border">
+          <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-4 w-full">
             {[
-              { value: "15+", label: "Years Experience", icon: Clock, color: "text-blue-600" },
-              { value: `${(liveStats.total_patients / 1000).toFixed(1)}k+`, label: "Happy Patients", icon: Award, color: "text-sky-500" },
-              { value: `${liveStats.success_rate}%`, label: "Success Rate", icon: TrendingUp, color: "text-cyan-500" }
+              { value: "13+", label: "Years Experience", icon: Clock, color: "text-blue-600 bg-blue-500/10 dark:text-blue-400 dark:bg-blue-400/10" },
+              { value: `${(liveStats.total_patients / 1000).toFixed(1)}k+`, label: "Happy Patients", icon: Award, color: "text-sky-500 bg-sky-500/10 dark:text-sky-400 dark:bg-sky-400/10" },
+              { value: `${liveStats.success_rate}%`, label: "Success Rate", icon: TrendingUp, color: "text-cyan-500 bg-cyan-500/10 dark:text-cyan-400 dark:bg-cyan-400/10" }
             ].map((stat, idx) => (
               <motion.div 
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + idx * 0.1 }}
-                className="flex flex-col items-center text-center"
+                transition={{ delay: 0.6 + idx * 0.1, type: "spring", stiffness: 100 }}
+                className="flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-white/5 shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-blue-500/20 dark:hover:border-blue-500/30 transition-all duration-300 group"
               >
-                <stat.icon className={`w-5 h-5 mb-2 ${stat.color}`} />
+                <div className={`p-2 rounded-xl mb-2 sm:mb-3 ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
+                  <stat.icon className="w-5 h-5 shrink-0" />
+                </div>
                 <motion.span 
-                  className="text-2xl sm:text-3xl font-bold text-foreground"
-                  initial={{ scale: 0.5 }}
+                  className="text-lg sm:text-2xl font-black text-foreground leading-tight"
+                  initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
-                  transition={{ delay: 0.8 + idx * 0.1, type: "spring" }}
+                  transition={{ delay: 0.8 + idx * 0.1 }}
                 >
                   {stat.value}
                 </motion.span>
-                <span className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</span>
+                <span className="text-[9px] sm:text-xs text-muted-foreground font-semibold uppercase tracking-wider leading-tight max-w-[80px] sm:max-w-none mt-1 sm:mt-1.5">
+                  {stat.label}
+                </span>
               </motion.div>
             ))}
           </div>
         </motion.div>
 
-        {/* Right Side - Moving Cards Stack with Rich Content */}
+        {/* Right Side - Carousel Slider (Images only, no click actions) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9, x: 30 }}
+          initial={{ opacity: 0, scale: 0.95, x: 30 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "circOut" }}
-          className="relative lg:block hidden"
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative w-full max-w-lg lg:max-w-xl mx-auto z-10"
         >
-          <div className="relative z-20" style={{ width: "100%", maxWidth: "520px", margin: "0 auto" }}>
-            <div className="relative" style={{ height: "620px" }}>
-              <AnimatePresence mode="wait">
-                {treatmentCards.map((card, idx) => {
-                  const offset = (idx - activeCard + treatmentCards.length) % treatmentCards.length;
-                  const isActive = offset === 0;
-                  const isBehind = offset === 1;
-                  const isFurtherBehind = offset === 2;
-                  
-                  if (offset > 2) return null;
-                  
-                  let yOffset = 0;
-                  let scale = 1;
-                  let opacity = 1;
-                  let zIndex = 10;
-                  let rotate = 0;
-                  let xOffset = 0;
-                  
-                  if (isActive) {
-                    yOffset = 0;
-                    scale = 1;
-                    opacity = 1;
-                    zIndex = 40;
-                    rotate = 0;
-                    xOffset = 0;
-                  } else if (isBehind) {
-                    yOffset = 25;
-                    scale = 0.96;
-                    opacity = 0.85;
-                    zIndex = 30;
-                    rotate = -2;
-                    xOffset = -6;
-                  } else {
-                    yOffset = 50;
-                    scale = 0.92;
-                    opacity = 0.7;
-                    zIndex = 20;
-                    rotate = -4;
-                    xOffset = -12;
-                  }
-                  
-                  return (
-                    <motion.div
-                      key={card.title}
-                      initial={false}
-                      animate={{
-                        y: yOffset,
-                        scale: scale,
-                        opacity: opacity,
-                        zIndex: zIndex,
-                        rotate: rotate,
-                        x: xOffset,
-                      }}
-                      transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 25 }}
-                      className={`absolute top-0 left-0 w-full bg-gradient-to-br ${card.gradientFrom} ${card.gradientTo} rounded-3xl p-6 shadow-2xl cursor-pointer border-2 border-white/30`}
-                      style={{ backdropFilter: "blur(10px)" }}
-                      onClick={() => setActiveCard(idx)}
-                    >
-                      <div className="flex flex-col h-full">
-                        {/* Header */}
-                        <div className="flex items-start gap-4 mb-5">
-                          <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                            <card.icon className="w-7 h-7 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-white font-bold text-xl mb-1">{card.title}</h3>
-                            <p className="text-white/80 text-sm leading-relaxed">{card.description}</p>
-                          </div>
-                        </div>
-                        
-                        {/* Stats Row - Two columns */}
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                          <div className="bg-white/15 rounded-xl p-2 text-center">
-                            <div className="flex items-center justify-center gap-1 mb-1">
-                              <TrendingUp className="w-3 h-3 text-white/80" />
-                              <span className="text-white text-xs font-semibold">Success Rate</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{card.stats}</p>
-                          </div>
-                          <div className="bg-white/15 rounded-xl p-2 text-center">
-                            <div className="flex items-center justify-center gap-1 mb-1">
-                              <Users className="w-3 h-3 text-white/80" />
-                              <span className="text-white text-xs font-semibold">Patients</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{card.patients}</p>
-                          </div>
-                        </div>
-                        
-                        {/* Recovery & Details */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-white/70" />
-                            <span className="text-white/80 text-xs">Recovery: {card.recovery}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <ThumbsUp className="w-3 h-3 text-white/70" />
-                            <span className="text-white/70 text-xs">Proven Results</span>
-                          </div>
-                        </div>
-                        
-                        {/* Details Line */}
-                        <div className="bg-white/10 rounded-xl p-2 mb-4">
-                          <p className="text-white/90 text-xs text-center">{card.details}</p>
-                        </div>
-                        
-                        {/* Divider */}
-                        <div className="border-t border-white/20 my-2"></div>
-                        
-                        {/* Footer */}
-                        <div className="flex items-center justify-between mt-1">
-                          <div>
-                            <span className="text-white/70 text-xs">Dr. Kanagaraj</span>
-                            <p className="text-white/60 text-[10px]">MBBS., MD (DVL)</p>
-                          </div>
-                          <div className="flex items-center gap-1 text-white font-semibold text-sm hover:gap-2 transition-all">
-                            Learn More
-                            <ChevronRight className="w-4 h-4" />
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Decorative sparkles */}
-                      <motion.div 
-                        className="absolute bottom-3 right-3 text-white/20"
-                        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                      >
-                        <Sparkles className="w-6 h-6" />
-                      </motion.div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            </div>
-            
-            {/* Card Navigation Dots - Reduced gap */}
-            <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 flex gap-3 mt-4">
-              {treatmentCards.map((card, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveCard(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    idx === activeCard 
-                      ? "w-8 bg-gradient-to-r from-blue-500 to-sky-400" 
-                      : "w-2 bg-blue-300/50 hover:bg-blue-400/70"
-                  }`}
-                />
-              ))}
-            </div>
+          {/* Slider window */}
+          <div className="relative aspect-square w-full rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-950 border border-slate-200/10">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0 flex h-full w-full"
+              >
+                <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden">
+                  <img
+                    src={flyers[currentIndex].src}
+                    alt={`Clinic Flyer ${flyers[currentIndex].id}`}
+                    className="w-full h-full object-contain select-none"
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
-          
-          {/* Floating Contact Card - Adjusted position */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
-            className="absolute bottom-4 -left-8 z-30 bg-gradient-to-r from-blue-600 to-blue-500 backdrop-blur-md rounded-2xl p-3 shadow-xl border border-blue-400/30 max-w-[240px]"
+
+          {/* Navigation Arrows */}
+          <button
+            onClick={handlePrev}
+            className="absolute left-2 sm:left-[-2rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20"
+            aria-label="Previous slide"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <Phone className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold text-white uppercase tracking-wider">Emergency Contact</p>
-                <p className="text-sm font-bold text-white">+91 97504 51176</p>
-                <p className="text-[9px] text-white/80">Available 24/7</p>
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Floating Rating Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
-            className="absolute top-12 -right-6 z-30 bg-gradient-to-r from-sky-500 to-cyan-500 backdrop-blur-md rounded-2xl p-2.5 shadow-xl border border-blue-400/30"
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-2 sm:right-[-2.5rem] lg:right-[-2rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20"
+            aria-label="Next slide"
           >
-            <div className="flex items-center gap-2">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="w-3 h-3 fill-white text-white" />
-                ))}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white leading-none">4.9/5</p>
-                <p className="text-[9px] text-white/80">1,200+ Reviews</p>
-              </div>
-            </div>
-          </motion.div>
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+
+          {/* Indicator Dots */}
+          <div className="flex justify-center gap-2 mt-6">
+            {flyers.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentIndex === idx 
+                    ? "bg-blue-600 w-5" 
+                    : "bg-slate-300 dark:bg-slate-700 hover:bg-slate-400"
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
+          </div>
         </motion.div>
       </div>
     </section>

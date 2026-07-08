@@ -18,24 +18,14 @@ import {
 
 const doctors = [
   {
-    name: "Dr. Kanakaraj S.",
-    specialization: "Dermatologist & Hair Restoration",
-    experience: "10+ Years Experience",
+    name: "Dr. (Major) R. Kanagaraj",
+    specialization: "Aesthetic Dermatologist & Trichologist",
+    experience: "13+ Years Experience",
     image: "/dr_kanakaraj_crossed_arms.png",
     rating: "4.9",
-    reviews: "2.5k+",
-    clinics: "Mumbai, Bangalore",
-    bio: "Pioneering minimally invasive hair restoration and advanced clinical dermatology treatments."
-  },
-  {
-    name: "Dr. A. Verma",
-    specialization: "Cosmetic Surgeon",
-    experience: "12+ Years Experience",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=2070&auto=format&fit=crop",
-    rating: "4.8",
-    reviews: "1.8k+",
-    clinics: "Mumbai Only",
-    bio: "Excellence in facial aesthetics, body contouring and post-hair restoration aesthetic management."
+    reviews: "5k+",
+    clinics: "Swarnapuri, Salem",
+    bio: "Ex-Major in the Army Medical Corps. Specializing in advanced hair transplantation, medical trichology, and USFDA-approved aesthetic dermatology treatments."
   }
 ];
 
@@ -69,20 +59,10 @@ const Doctors = () => {
             </motion.h2>
           </div>
           
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <Button variant="outline" className="rounded-full shadow-lg border-2 border-primary/20 text-primary font-bold hover:bg-primary/5 h-auto py-4 px-8">
-              View Entire Medical Board
-            </Button>
-          </motion.div>
         </div>
 
         {/* Doctors Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-12 items-start">
+        <div className="max-w-4xl mx-auto">
           {doctors.map((doctor, index) => (
             <motion.div
               key={doctor.name}

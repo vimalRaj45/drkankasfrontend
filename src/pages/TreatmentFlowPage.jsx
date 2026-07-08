@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 const steps = [
   {
     title: "Clinical Consultation",
-    desc: "A comprehensive assessment of your medical history and current conditions by Dr. Kanagaraj.",
+    desc: "A comprehensive assessment of your medical history and current conditions by Dr. (Major) R. Kanagaraj.",
     icon: <Stethoscope className="w-8 h-8" />,
     color: "bg-blue-100 text-blue-600 border-blue-200"
   },
@@ -172,7 +172,7 @@ const TreatmentFlowPage = () => {
                <Sparkles className="w-12 h-12 text-white/50 mx-auto mb-8 animate-pulse" />
                <h2 className="text-4xl md:text-5xl font-extrabold mb-8 leading-tight">Ready to Begin Your Transformation?</h2>
                <p className="text-white/80 text-lg font-medium mb-12 italic leading-relaxed">
-                 Every great clinical outcome starts with the first step of consultation. Connect with Dr. Kanagaraj today.
+                 Every great clinical outcome starts with the first step of consultation. Connect with Dr. (Major) R. Kanagaraj today.
                </p>
                <div className="flex flex-wrap justify-center gap-6">
                  <Button onClick={() => navigate('/book')} size="lg" className="h-16 px-10 rounded-2xl bg-white text-primary hover:bg-white/90 font-bold text-lg shadow-xl shadow-black/5">
