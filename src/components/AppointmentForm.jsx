@@ -80,10 +80,11 @@ const AppointmentForm = ({ onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const cleanValue = name === 'phone' ? value.replace(/\D/g, '') : value;
+    setFormData(prev => ({ ...prev, [name]: cleanValue }));
 
-    if (name === 'phone' && value.replace(/\s/g, '').length === 10) {
-      handleCheckUser(value.replace(/\s/g, ''));
+    if (name === 'phone' && cleanValue.length === 10) {
+      handleCheckUser(cleanValue);
     }
   };
 
@@ -189,21 +190,46 @@ const AppointmentForm = ({ onSuccess }) => {
       </CardHeader>
       <CardContent className="p-6 sm:p-10 -mt-10 bg-card rounded-t-[2.5rem] relative z-20">
         <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-5">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Name</Label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input name="name" value={formData.name} onChange={handleChange} placeholder="Full Name" className="pl-12 h-12 rounded-xl text-sm" required />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Phone</Label>
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Phone Number (Required first)</Label>
               <div className="relative">
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input name="phone" value={formData.phone} onChange={handleChange} placeholder="9876543210" className="pl-12 h-12 rounded-xl text-sm" required />
+                <Input 
+                  name="phone" 
+                  value={formData.phone} 
+                  onChange={handleChange} 
+                  placeholder="Enter 10-digit mobile number" 
+                  className="pl-12 h-12 rounded-xl text-sm" 
+                  maxLength={10}
+                  required 
+                />
               </div>
             </div>
+
+            <AnimatePresence initial={false}>
+              {formData.phone.length === 10 && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-1.5 overflow-hidden"
+                >
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input 
+                      name="name" 
+                      value={formData.name} 
+                      onChange={handleChange} 
+                      placeholder="Enter Full Name" 
+                      className="pl-12 h-12 rounded-xl text-sm" 
+                      required 
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

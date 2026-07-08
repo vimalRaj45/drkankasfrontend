@@ -17,14 +17,15 @@ import {
   TrendingUp,
   MapPin,
   FileText,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "react-hot-toast";
-import { getUserAppointments, API_URL } from '../services/api';
+import { getUserAppointments, API_URL, checkUser } from '../services/api';
 
 const QueueProgress = ({ date }) => {
   const [completed, setCompleted] = useState(0);
@@ -91,6 +92,8 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loginPhone, setLoginPhone] = useState("");
+  const [checking, setChecking] = useState(false);
   const navigate = useNavigate();
 
   const syncAppointments = async (phone) => {
@@ -142,7 +145,82 @@ const Profile = () => {
     navigate('/');
   };
 
-  if (!user) return null;
+  const handlePhoneLogin = async (e) => {
+    e.preventDefault();
+    if (!loginPhone || loginPhone.length < 10) {
+      toast.error("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    setChecking(true);
+    try {
+      const res = await checkUser(loginPhone);
+      if (res.success && res.user) {
+        localStorage.setItem('clinic_user', JSON.stringify(res.user));
+        setUser(res.user);
+        syncAppointments(res.user.phone);
+        toast.success("Welcome back! Your clinical profile has been loaded.");
+      } else {
+        toast.error("No profile found with this number. Please book an appointment to register!");
+      }
+    } catch (err) {
+      toast.error("Failed to connect to backend server.");
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <section className="py-20 sm:py-32 bg-slate-50/30 flex items-center justify-center min-h-[70vh]">
+        <div className="container mx-auto px-4 max-w-md">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="border border-border/50 shadow-2xl rounded-[2.5rem] overflow-hidden bg-card">
+              <CardHeader className="text-center pb-4 pt-8">
+                <div className="mx-auto w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                  <User className="w-7 h-7 text-primary" />
+                </div>
+                <CardTitle className="text-2xl font-black tracking-tight">Access Your Profile</CardTitle>
+                <CardDescription className="text-muted-foreground font-medium pt-1 px-2">
+                  Enter your registered mobile number to check booking history, vitals, and treatment history.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-6 sm:px-8 pb-8">
+                <form onSubmit={handlePhoneLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-2">Mobile Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        maxLength={10}
+                        placeholder="98765 43210"
+                        className="pl-12 h-12 rounded-xl border-slate-200 focus:ring-primary shadow-sm"
+                        value={loginPhone}
+                        onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-full font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                    disabled={checking}
+                  >
+                    {checking ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                    Verify & Access
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="profile" className="py-24 bg-background overflow-hidden relative scroll-mt-20 transition-colors duration-500">
