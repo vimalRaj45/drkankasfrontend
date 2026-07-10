@@ -173,8 +173,18 @@ iframe[id^=":"] {
 
 /* Scale down font size slightly when translated to Tamil to accommodate larger characters and increase readability */
 html[lang="ta"] {
-  font-size: 70% !important;
+  font-size: 90% !important;
 }
 html[lang="ta"] body {
   font-weight: 500;
+}
+
+/* Decrease button font sizes even further to 60% to prevent overflow/wrap on narrow clinic buttons */
+html[lang="ta"] button,
+html[lang="ta"] button *,
+html[lang="ta"] a.button,
+html[lang="ta"] .btn,
+html[lang="ta"] [role="button"],
+html[lang="ta"] .notranslate.text-xs {
+  font-size: 60% !important;
 }
