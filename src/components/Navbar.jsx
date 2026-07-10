@@ -25,17 +25,36 @@ const Navbar = () => {
   const [lang, setLang] = useState("en");
 
   useEffect(() => {
-    const getCookie = (name) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
+    const checkLang = () => {
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+          try {
+            return decodeURIComponent(parts.pop().split(';').shift());
+          } catch (e) {
+            return parts.pop().split(';').shift();
+          }
+        }
+      };
+      
+      const currentLang = getCookie('googtrans');
+      const isTamil = 
+        (currentLang && currentLang.includes('/ta')) ||
+        document.documentElement.lang === 'ta' ||
+        document.documentElement.classList.contains('translated-ltr') ||
+        document.documentElement.className.includes('translated');
+        
+      setLang(isTamil ? "ta" : "en");
     };
-    const currentLang = getCookie('googtrans');
-    if (currentLang && currentLang.includes('/ta')) {
-      setLang("ta");
-    } else {
-      setLang("en");
-    }
+
+    checkLang();
+
+    // Observe changes to <html> tag attributes (like lang and class) when translation triggers
+    const observer = new MutationObserver(checkLang);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'class'] });
+
+    return () => observer.disconnect();
   }, []);
 
   const handleLanguageChange = (newLang) => {
@@ -134,7 +153,7 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-full px-3 h-9 sm:h-11 hover:bg-muted text-foreground font-bold border border-border flex items-center gap-1.5"
+            className="notranslate rounded-full px-3 h-9 sm:h-11 hover:bg-muted text-foreground font-bold border border-border flex items-center gap-1.5"
             onClick={() => handleLanguageChange(lang === "en" ? "ta" : "en")}
           >
             <Globe className="w-4 h-4 text-primary" />
@@ -202,7 +221,7 @@ const Navbar = () => {
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border mt-auto">
                 <Button 
                   variant="outline" 
-                  className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
+                  className="notranslate w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
                   onClick={() => {
                     handleLanguageChange(lang === "en" ? "ta" : "en");
                     setIsMenuOpen(false);
