@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { 
-  ShieldCheck, 
-  X, 
-  LayoutDashboard, 
-  Calendar, 
-  Clock, 
-  User, 
-  Phone, 
-  Stethoscope, 
-  CheckCircle2, 
-  XCircle, 
-  ExternalLink, 
+import {
+  ShieldCheck,
+  X,
+  LayoutDashboard,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  Stethoscope,
+  CheckCircle2,
+  XCircle,
+  ExternalLink,
   Search,
   Filter,
   MoreVertical,
@@ -27,17 +27,17 @@ import {
   Edit2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   CardDescription,
   CardFooter
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -91,7 +91,7 @@ const AdminPanel = () => {
       const mIdx = parseInt(parts[1]) - 1;
       const d = parseInt(parts[2]);
       const m = months[mIdx] || "";
-      
+
       let displayTime = timeStr || "";
       if (timeStr && timeStr.includes(':')) {
         const timeParts = timeStr.split(':');
@@ -100,7 +100,7 @@ const AdminPanel = () => {
         if (!timeStr.toUpperCase().includes('AM') && !timeStr.toUpperCase().includes('PM')) {
           const suffix = h >= 12 ? 'PM' : 'AM';
           h = h % 12 || 12;
-          displayTime = `${h}:${mins.substring(0,2)} ${suffix}`;
+          displayTime = `${h}:${mins.substring(0, 2)} ${suffix}`;
         } else {
           const suffix = timeStr.toUpperCase().includes('PM') ? 'PM' : 'AM';
           h = parseInt(timeStr.split(':')[0]);
@@ -204,7 +204,7 @@ const AdminPanel = () => {
   const handleDynamicStatusChange = async (id, newStatus) => {
     if (!newStatus.trim()) newStatus = 'PENDING';
     try {
-      const res = await updateStatus(id, newStatus, "CHANGE_THIS_SECRET");
+      const res = await updateStatus(id, newStatus, "dr_kanaks");
       if (res.success || res.status === 'success') {
         toast.success("Status updated!");
         fetchAppointments();
@@ -230,7 +230,7 @@ const AdminPanel = () => {
       } else {
         result = await broadcastPush(pushData.title, pushData.body, pushData.url, pushData.image, pushData.send_native_push);
       }
-      
+
       if (result.success) {
         toast.success(editingBannerId ? "Banner updated successfully!" : "Announcement published successfully!");
         handlePushDialogClose();
@@ -248,13 +248,13 @@ const AdminPanel = () => {
   const handleImageFileChange = async (e) => {
     if (e.target.files.length === 0) return;
     const file = e.target.files[0];
-    
+
     setUploadLoading(true);
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64Data = event.target.result;
       try {
-        const res = await uploadImage(base64Data, "CHANGE_THIS_SECRET");
+        const res = await uploadImage(base64Data, "dr_kanaks");
         if (res.success) {
           setPushData(prev => ({ ...prev, image: res.url }));
           toast.success("Image uploaded successfully!");
@@ -285,7 +285,7 @@ const AdminPanel = () => {
   const handleSaveHours = async () => {
     setSavingHours(true);
     try {
-      const res = await saveSetting("working_hours", clinicHours, "CHANGE_THIS_SECRET");
+      const res = await saveSetting("working_hours", clinicHours, "dr_kanaks");
       if (res.success) {
         toast.success("Clinical working hours updated successfully!");
         setIsHoursDialogOpen(false);
@@ -299,7 +299,7 @@ const AdminPanel = () => {
     }
   };
 
-  const filteredAppointments = appointments.filter(apt => 
+  const filteredAppointments = appointments.filter(apt =>
     apt.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     apt.phone?.includes(searchTerm) ||
     apt.id?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -307,8 +307,8 @@ const AdminPanel = () => {
 
   if (!showAdmin) {
     return (
-      <Button 
-        onClick={() => setShowAdmin(true)} 
+      <Button
+        onClick={() => setShowAdmin(true)}
         className="fixed bottom-10 right-10 z-[100] h-14 w-14 rounded-full shadow-2xl bg-slate-900 border-2 border-white/10 p-0 overflow-hidden group hover:w-48 hover:rounded-2xl transition-all duration-300"
       >
         <Lock className="w-5 h-5 text-white group-hover:mr-2" />
@@ -326,150 +326,150 @@ const AdminPanel = () => {
       >
         {/* Admin Header */}
         <div className="bg-slate-900 dark:bg-slate-950 text-white p-10 flex items-center justify-between relative overflow-hidden">
-           <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-2">
-                 <div className="bg-white px-3 py-1.5 rounded-xl shadow-lg border border-white/10 flex items-center">
-                    <img src={Logo} className="h-8 w-auto object-contain" alt="Logo" />
-                 </div>
-                 <h2 className="text-3xl font-extrabold tracking-tighter">Clinical Dashboard V4.0</h2>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-white px-3 py-1.5 rounded-xl shadow-lg border border-white/10 flex items-center">
+                <img src={Logo} className="h-8 w-auto object-contain" alt="Logo" />
               </div>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-                 <ShieldCheck className="w-3 h-3 text-primary" />
-                 Authenticated Admin Session &middot; Secure 256-bit Encryption
-              </p>
-           </div>
-           
-           <Button 
-              variant="outline" 
-              size="icon" 
-              className="rounded-full bg-white/5 border-white/10 hover:bg-foreground hover:text-background h-14 w-14 transition-all"
-              onClick={() => setShowAdmin(false)}
-           >
-              <X className="w-6 h-6" />
-           </Button>
+              <h2 className="text-3xl font-extrabold tracking-tighter">Clinical Dashboard V4.0</h2>
+            </div>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+              <ShieldCheck className="w-3 h-3 text-primary" />
+              Authenticated Admin Session &middot; Secure 256-bit Encryption
+            </p>
+          </div>
 
-           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-0 translate-x-1/2 -translate-y-1/2" />
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-full bg-white/5 border-white/10 hover:bg-foreground hover:text-background h-14 w-14 transition-all"
+            onClick={() => setShowAdmin(false)}
+          >
+            <X className="w-6 h-6" />
+          </Button>
+
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-0 translate-x-1/2 -translate-y-1/2" />
         </div>
 
         {/* Filters & Actions Bar */}
         <div className="p-8 border-b border-border flex flex-wrap items-center justify-between gap-6 bg-muted/30">
-           <div className="relative w-full md:w-96">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input 
-                placeholder="Search Patient Name, Phone or ID..." 
-                className="pl-12 h-12 rounded-2xl border-slate-200 bg-white focus:ring-primary shadow-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-           </div>
-           <div className="flex items-center gap-4">
-              <Button 
-                onClick={() => setIsPushDialogOpen(true)} 
-                className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
-              >
-                 <Bell className="w-4 h-4 text-primary" />
-                 Banner Upload
-              </Button>
-              <Button 
-                onClick={handleOpenHoursDialog} 
-                className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
-              >
-                 <Clock className="w-4 h-4 text-primary" />
-                 Clinic Hours
-              </Button>
-              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-6 gap-2 bg-primary font-bold shadow-lg shadow-primary/20">
-                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
-                 Sync Database
-              </Button>
-           </div>
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Search Patient Name, Phone or ID..."
+              className="pl-12 h-12 rounded-2xl border-slate-200 bg-white focus:ring-primary shadow-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setIsPushDialogOpen(true)}
+              className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+            >
+              <Bell className="w-4 h-4 text-primary" />
+              Banner Upload
+            </Button>
+            <Button
+              onClick={handleOpenHoursDialog}
+              className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+            >
+              <Clock className="w-4 h-4 text-primary" />
+              Clinic Hours
+            </Button>
+            <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-6 gap-2 bg-primary font-bold shadow-lg shadow-primary/20">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
+              Sync Database
+            </Button>
+          </div>
         </div>
 
         {/* Database Grid */}
         <div className="flex-grow overflow-y-auto p-8 bg-muted/30 relative">
-           {loading ? (
-             <div className="h-full flex flex-col items-center justify-center opacity-50">
-                <Loader2 className="w-16 h-16 text-primary animate-spin mb-6" />
-                <h4 className="text-xl font-extrabold text-slate-900 uppercase tracking-widest text-xs">Querying Clinical Records...</h4>
-             </div>
-           ) : filteredAppointments.length === 0 ? (
-             <div className="h-full flex flex-col items-center justify-center text-center">
-                <div className="bg-muted p-10 rounded-full mb-8">
-                   <Search className="w-16 h-16 text-muted-foreground" />
-                </div>
-                <h4 className="text-2xl font-extrabold text-foreground mb-2">No Matching Records Found</h4>
-                <p className="text-muted-foreground font-medium max-w-sm">Try adjusting your search criteria or contact backend support if records appear missing.</p>
-             </div>
-           ) : (
-             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredAppointments.map((apt) => (
-                  <motion.div
-                    key={apt.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -5 }}
-                  >
-                     <Card className="border border-border shadow-xl shadow-slate-200/40 dark:shadow-none rounded-[2.5rem] bg-card overflow-hidden group">
-                        <CardHeader 
-                          className="p-8 pb-4 flex flex-row items-center justify-between cursor-pointer"
-                          onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
-                        >
-                           <div>
-                              <Badge className="bg-foreground text-background mb-2 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg border-none">PID: {apt.id}</Badge>
-                              <CardTitle className="text-xl font-extrabold text-primary underline leading-none group-hover:text-primary transition-colors">{apt.name}</CardTitle>
-                           </div>
-                        </CardHeader>
-                        <CardContent className="p-8 pt-0 space-y-6">
-                           <div className="bg-muted/50 p-4 rounded-2xl border border-border w-full">
-                               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1">
-                                  <Calendar className="w-3 h-3 text-primary" /> Schedule Slot
-                               </p>
-                               <p className="text-sm font-black text-foreground">
-                                  {formatApptDateTime(apt.date, apt.time)}
-                               </p>
-                            </div>
-                           
-                           <div className="space-y-3">
-                              <div className="flex items-center gap-3 text-sm font-bold text-foreground">
-                                 <Stethoscope className="w-4 h-4 text-primary" />
-                                 <span>{apt.service}</span>
-                              </div>
-                              <div className="flex items-center gap-3 text-sm font-bold text-foreground">
-                                 <Phone className="w-4 h-4 text-secondary" />
-                                 <a href={`tel:${apt.phone}`} className="hover:text-secondary hover:underline transition-all font-mono">{apt.phone}</a>
-                              </div>
-                              {apt.message && apt.message !== "No message" && (
-                                <div className="flex items-start gap-3 mt-4 pt-4 border-t border-slate-100 italic">
-                                   <MessageSquare className="w-4 h-4 text-slate-300 mt-1" />
-                                   <p className="text-xs text-slate-400 font-medium leading-relaxed font-mono">
-                                      {apt.message}
-                                   </p>
-                                </div>
-                              )}
-                           </div>
-                        </CardContent>
-                        <CardFooter className="p-4 border-t border-border bg-muted/20 flex items-center justify-between gap-4">
-                           <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
-                              Status:
-                           </span>
-                           <input 
-                              type="text" 
-                              defaultValue={apt.status || 'PENDING'} 
-                              onBlur={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
-                              onKeyDown={(e) => {
-                                 if (e.key === 'Enter') {
-                                    handleDynamicStatusChange(apt.id, e.currentTarget.value);
-                                    e.currentTarget.blur();
-                                 }
-                              }}
-                              className="bg-background border border-border text-foreground px-3 py-1.5 rounded-xl font-bold text-xs text-center outline-none focus:ring-1 focus:ring-primary w-32"
-                              placeholder="Enter status..."
-                           />
-                        </CardFooter>
-                     </Card>
-                  </motion.div>
-                ))}
-             </div>
-           )}
+          {loading ? (
+            <div className="h-full flex flex-col items-center justify-center opacity-50">
+              <Loader2 className="w-16 h-16 text-primary animate-spin mb-6" />
+              <h4 className="text-xl font-extrabold text-slate-900 uppercase tracking-widest text-xs">Querying Clinical Records...</h4>
+            </div>
+          ) : filteredAppointments.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-center">
+              <div className="bg-muted p-10 rounded-full mb-8">
+                <Search className="w-16 h-16 text-muted-foreground" />
+              </div>
+              <h4 className="text-2xl font-extrabold text-foreground mb-2">No Matching Records Found</h4>
+              <p className="text-muted-foreground font-medium max-w-sm">Try adjusting your search criteria or contact backend support if records appear missing.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredAppointments.map((apt) => (
+                <motion.div
+                  key={apt.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <Card className="border border-border shadow-xl shadow-slate-200/40 dark:shadow-none rounded-[2.5rem] bg-card overflow-hidden group">
+                    <CardHeader
+                      className="p-8 pb-4 flex flex-row items-center justify-between cursor-pointer"
+                      onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
+                    >
+                      <div>
+                        <Badge className="bg-foreground text-background mb-2 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg border-none">PID: {apt.id}</Badge>
+                        <CardTitle className="text-xl font-extrabold text-primary underline leading-none group-hover:text-primary transition-colors">{apt.name}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-8 pt-0 space-y-6">
+                      <div className="bg-muted/50 p-4 rounded-2xl border border-border w-full">
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-primary" /> Schedule Slot
+                        </p>
+                        <p className="text-sm font-black text-foreground">
+                          {formatApptDateTime(apt.date, apt.time)}
+                        </p>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-sm font-bold text-foreground">
+                          <Stethoscope className="w-4 h-4 text-primary" />
+                          <span>{apt.service}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm font-bold text-foreground">
+                          <Phone className="w-4 h-4 text-secondary" />
+                          <a href={`tel:${apt.phone}`} className="hover:text-secondary hover:underline transition-all font-mono">{apt.phone}</a>
+                        </div>
+                        {apt.message && apt.message !== "No message" && (
+                          <div className="flex items-start gap-3 mt-4 pt-4 border-t border-slate-100 italic">
+                            <MessageSquare className="w-4 h-4 text-slate-300 mt-1" />
+                            <p className="text-xs text-slate-400 font-medium leading-relaxed font-mono">
+                              {apt.message}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter className="p-4 border-t border-border bg-muted/20 flex items-center justify-between gap-4">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                        Status:
+                      </span>
+                      <input
+                        type="text"
+                        defaultValue={apt.status || 'PENDING'}
+                        onBlur={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleDynamicStatusChange(apt.id, e.currentTarget.value);
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        className="bg-background border border-border text-foreground px-3 py-1.5 rounded-xl font-bold text-xs text-center outline-none focus:ring-1 focus:ring-primary w-32"
+                        placeholder="Enter status..."
+                      />
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
       </motion.div>
 
@@ -477,13 +477,13 @@ const AdminPanel = () => {
       <Dialog open={isPushDialogOpen} onOpenChange={handlePushDialogClose}>
         <DialogContent className="rounded-[2.5rem] p-10 max-w-4xl border-none shadow-2xl overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
-          
+
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
-               <div className="bg-primary/20 p-2 rounded-xl">
-                 <Zap className="w-5 h-5 text-primary" />
-               </div>
-               <DialogTitle className="text-2xl font-extrabold text-foreground">Banner Upload with Description</DialogTitle>
+              <div className="bg-primary/20 p-2 rounded-xl">
+                <Zap className="w-5 h-5 text-primary" />
+              </div>
+              <DialogTitle className="text-2xl font-extrabold text-foreground">Banner Upload with Description</DialogTitle>
             </div>
             <DialogDescription className="text-muted-foreground font-medium">
               Upload a banner and description to display as a popup immediately when patients open the website.
@@ -496,48 +496,48 @@ const AdminPanel = () => {
               <h3 className="font-extrabold text-sm uppercase tracking-wider text-primary">
                 {editingBannerId ? "Edit Announcement" : "Create Announcement"}
               </h3>
-              
+
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Announcement Title</Label>
-                <Input 
-                  placeholder="e.g. Health Camp This Sunday" 
+                <Input
+                  placeholder="e.g. Health Camp This Sunday"
                   className="h-14 rounded-2xl border-border bg-muted/30 pl-6 focus:bg-background focus:ring-primary shadow-sm font-bold"
                   value={pushData.title}
-                  onChange={(e) => setPushData({...pushData, title: e.target.value})}
+                  onChange={(e) => setPushData({ ...pushData, title: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Message Content</Label>
-                <textarea 
-                  placeholder="Describe your announcement..." 
+                <textarea
+                  placeholder="Describe your announcement..."
                   className="w-full min-h-[100px] rounded-2xl border border-border bg-muted/30 p-6 focus:bg-background focus:ring-primary shadow-sm font-medium text-sm outline-none transition-all"
                   value={pushData.body}
-                  onChange={(e) => setPushData({...pushData, body: e.target.value})}
+                  onChange={(e) => setPushData({ ...pushData, body: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Redirect URL / Feedback Link</Label>
-                <Input 
-                  placeholder="https://dr-kanaks-clinic.netlify.app/feedback" 
+                <Input
+                  placeholder="https://dr-kanaks-clinic.netlify.app/feedback"
                   className="h-14 rounded-2xl border-border bg-muted/30 pl-6 focus:bg-background focus:ring-primary shadow-sm"
                   value={pushData.url}
-                  onChange={(e) => setPushData({...pushData, url: e.target.value})}
+                  onChange={(e) => setPushData({ ...pushData, url: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Image (Upload File or Enter URL)</Label>
                 <div className="flex gap-3">
-                  <Input 
-                    placeholder={uploadLoading ? "Uploading file..." : "https://example.com/image.jpg"} 
+                  <Input
+                    placeholder={uploadLoading ? "Uploading file..." : "https://example.com/image.jpg"}
                     disabled={uploadLoading}
                     className="h-14 rounded-2xl border-border bg-muted/30 pl-6 focus:bg-background focus:ring-primary shadow-sm flex-1"
                     value={pushData.image}
-                    onChange={(e) => setPushData({...pushData, image: e.target.value})}
+                    onChange={(e) => setPushData({ ...pushData, image: e.target.value })}
                   />
-                  
+
                   <Label className="h-14 px-6 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-primary/20 transition-all hover:bg-primary/95 text-sm whitespace-nowrap active:scale-[0.98]">
                     <Upload className="w-4 h-4" />
                     {uploadLoading ? "Uploading..." : "Upload File"}
@@ -548,9 +548,9 @@ const AdminPanel = () => {
                 {pushData.image && (
                   <div className="mt-3 relative rounded-2xl border border-border overflow-hidden max-w-[150px] shadow-sm">
                     <img src={pushData.image} alt="Preview" className="w-full h-auto object-cover" />
-                    <button 
-                      type="button" 
-                      onClick={() => setPushData(prev => ({ ...prev, image: "" }))} 
+                    <button
+                      type="button"
+                      onClick={() => setPushData(prev => ({ ...prev, image: "" }))}
                       className="absolute top-2 right-2 bg-black/70 hover:bg-black/85 text-white rounded-full p-1.5 shadow-md transition-colors"
                     >
                       <X className="w-4 h-4" />
@@ -561,10 +561,10 @@ const AdminPanel = () => {
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Broadcast Channel</Label>
-                <select 
+                <select
                   className="flex h-14 w-full rounded-2xl border border-border bg-muted/30 px-6 focus:bg-background focus:ring-primary shadow-sm font-bold text-sm outline-none"
                   value={pushData.send_native_push ? "both" : "in_app"}
-                  onChange={(e) => setPushData({...pushData, send_native_push: e.target.value === "both"})}
+                  onChange={(e) => setPushData({ ...pushData, send_native_push: e.target.value === "both" })}
                 >
                   <option value="both">Both (Browser Push + Website Pop-up)</option>
                   <option value="in_app">In-App Only (Website Pop-up, No Browser Push)</option>
@@ -575,10 +575,10 @@ const AdminPanel = () => {
                 <Button variant="ghost" className="rounded-full h-12 flex-1 font-bold" onClick={handlePushDialogClose}>
                   Cancel
                 </Button>
-                <Button 
-                   disabled={pushSending}
-                   className="rounded-full h-12 flex-1 font-extrabold text-xs uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 gap-2" 
-                   onClick={handleSendBroadcast}
+                <Button
+                  disabled={pushSending}
+                  className="rounded-full h-12 flex-1 font-extrabold text-xs uppercase tracking-widest bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 gap-2"
+                  onClick={handleSendBroadcast}
                 >
                   {pushSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   {editingBannerId ? "Update" : "Publish"}
@@ -591,7 +591,7 @@ const AdminPanel = () => {
               <h3 className="font-extrabold text-sm uppercase tracking-wider text-muted-foreground mb-4">
                 Active & Past Banners
               </h3>
-              
+
               <div className="space-y-4 overflow-y-auto pr-2 flex-grow">
                 {bannerList.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic p-4 text-center">No announcement banners published yet.</p>
@@ -710,25 +710,25 @@ const AdminPanel = () => {
           <div className="space-y-4 pt-4 text-left">
             <div>
               <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-2">Operational Hours Text</Label>
-              <Input 
-                value={clinicHours} 
-                onChange={(e) => setClinicHours(e.target.value)} 
-                placeholder="e.g. Mon – Sat: 10:30 AM – 8:30 PM (Sunday Closed)" 
+              <Input
+                value={clinicHours}
+                onChange={(e) => setClinicHours(e.target.value)}
+                placeholder="e.g. Mon – Sat: 10:30 AM – 8:30 PM (Sunday Closed)"
                 className="h-12 rounded-xl border-slate-200 focus:ring-primary shadow-sm w-full"
               />
             </div>
           </div>
 
           <DialogFooter className="mt-8 gap-3 flex-col sm:flex-row">
-            <Button 
+            <Button
               variant="outline"
-              className="rounded-full h-12 font-bold w-full sm:w-auto" 
+              className="rounded-full h-12 font-bold w-full sm:w-auto"
               onClick={() => setIsHoursDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
-              className="rounded-full h-12 font-bold bg-primary hover:bg-primary/90 w-full sm:w-auto flex items-center justify-center gap-2" 
+            <Button
+              className="rounded-full h-12 font-bold bg-primary hover:bg-primary/90 w-full sm:w-auto flex items-center justify-center gap-2"
               onClick={handleSaveHours}
               disabled={savingHours}
             >

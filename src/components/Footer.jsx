@@ -13,7 +13,8 @@ import {
   MapPin, 
   ArrowRight,
   Send,
-  CalendarCheck
+  CalendarCheck,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,14 +44,30 @@ const Footer = () => {
             </p>
 
             <div className="flex gap-4">
-              <Button size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
-                <Instagram className="w-5 h-5" />
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+                <a href="https://www.instagram.com/drkanaks?igsh=ZWgydWlnNXU3MzB2" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <Instagram className="w-5 h-5" />
+                </a>
               </Button>
-              <Button size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
-                <Youtube className="w-5 h-5" />
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+                <a href="https://www.facebook.com/profile.php?id=61567068521262" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <Facebook className="w-5 h-5" />
+                </a>
               </Button>
-              <Button size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
-                <Linkedin className="w-5 h-5" />
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+                <a href="https://www.youtube.com/@drkanaks1847/shorts" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <Youtube className="w-5 h-5" />
+                </a>
+              </Button>
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+                <a href="https://www.linkedin.com/in/dr-kanaks-150226320/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                  <Linkedin className="w-5 h-5" />
+                </a>
+              </Button>
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+                <a href="https://share.google/JJWJzBNnjSpuiSfb8" target="_blank" rel="noopener noreferrer" aria-label="Google My Business">
+                  <Globe className="w-5 h-5" />
+                </a>
               </Button>
             </div>
           </div>

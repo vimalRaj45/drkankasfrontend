@@ -84,11 +84,15 @@ const Doctors = () => {
                     />
                     {/* Social Overlay */}
                     <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                      <Button size="icon" variant="ghost" className="rounded-full bg-white text-primary ring-offset-primary hover:bg-primary hover:text-white transform scale-0 group-hover:scale-100 transition-all delay-75">
-                        <Instagram className="w-5 h-5" />
+                      <Button asChild size="icon" variant="ghost" className="rounded-full bg-white text-primary ring-offset-primary hover:bg-primary hover:text-white transform scale-0 group-hover:scale-100 transition-all delay-75">
+                        <a href="https://www.instagram.com/drkanaks?igsh=ZWgydWlnNXU3MzB2" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                          <Instagram className="w-5 h-5" />
+                        </a>
                       </Button>
-                      <Button size="icon" variant="ghost" className="rounded-full bg-white text-secondary ring-offset-secondary hover:bg-secondary hover:text-white transform scale-0 group-hover:scale-100 transition-all delay-150">
-                        <Linkedin className="w-5 h-5" />
+                      <Button asChild size="icon" variant="ghost" className="rounded-full bg-white text-secondary ring-offset-secondary hover:bg-secondary hover:text-white transform scale-0 group-hover:scale-100 transition-all delay-150">
+                        <a href="https://www.linkedin.com/in/dr-kanaks-150226320/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                          <Linkedin className="w-5 h-5" />
+                        </a>
                       </Button>
                     </div>
                   </div>

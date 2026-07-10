@@ -83,7 +83,7 @@ const Testimonials = () => {
   }, []);
 
   const handlePositiveFeedback = () => {
-    const googleReviewUrl = "https://www.google.com/maps/place/Dr+Kanaks+Skin+Hair+%26+Cosmetology+Clinic/@11.6756687,78.1375675,359m/data=!3m1!1e3!4m8!3m7!1s0x3babf05ad2d9eac9:0x5837334bf668c2d8!8m2!3d11.6755833!4d78.1367078!9m1!1b1!16s%2Fg%2F11gjv748y_?hl=en-IN&entry=ttu&g_ep=EgoyMDI2MDMzMC4wIKXMDSoASAFQAw%3D%3D";
+    const googleReviewUrl = "https://share.google/JJWJzBNnjSpuiSfb8";
 
     toast.success('Amazing! Your support means the world to us! ❤️ Please help us grow by sharing your experience on Google.', {
       duration: 4000,

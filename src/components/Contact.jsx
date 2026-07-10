@@ -6,12 +6,14 @@ import {
   MapPin, 
   Instagram, 
   Facebook, 
-  Twitter, 
   Clock, 
   Send,
   MessageSquare,
   ArrowUpRight,
-  ShieldCheck
+  ShieldCheck,
+  Youtube,
+  Linkedin,
+  Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,14 +120,30 @@ const Contact = () => {
 
             {/* Social Links */}
             <div className="flex gap-3 pt-2">
-              <Button size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-primary transition-colors">
-                <Instagram className="w-4 h-4" />
+              <Button asChild size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-pink-600 transition-colors">
+                <a href="https://www.instagram.com/drkanaks?igsh=ZWgydWlnNXU3MzB2" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <Instagram className="w-4 h-4" />
+                </a>
               </Button>
-              <Button size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-blue-600 transition-colors">
-                <Facebook className="w-4 h-4" />
+              <Button asChild size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-blue-600 transition-colors">
+                <a href="https://www.facebook.com/profile.php?id=61567068521262" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <Facebook className="w-4 h-4" />
+                </a>
               </Button>
-              <Button size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-sky-500 transition-colors">
-                <Twitter className="w-4 h-4" />
+              <Button asChild size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-red-600 transition-colors">
+                <a href="https://www.youtube.com/@drkanaks1847/shorts" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+                  <Youtube className="w-4 h-4" />
+                </a>
+              </Button>
+              <Button asChild size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-blue-700 transition-colors">
+                <a href="https://www.linkedin.com/in/dr-kanaks-150226320/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                  <Linkedin className="w-4 h-4" />
+                </a>
+              </Button>
+              <Button asChild size="icon" className="rounded-xl h-10 w-10 bg-foreground text-background shadow-md hover:bg-amber-600 transition-colors">
+                <a href="https://share.google/JJWJzBNnjSpuiSfb8" target="_blank" rel="noopener noreferrer" aria-label="Google My Business">
+                  <Globe className="w-4 h-4" />
+                </a>
               </Button>
             </div>
           </div>

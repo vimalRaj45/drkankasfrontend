@@ -1,5 +1,5 @@
-export const API_URL = (window.location.origin.includes('localhost') || window.location.origin.includes('trycloudflare.com')) 
-  ? window.location.origin 
+export const API_URL = (window.location.origin.includes('localhost') || window.location.origin.includes('trycloudflare.com'))
+  ? window.location.origin
   : "https://drkanaksbackend.onrender.com";
 /* ---------------- HELPER ---------------- */
 
@@ -67,7 +67,7 @@ export const bookAppointment = async (appointmentData) => {
 
 export const getAppointments = async (page = 1, limit = 10) => {
   try {
-    const adminToken = "CHANGE_THIS_SECRET";
+    const adminToken = "dr_kanaks";
     const response = await fetch(`${API_URL}/appointments?page=${page}&limit=${limit}&admin_token=${adminToken}`);
     const data = await response.json();
     return {
@@ -80,7 +80,7 @@ export const getAppointments = async (page = 1, limit = 10) => {
   }
 };
 
-export const updateStatus = async (appointmentId, status, adminToken = "CHANGE_THIS_SECRET", reason = "", suggestedDate = "") => {
+export const updateStatus = async (appointmentId, status, adminToken = "dr_kanaks", reason = "", suggestedDate = "") => {
   try {
     const response = await fetch(`${API_URL}/update-status`, {
       method: "POST",
@@ -166,7 +166,7 @@ export const submitGoogleFeedback = async (rating, feedback, name = "") => {
   }
 };
 
-export const broadcastPush = async (title, body, url, image = "", sendNativePush = true, adminToken = "CHANGE_THIS_SECRET") => {
+export const broadcastPush = async (title, body, url, image = "", sendNativePush = true, adminToken = "dr_kanaks") => {
   try {
     const response = await fetch(`${API_URL}/broadcast-push`, {
       method: "POST",
@@ -184,7 +184,7 @@ export const broadcastPush = async (title, body, url, image = "", sendNativePush
   }
 };
 
-export const uploadImage = async (base64Image, adminToken = "CHANGE_THIS_SECRET") => {
+export const uploadImage = async (base64Image, adminToken = "dr_kanaks") => {
   try {
     const response = await fetch(`${API_URL}/api/upload`, {
       method: "POST",
@@ -217,7 +217,7 @@ export const getNotifications = async () => {
   }
 };
 
-export const updateNotification = async (id, title, body, url, image, adminToken = "CHANGE_THIS_SECRET") => {
+export const updateNotification = async (id, title, body, url, image, adminToken = "dr_kanaks") => {
   try {
     const response = await fetch(`${API_URL}/api/notifications/${id}`, {
       method: "PUT",
@@ -235,7 +235,7 @@ export const updateNotification = async (id, title, body, url, image, adminToken
   }
 };
 
-export const deleteNotification = async (id, adminToken = "CHANGE_THIS_SECRET") => {
+export const deleteNotification = async (id, adminToken = "dr_kanaks") => {
   try {
     const response = await fetch(`${API_URL}/api/notifications/${id}?admin_token=${adminToken}`, {
       method: "DELETE",
