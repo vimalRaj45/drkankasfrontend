@@ -156,7 +156,11 @@ const Hero = () => {
             </span>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] text-foreground tracking-tight">
               <span className="block mb-2">Advanced Care for</span>
-              <span className="notranslate inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black">
+              <span className={`notranslate inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em] font-black ${
+                lang === 'ta' 
+                  ? "text-xl sm:text-3xl md:text-4xl lg:text-5xl" 
+                  : "text-2xl sm:text-4xl md:text-5xl lg:text-6xl"
+              }`}>
                 {currentText || "\u00A0"}
               </span>
               <span className="notranslate w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
