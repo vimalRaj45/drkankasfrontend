@@ -23,7 +23,7 @@ const flyers = [
   { id: 5, src: "/flyer5.jpg" }
 ];
 
-const words = [
+const englishWords = [
   "Your Skin & Hair",
   "Your Confidence",
   "Your Aesthetics",
@@ -31,7 +31,29 @@ const words = [
   "Clinical Excellence"
 ];
 
+const tamilWords = [
+  "உங்கள் சருமம் & முடி",
+  "உங்கள் நம்பிக்கை",
+  "உங்கள் அழகியல்",
+  "முடி மறுசீரமைப்பு",
+  "சிறந்த மருத்துவ சேவை"
+];
+
+const getLanguage = () => {
+  if (typeof window === "undefined" || typeof document === "undefined") return "en";
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
+  const currentLang = getCookie('googtrans');
+  return (currentLang && currentLang.includes('/ta')) ? 'ta' : 'en';
+};
+
 const Hero = () => {
+  const lang = getLanguage();
+  const words = lang === 'ta' ? tamilWords : englishWords;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [liveStats, setLiveStats] = useState({ total_patients: 10000, success_rate: 98 });
   const [wordIndex, setWordIndex] = useState(0);
@@ -134,10 +156,10 @@ const Hero = () => {
             </span>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] text-foreground tracking-tight">
               <span className="block mb-2">Advanced Care for</span>
-              <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black">
+              <span className="notranslate inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em] text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black">
                 {currentText || "\u00A0"}
               </span>
-              <span className="w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
+              <span className="notranslate w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
             </h1>
           </div>
 
