@@ -39,13 +39,29 @@ const Navbar = () => {
   }, []);
 
   const handleLanguageChange = (newLang) => {
+    const domains = [
+      "",
+      window.location.hostname,
+      "." + window.location.hostname,
+      window.location.hostname.replace(/^www\./, ""),
+      "." + window.location.hostname.replace(/^www\./, "")
+    ];
+    
+    // Clear all existing googtrans cookies
+    domains.forEach(dom => {
+      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;" + (dom ? ` domain=${dom};` : "");
+    });
+
     if (newLang === "ta") {
       document.cookie = "googtrans=/en/ta; path=/;";
-      document.cookie = "googtrans=/en/ta; path=/; domain=" + window.location.hostname + ";";
+      domains.forEach(dom => {
+        if (dom) {
+          document.cookie = `googtrans=/en/ta; path=/; domain=${dom};`;
+        }
+      });
       setLang("ta");
     } else {
-      document.cookie = "googtrans=/en/en; path=/;";
-      document.cookie = "googtrans=/en/en; path=/; domain=" + window.location.hostname + ";";
+      // For English, we just delete all googtrans cookies and let the page render natively
       setLang("en");
     }
     window.location.reload();
