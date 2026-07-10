@@ -74,13 +74,13 @@ const Footer = () => {
 
           {/* Quick Nav Links Column */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-primary pl-4 tracking-tighter uppercase tracking-widest text-xs">Medical Directory</h4>
+            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-primary pl-4 uppercase tracking-widest text-xs">Medical Directory</h4>
             <nav className="flex flex-col gap-5">
               {[
                 { name: "Home", path: "/" },
                 { name: "About Us", path: "/about" },
                 { name: "Services", path: "/services" },
-                { name: "Our Doctors", path: "/doctors" },
+                { name: "Our Doctors", path: "/#doctors" },
                 { name: "Book Appointment", path: "/book" },
                 { name: "Contact Us", path: "/contact" }
               ].map(link => (
@@ -98,7 +98,7 @@ const Footer = () => {
 
           {/* Clinical Locations / Support Column */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-secondary pl-4 tracking-tighter uppercase tracking-widest text-xs">Patient Concierge</h4>
+            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-secondary pl-4 uppercase tracking-widest text-xs">Patient Concierge</h4>
             <div className="space-y-6">
               <div className="flex items-start gap-4 text-slate-400">
                 <Phone className="w-5 h-5 text-secondary mt-1" />
@@ -120,7 +120,7 @@ const Footer = () => {
 
           {/* Newsletter / CTA Column */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-amber-500 pl-4 tracking-tighter uppercase tracking-widest text-xs">Clinical Bulletin</h4>
+            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-amber-500 pl-4 uppercase tracking-widest text-xs">Clinical Bulletin</h4>
             <p className="text-slate-400 text-sm font-medium mb-6 leading-relaxed italic">
               Subscribe to receive exclusive healthcare tips and priority update on clinical camps.
             </p>

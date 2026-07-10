@@ -146,7 +146,12 @@ export const subscribeUser = async (userId, subscription) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    return await response.json();
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : { success: response.ok };
+    } catch (e) {
+      return { success: response.ok, error: "Non-JSON response received", text };
+    }
   } catch (error) {
     console.error("Subscription failed:", error);
     return { success: false, error: error.message };
