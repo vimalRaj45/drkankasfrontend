@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star, Globe } from "lucide-react";
+import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star, Globe, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
@@ -221,6 +221,17 @@ const Navbar = () => {
 
               {/* Bottom Compact CTA */}
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border mt-auto">
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
+                  onClick={() => {
+                    window.dispatchEvent(new Event('triggerPushPrompt'));
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <Bell className="w-3.5 h-3.5 text-primary animate-pulse" />
+                  {lang === 'ta' ? "அறிவிப்புகளை அனுமதி" : "Allow Notifications"}
+                </Button>
                 <Button 
                   variant="outline" 
                   className="notranslate w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
