@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, ShieldCheck, Sparkles, Activity } from "lucide-react";
 
-import Logo from "../assets/dr_kanaks_logo.png";
-
 const LoadingScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
 
@@ -24,15 +22,15 @@ const LoadingScreen = () => {
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center overflow-hidden"
         >
-          {/* Main Logo Animation */}
+          {/* Main Logo Animation - Replaced Logo with Premium Clinic Icon */}
           <motion.div
             initial={{ scale: 0.8, rotate: -10 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 1, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-            className="relative"
+            className="relative flex items-center justify-center"
           >
             <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150" />
-            <img src={Logo} className="h-20 sm:h-28 w-auto object-contain relative z-10" alt="Dr. Kanaks Clinic" />
+            <Activity className="h-14 w-14 text-primary relative z-10" />
             
             {/* Spinning Ring */}
             <motion.div
