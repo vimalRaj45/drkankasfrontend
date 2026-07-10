@@ -10,12 +10,12 @@ import Logo from "../assets/dr_kanaks_logo.png";
 import NotificationCenter from "./NotificationCenter";
 
 const navLinks = [
-  { name: "Home", href: "/", icon: <Layout className="w-4 h-4" /> },
-  { name: "About", href: "/about", icon: <Heart className="w-4 h-4" /> },
-  { name: "Services", href: "/services", icon: <Briefcase className="w-4 h-4" /> },
-  { name: "Testimonials", href: "/#testimonials", icon: <Star className="w-4 h-4 text-yellow-500" /> },
-  { name: "Blog", href: "/blog", icon: <Users className="w-4 h-4" /> },
-  { name: "Contact", href: "/contact", icon: <MessageSquare className="w-4 h-4" /> },
+  { name: "Home", tamilName: "முகப்பு", href: "/", icon: <Layout className="w-4 h-4" /> },
+  { name: "About", tamilName: "பற்றி", href: "/about", icon: <Heart className="w-4 h-4" /> },
+  { name: "Services", tamilName: "சேவைகள்", href: "/services", icon: <Briefcase className="w-4 h-4" /> },
+  { name: "Testimonials", tamilName: "சான்றுகள்", href: "/#testimonials", icon: <Star className="w-4 h-4 text-yellow-500" /> },
+  { name: "Blog", tamilName: "வலைப்பதிவு", href: "/blog", icon: <Users className="w-4 h-4" /> },
+  { name: "Contact", tamilName: "தொடர்பு", href: "/contact", icon: <MessageSquare className="w-4 h-4" /> },
 ];
 
 const Navbar = () => {
@@ -139,7 +139,7 @@ const Navbar = () => {
                     transition={{ type: "spring", stiffness: 350, damping: 28 }}
                   />
                 )}
-                {link.name}
+                {lang === 'ta' ? link.tamilName : link.name}
               </Link>
             );
           })}
@@ -160,15 +160,15 @@ const Navbar = () => {
             <span className="text-xs">{lang === "en" ? "தமிழ்" : "English"}</span>
           </Button>
 
-          <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
+           <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
               <User className="w-4 h-4" />
-              Profile
+              {lang === 'ta' ? "சுயவிவரம்" : "Profile"}
             </Link>
           </Button>
           
           <Button className="rounded-full shadow-lg shadow-primary/25 hidden md:flex h-11" asChild>
-            <Link to="/book">Book Appointment</Link>
+            <Link to="/book">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
           </Button>
 
           {/* Mobile Menu */}
@@ -184,7 +184,9 @@ const Navbar = () => {
                   <div className="bg-white p-1 rounded-lg border border-border">
                     <img src={Logo} className="w-5 h-5 object-contain" alt="Logo" />
                   </div>
-                  <span className="font-black text-sm uppercase tracking-widest text-slate-800 dark:text-white">Clinical Menu</span>
+                  <span className="font-black text-sm uppercase tracking-widest text-slate-800 dark:text-white">
+                    {lang === 'ta' ? "முன்பதிவு வழிகாட்டி" : "Clinical Menu"}
+                  </span>
                 </SheetTitle>
               </SheetHeader>
 
@@ -200,7 +202,7 @@ const Navbar = () => {
                     <div className="p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-xs border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
                       {React.cloneElement(link.icon, { className: "w-3.5 h-3.5" })}
                     </div>
-                    {link.name}
+                    {lang === 'ta' ? link.tamilName : link.name}
                   </Link>
                 ))}
                 
@@ -213,7 +215,7 @@ const Navbar = () => {
                   <div className="p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-xs border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
                     <User className="w-3.5 h-3.5" />
                   </div>
-                  My Profile
+                  {lang === 'ta' ? "சுயவிவரம்" : "My Profile"}
                 </Link>
               </div>
 
@@ -230,8 +232,8 @@ const Navbar = () => {
                   <Globe className="w-3.5 h-3.5 text-primary" />
                   {lang === "en" ? "தமிழ்" : "English"}
                 </Button>
-                <Button className="w-full rounded-xl py-4 h-9 text-[10px] font-black uppercase tracking-widest mb-3 bg-primary shadow-lg shadow-primary/20" asChild onClick={() => setIsMenuOpen(false)}>
-                  <Link to="/book">Book Appointment</Link>
+                 <Button className="w-full rounded-xl py-4 h-9 text-[10px] font-black uppercase tracking-widest mb-3 bg-primary shadow-lg shadow-primary/20" asChild onClick={() => setIsMenuOpen(false)}>
+                  <Link to="/book">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
                 </Button>
                 <div className="flex items-center justify-center gap-2 text-primary font-black text-[10px] uppercase tracking-tighter">
                   <Phone className="w-3 h-3" />
