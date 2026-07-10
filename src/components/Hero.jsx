@@ -39,19 +39,8 @@ const tamilWords = [
   "சிறந்த மருத்துவ சேவை"
 ];
 
-const getLanguage = () => {
-  if (typeof window === "undefined" || typeof document === "undefined") return "en";
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  };
-  const currentLang = getCookie('googtrans');
-  return (currentLang && currentLang.includes('/ta')) ? 'ta' : 'en';
-};
-
 const Hero = () => {
-  const lang = getLanguage();
+  const [lang, setLang] = useState("en");
   const words = lang === 'ta' ? tamilWords : englishWords;
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -60,6 +49,40 @@ const Hero = () => {
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [speed, setSpeed] = useState(50);
+
+  // Watch for language changes and browser translation events
+  useEffect(() => {
+    const checkLang = () => {
+      const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) {
+          try {
+            return decodeURIComponent(parts.pop().split(';').shift());
+          } catch (e) {
+            return parts.pop().split(';').shift();
+          }
+        }
+      };
+      
+      const currentLang = getCookie('googtrans');
+      const isTamil = 
+        (currentLang && currentLang.includes('/ta')) ||
+        document.documentElement.lang === 'ta' ||
+        document.documentElement.classList.contains('translated-ltr') ||
+        document.documentElement.className.includes('translated');
+        
+      setLang(isTamil ? "ta" : "en");
+    };
+
+    checkLang();
+
+    // Observe changes to html lang attribute to detect dynamic browser translations
+    const observer = new MutationObserver(checkLang);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang', 'class'] });
+
+    return () => observer.disconnect();
+  }, []);
   
   // Fetch live stats
   useEffect(() => {
@@ -106,7 +129,7 @@ const Hero = () => {
 
     timer = setTimeout(handleType, speed);
     return () => clearTimeout(timer);
-  }, [currentText, isDeleting, wordIndex, speed]);
+  }, [currentText, isDeleting, wordIndex, speed, words]);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % flyers.length);
