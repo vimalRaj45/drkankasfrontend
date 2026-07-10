@@ -64,7 +64,6 @@ const Testimonials = () => {
     }
 
     return () => {
-      observer.disconnect();
       if (script) {
         script.removeEventListener('load', initCommonNinja);
       }

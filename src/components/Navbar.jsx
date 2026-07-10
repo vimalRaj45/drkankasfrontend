@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star } from "lucide-react";
+import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
@@ -22,6 +22,34 @@ const Navbar = () => {
   const { pathname, hash } = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  useEffect(() => {
+    const getCookie = (name) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+    const currentLang = getCookie('googtrans');
+    if (currentLang && currentLang.includes('/ta')) {
+      setLang("ta");
+    } else {
+      setLang("en");
+    }
+  }, []);
+
+  const handleLanguageChange = (newLang) => {
+    if (newLang === "ta") {
+      document.cookie = "googtrans=/en/ta; path=/;";
+      document.cookie = "googtrans=/en/ta; path=/; domain=" + window.location.hostname + ";";
+      setLang("ta");
+    } else {
+      document.cookie = "googtrans=/en/en; path=/;";
+      document.cookie = "googtrans=/en/en; path=/; domain=" + window.location.hostname + ";";
+      setLang("en");
+    }
+    window.location.reload();
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,6 +114,17 @@ const Navbar = () => {
         <div className="flex items-center gap-1.5 sm:gap-3">
           <NotificationCenter />
 
+          {/* Desktop Language Switcher */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="rounded-full px-3 h-9 sm:h-11 hover:bg-muted text-foreground font-bold border border-border flex items-center gap-1.5"
+            onClick={() => handleLanguageChange(lang === "en" ? "ta" : "en")}
+          >
+            <Globe className="w-4 h-4 text-primary" />
+            <span className="text-xs">{lang === "en" ? "தமிழ்" : "English"}</span>
+          </Button>
+
           <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
               <User className="w-4 h-4" />
@@ -145,6 +184,17 @@ const Navbar = () => {
 
               {/* Bottom Compact CTA */}
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border mt-auto">
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
+                  onClick={() => {
+                    handleLanguageChange(lang === "en" ? "ta" : "en");
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <Globe className="w-3.5 h-3.5 text-primary" />
+                  {lang === "en" ? "தமிழ்" : "English"}
+                </Button>
                 <Button className="w-full rounded-xl py-4 h-9 text-[10px] font-black uppercase tracking-widest mb-3 bg-primary shadow-lg shadow-primary/20" asChild onClick={() => setIsMenuOpen(false)}>
                   <Link to="/book">Book Appointment</Link>
                 </Button>
