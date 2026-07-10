@@ -25,7 +25,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-900 pt-14 sm:pt-24 pb-8 sm:pb-12 relative overflow-hidden border-t border-white/5">
+    <footer className="bg-slate-50 pt-14 sm:pt-24 pb-8 sm:pb-12 relative overflow-hidden border-t border-slate-200">
       {/* Background Decorative Element */}
       <div className="absolute top-1/4 right-0 w-80 h-80 bg-primary/5 rounded-full blur-[100px] -z-0" />
       <div className="absolute bottom-1/4 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-[100px] -z-0" />
@@ -39,32 +39,32 @@ const Footer = () => {
               <img src={Logo} className="h-14 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105" alt="Dr. Kanaks Clinic" />
             </Link>
             
-            <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs italic">
+            <p className="text-slate-600 text-sm font-medium leading-relaxed max-w-xs italic">
               "Pioneering world-class clinical excellence in dermatology and hair restoration since 2014. Committed to delivering safe, effective and personalized patient care."
             </p>
 
             <div className="flex gap-4">
-              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-slate-200/50 text-slate-600 border border-slate-200 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl transition-all">
                 <a href="https://www.instagram.com/drkanaks?igsh=ZWgydWlnNXU3MzB2" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
                   <Instagram className="w-5 h-5" />
                 </a>
               </Button>
-              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-slate-200/50 text-slate-600 border border-slate-200 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl transition-all">
                 <a href="https://www.facebook.com/profile.php?id=61567068521262" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                   <Facebook className="w-5 h-5" />
                 </a>
               </Button>
-              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-slate-200/50 text-slate-600 border border-slate-200 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl transition-all">
                 <a href="https://www.youtube.com/@drkanaks1847/shorts" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
                   <Youtube className="w-5 h-5" />
                 </a>
               </Button>
-              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-slate-200/50 text-slate-600 border border-slate-200 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl transition-all">
                 <a href="https://www.linkedin.com/in/dr-kanaks-150226320/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
                   <Linkedin className="w-5 h-5" />
                 </a>
               </Button>
-              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-white/5 text-slate-300 border border-white/10 hover:bg-white hover:text-slate-900 hover:shadow-xl transition-all">
+              <Button asChild size="icon" variant="ghost" className="rounded-full h-11 w-11 bg-slate-200/50 text-slate-600 border border-slate-200 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl transition-all">
                 <a href="https://share.google/JJWJzBNnjSpuiSfb8" target="_blank" rel="noopener noreferrer" aria-label="Google My Business">
                   <Globe className="w-5 h-5" />
                 </a>
@@ -87,7 +87,7 @@ const Footer = () => {
                 <Link 
                   key={link.name} 
                   to={link.path} 
-                  className="text-slate-400 text-sm font-bold hover:text-primary hover:translate-x-1 transition-all decoration-none flex items-center gap-2 group"
+                  className="text-slate-600 text-sm font-semibold hover:text-primary hover:translate-x-1 transition-all decoration-none flex items-center gap-2 group"
                 >
                   <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
                   {link.name}
@@ -98,21 +98,21 @@ const Footer = () => {
 
           {/* Clinical Locations / Support Column */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-secondary pl-4 uppercase tracking-widest text-xs">Patient Concierge</h4>
+            <h4 className="text-lg font-bold text-slate-800 mb-8 border-l-2 border-secondary pl-4 uppercase tracking-widest text-xs">Patient Concierge</h4>
             <div className="space-y-6">
-              <div className="flex items-start gap-4 text-slate-400">
+              <div className="flex items-start gap-4 text-slate-600">
                 <Phone className="w-5 h-5 text-secondary mt-1" />
                 <div className="text-sm font-medium">
-                  <p className="text-white font-bold mb-1">Clinic Support</p>
-                  <p>+91 97504 51176</p>
+                  <p className="text-slate-800 font-bold mb-1">Clinic Support</p>
+                  <p className="text-slate-600">+91 97504 51176</p>
                 </div>
               </div>
-              <div className="flex items-start gap-4 text-slate-400">
+              <div className="flex items-start gap-4 text-slate-600">
                 <MapPin className="w-5 h-5 text-secondary mt-1" />
                 <div className="text-sm font-medium">
-                  <p className="text-white font-bold mb-1">Clinic Address</p>
-                  <p>1/11A-3, Anna Salai, Swarnapuri,</p>
-                  <p>Salem, Tamil Nadu 636004</p>
+                  <p className="text-slate-800 font-bold mb-1">Clinic Address</p>
+                  <p className="text-slate-600">1/11A-3, Anna Salai, Swarnapuri,</p>
+                  <p className="text-slate-600">Salem, Tamil Nadu 636004</p>
                 </div>
               </div>
             </div>
@@ -120,14 +120,14 @@ const Footer = () => {
 
           {/* Newsletter / CTA Column */}
           <div className="lg:col-span-1">
-            <h4 className="text-lg font-bold text-white mb-8 border-l-2 border-amber-500 pl-4 uppercase tracking-widest text-xs">Clinical Bulletin</h4>
-            <p className="text-slate-400 text-sm font-medium mb-6 leading-relaxed italic">
+            <h4 className="text-lg font-bold text-slate-800 mb-8 border-l-2 border-amber-500 pl-4 uppercase tracking-widest text-xs">Clinical Bulletin</h4>
+            <p className="text-slate-600 text-sm font-medium mb-6 leading-relaxed italic">
               Subscribe to receive exclusive healthcare tips and priority update on clinical camps.
             </p>
             <div className="relative mb-6">
               <Input 
                 placeholder="Email Address" 
-                className="h-14 rounded-2xl bg-white/5 border border-white/10 pl-6 text-white text-sm focus:ring-primary shadow-xl"
+                className="h-14 rounded-2xl bg-white border border-slate-200 pl-6 text-slate-800 text-sm focus:ring-primary shadow-sm"
               />
               <Button 
                 size="icon" 
@@ -146,7 +146,7 @@ const Footer = () => {
               </div>
               <div>
                 <p className="text-xs text-primary font-extrabold uppercase tracking-widest leading-none mb-1">Priority Desk</p>
-                <p className="text-white text-sm font-bold">Book Instantly</p>
+                <p className="text-slate-800 text-sm font-bold">Book Instantly</p>
               </div>
             </Link>
           </div>
@@ -154,7 +154,7 @@ const Footer = () => {
 
 
         {/* Bottom Bar: Copyright & Accessibility */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-12 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-slate-500 text-xs font-medium">
              &copy; {currentYear} Dr. Kanaks Speciality Clinic. All Rights Reserved. &middot; <a href="#" className="hover:text-primary decoration-none">Privacy Policy</a>
           </p>
