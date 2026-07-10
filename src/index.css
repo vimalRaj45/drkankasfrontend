@@ -173,5 +173,5 @@ iframe[id^=":"] {
 
 /* Scale down font size slightly when translated to Tamil to accommodate larger characters */
 html[lang="ta"] {
-  font-size: 93.75% !important; /* Reduces base size from 16px to 15px */
+  font-size: 80% !important;
 }
