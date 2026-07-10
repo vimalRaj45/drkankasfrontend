@@ -15,7 +15,6 @@ const navLinks = [
   { name: "Services", href: "/services", icon: <Briefcase className="w-4 h-4" /> },
   { name: "Testimonials", href: "/#testimonials", icon: <Star className="w-4 h-4 text-yellow-500" /> },
   { name: "Blog", href: "/blog", icon: <Users className="w-4 h-4" /> },
-  { name: "Appointment", href: "/book", icon: <Calendar className="w-4 h-4" /> },
   { name: "Contact", href: "/contact", icon: <MessageSquare className="w-4 h-4" /> },
 ];
 
@@ -76,22 +75,31 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Links */}
-        <nav className="hidden lg:flex items-center gap-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.href}
-              onClick={() => setActiveToken(link.name)}
-              className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 decoration-none flex items-center gap-2",
-                pathname === link.href || (pathname === '/' && link.href === '/' && !hash)
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-foreground/70 hover:bg-muted hover:text-foreground"
-              )}
-            >
-              {link.name}
-            </Link>
-          ))}
+        <nav className="hidden lg:flex items-center gap-1.5 relative">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (pathname === '/' && link.href === '/' && !hash) || (hash && link.href.endsWith(hash));
+            return (
+              <Link
+                key={link.name}
+                to={link.href}
+                className={cn(
+                  "relative px-4 py-2 text-sm font-semibold transition-all duration-300 decoration-none rounded-full flex items-center gap-1.5 z-10",
+                  isActive
+                    ? "text-primary dark:text-blue-400"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeNavBackground"
+                    className="absolute inset-0 bg-primary/10 dark:bg-primary/20 rounded-full -z-10 border border-primary/15 dark:border-primary/30"
+                    transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                  />
+                )}
+                {link.name}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* CTA & Mobile Menu & Theme Toggle */}
