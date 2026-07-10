@@ -173,7 +173,7 @@ iframe[id^=":"] {
 
 /* Scale down font size slightly when translated to Tamil to accommodate larger characters and increase readability */
 html[lang="ta"] {
-  font-size: 90% !important;
+  font-size: 93% !important;
 }
 html[lang="ta"] body {
   font-weight: 500;
