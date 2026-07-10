@@ -36,18 +36,7 @@ const Testimonials = () => {
   const [feedbackName, setFeedbackName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(1); // 1: Rating, 2: Feedback/Redirect
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
   useEffect(() => {
-    // Sync with global theme
-    const checkTheme = () => {
-      setIsDarkMode(document.documentElement.classList.contains("dark"));
-    };
-    checkTheme();
-    
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-
     // Ensure Common Ninja re-triggers and initializes correctly
     const initCommonNinja = () => {
       if (window.CommonNinja) {

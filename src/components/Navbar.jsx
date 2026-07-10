@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Moon, Sun, Star } from "lucide-react";
+import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
@@ -21,8 +21,6 @@ const navLinks = [
 const Navbar = () => {
   const { pathname, hash } = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeToken, setActiveToken] = useState("Home");
-  const [isDark, setIsDark] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,30 +29,12 @@ const Navbar = () => {
     };
     window.addEventListener("scroll", handleScroll);
 
-    // Initial theme check
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      document.documentElement.classList.add("dark");
-      setIsDark(true);
-    } else {
-      document.documentElement.classList.remove("dark");
-      setIsDark(false);
-    }
+    // Force Light Theme Only
+    document.documentElement.classList.remove("dark");
+    localStorage.removeItem("theme");
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    if (newDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
 
   return (
     <header
@@ -102,18 +82,9 @@ const Navbar = () => {
           })}
         </nav>
 
-        {/* CTA & Mobile Menu & Theme Toggle */}
+        {/* CTA & Mobile Menu */}
         <div className="flex items-center gap-1.5 sm:gap-3">
           <NotificationCenter />
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full h-9 w-9 sm:h-11 sm:w-11 hover:bg-slate-100 dark:hover:bg-slate-800"
-            onClick={toggleTheme}
-          >
-            {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-foreground/70" />}
-          </Button>
 
           <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
