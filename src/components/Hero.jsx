@@ -24,11 +24,11 @@ const flyers = [
 ];
 
 const words = [
-  "Your Skin, Hair & Confidence Our Priority",
-  "Pioneering Clinical Excellence in Salem",
-  "Advanced Skin Treatments & Cosmetology",
-  "US FDA Approved Technologies & Care",
-  "Trusted Hair Restoration & Transplant"
+  "Your Skin & Hair",
+  "Your Confidence",
+  "Advanced Aesthetics",
+  "Hair Restoration",
+  "Clinical Excellence"
 ];
 
 const Hero = () => {
@@ -128,12 +128,18 @@ const Hero = () => {
         >
 
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] mb-6 text-foreground tracking-tight">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-blue-600 to-slate-900 dark:from-white dark:via-blue-400 dark:to-white">
-              {currentText}
+          <div className="mb-6">
+            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3 block">
+              Pioneering Clinical Excellence
             </span>
-            <span className="w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
-          </h1>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] text-foreground tracking-tight">
+              <span className="block mb-2">Advanced Care for</span>
+              <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em]">
+                {currentText || "\u00A0"}
+              </span>
+              <span className="w-[4px] h-[0.9em] bg-blue-600 dark:bg-blue-400 ml-1 animate-pulse inline-block align-middle shrink-0" />
+            </h1>
+          </div>
 
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
             Expert dermatological care by Dr. (Major) R. Kanagaraj MBBS., MD (DVL). Specialized in advanced skin treatments, 
