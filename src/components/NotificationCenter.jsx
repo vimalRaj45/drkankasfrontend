@@ -3,6 +3,143 @@ import { Bell, BellRing, ArrowUpRight, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { getNotifications } from "../services/api";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
+
+const SwipeableCard = ({ 
+  banner, 
+  onDismiss, 
+  isExpanded, 
+  setIsExpanded, 
+  total,
+  currentIndex 
+}) => {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 200], [-15, 15]);
+  const opacity = useTransform(x, [-200, -150, 0, 150, 200], [0.5, 0.9, 1, 0.9, 0.5]);
+
+  const handleDragEnd = (event, info) => {
+    if (Math.abs(info.offset.x) > 130 || Math.abs(info.velocity.x) > 400) {
+      onDismiss();
+    }
+  };
+
+  return (
+    <motion.div
+      style={{ x, rotate, opacity }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      onDragEnd={handleDragEnd}
+      whileDrag={{ scale: 1.03 }}
+      initial={{ scale: 0.92, y: 30, opacity: 0 }}
+      animate={{ scale: 1, y: 0, opacity: 1 }}
+      exit={{ 
+        x: x.get() > 0 ? 400 : x.get() < 0 ? -400 : 400, 
+        opacity: 0, 
+        rotate: x.get() > 0 ? 25 : -25,
+        transition: { duration: 0.2, ease: "easeOut" }
+      }}
+      transition={{ type: "spring", stiffness: 350, damping: 25 }}
+      layout
+      className="bg-card border border-border rounded-[2.5rem] w-full max-w-sm sm:max-w-md overflow-hidden shadow-2xl relative flex flex-col cursor-grab active:cursor-grabbing select-none z-[100]"
+    >
+      {/* Drag handle pill */}
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/30 rounded-full z-50 pointer-events-none" />
+
+      {/* Close/Dismiss button */}
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          onDismiss();
+        }}
+        className="absolute top-4 right-4 bg-slate-950/60 hover:bg-slate-950 border border-white/10 text-white rounded-full p-2 z-50 transition-colors shadow-lg cursor-pointer"
+        title="Close"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Banner image */}
+      <div 
+        className="relative w-full h-64 sm:h-72 bg-slate-950 overflow-hidden cursor-pointer group shrink-0"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <img 
+          src={banner.image_url} 
+          alt="Banner" 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        
+        {/* Toggle instruction overlay */}
+        {!isExpanded && (
+          <div className="absolute inset-0 bg-black/25 group-hover:bg-black/15 flex flex-col items-center justify-center gap-1 transition-colors">
+            <span className="text-white text-[10px] bg-primary/90 px-4 py-1.5 rounded-full font-black uppercase tracking-widest shadow-md transition-all active:scale-[0.98]">
+              Click for Details
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Details pane */}
+      <motion.div 
+        layout
+        className="p-6 sm:p-8 flex flex-col gap-4 text-center bg-card border-t border-border"
+      >
+        <div className="flex flex-col gap-1.5">
+          <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight leading-tight">
+            {banner.title}
+          </h3>
+          <span className="text-[9px] bg-primary/10 text-primary font-black px-2 py-0.5 rounded-full w-fit mx-auto uppercase">
+            Announcement
+          </span>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isExpanded && (
+            <motion.p 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto"
+            >
+              {banner.body}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {/* Buttons */}
+        <div className="flex gap-3 mt-1">
+          {banner.url && (
+            <a
+              href={banner.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-11 bg-primary hover:bg-primary/95 text-white font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center gap-1.5 flex-1 shadow-lg shadow-primary/20 transition-all decoration-none"
+            >
+              Open Link <ArrowUpRight className="w-3.5 h-3.5" />
+            </a>
+          )}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDismiss();
+            }}
+            className="h-11 border border-border hover:bg-muted text-foreground font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center flex-1 transition-all cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      </motion.div>
+
+      {/* Navigation hints */}
+      <div className="py-2.5 bg-slate-50 dark:bg-slate-900/50 border-t border-border text-center text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex items-center justify-center gap-1.5 pointer-events-none">
+        <span>← Swipe to dismiss →</span>
+        {total > 1 && <span>•</span>}
+        {total > 1 && <span>Card {currentIndex + 1} of {total}</span>}
+      </div>
+    </motion.div>
+  );
+};
 
 const NotificationCenter = () => {
   const [notifications, setNotifications] = useState([]);
@@ -171,87 +308,48 @@ const NotificationCenter = () => {
       {/* PREMIUM STACKED IN-APP ANNOUNCEMENT POPUP MODALS */}
       {currentBanner && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-[2rem] max-w-md w-full overflow-hidden shadow-2xl relative flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            
-            {/* Close Button in top right */}
-            <button 
-              onClick={handleDismissCurrentBanner}
-              className="absolute top-4 right-4 bg-slate-900/80 hover:bg-slate-900 border border-border text-white rounded-full p-2 z-[10000] transition-colors shadow-lg"
-              title="Close and show next"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            {/* Banner Image (always shown first) */}
-            <div 
-              className="relative w-full h-72 bg-slate-950 overflow-hidden cursor-pointer group"
-              onClick={() => setIsExpanded(true)}
-            >
-              <img 
-                src={currentBanner.image_url} 
-                alt="Banner Announcement" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              
-              {/* Click instruction overlay helper */}
-              {!isExpanded && (
-                <div className="absolute inset-0 bg-black/35 group-hover:bg-black/25 flex flex-col items-center justify-center gap-1 transition-colors">
-                  <span className="text-white text-xs bg-primary/90 px-4 py-1.5 rounded-full font-black uppercase tracking-widest shadow-md transition-all active:scale-[0.98]">
-                    Click for Details
-                  </span>
-                  {bannerQueue.length > 1 && (
-                    <span className="text-[10px] text-slate-300 font-bold">
-                      {bannerQueue.length} announcements pending
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Detailed Message (Revealed on click) */}
-            {isExpanded && (
-              <div className="p-6 sm:p-8 flex flex-col gap-4 text-center border-t border-border animate-in fade-in slide-in-from-bottom-3 duration-300">
-                <div className="flex flex-col gap-1.5">
-                  <h3 className="text-xl font-black text-foreground tracking-tight leading-tight">
-                    {currentBanner.title}
-                  </h3>
-                  <span className="text-[10px] bg-primary/10 text-primary font-black px-2 py-0.5 rounded-full w-fit mx-auto uppercase">
-                    Clinic Announcement
-                  </span>
-                </div>
+          <div className="relative w-full max-w-sm sm:max-w-md flex items-center justify-center min-h-[480px]">
+            <AnimatePresence mode="popLayout">
+              {bannerQueue.slice(0, 3).reverse().map((banner, idx, arr) => {
+                const isTop = idx === arr.length - 1;
+                const relativeIndex = (arr.length - 1) - idx;
                 
-                <p className="text-xs sm:text-sm text-muted-foreground font-medium leading-relaxed whitespace-pre-wrap max-h-40 overflow-y-auto">
-                  {currentBanner.body}
-                </p>
-                
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 mt-2">
-                  {currentBanner.url && (
-                    <a
-                      href={currentBanner.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="h-12 bg-primary hover:bg-primary/95 text-white font-extrabold text-xs uppercase tracking-widest rounded-full flex items-center justify-center gap-2 flex-1 shadow-lg shadow-primary/20 transition-all decoration-none"
-                    >
-                      Open Link <ArrowUpRight className="w-4 h-4" />
-                    </a>
-                  )}
-                  <button
-                    onClick={handleDismissCurrentBanner}
-                    className="h-12 border border-border hover:bg-muted text-foreground font-extrabold text-xs uppercase tracking-widest rounded-full flex items-center justify-center flex-1 transition-all"
+                if (isTop) {
+                  return (
+                    <SwipeableCard
+                      key={banner.id}
+                      banner={banner}
+                      onDismiss={handleDismissCurrentBanner}
+                      isExpanded={isExpanded}
+                      setIsExpanded={setIsExpanded}
+                      total={bannerQueue.length}
+                      currentIndex={0}
+                    />
+                  );
+                }
+
+                return (
+                  <motion.div
+                    key={banner.id}
+                    initial={{ scale: 0.9, y: 30, opacity: 0 }}
+                    animate={{
+                      scale: 1 - relativeIndex * 0.05,
+                      y: relativeIndex * 15,
+                      opacity: 0.6 - relativeIndex * 0.2,
+                      zIndex: 10 - relativeIndex
+                    }}
+                    exit={{ opacity: 0, y: 30, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    className="absolute bg-card border border-border rounded-[2.5rem] w-full h-[380px] shadow-lg pointer-events-none overflow-hidden"
                   >
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Queue pagination status bar */}
-            {bannerQueue.length > 1 && (
-              <div className="py-2 bg-muted/30 border-t border-border text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                Stack queue: 1 of {bannerQueue.length}
-              </div>
-            )}
+                    <div className="w-full h-full relative">
+                      <img src={banner.image_url} alt="" className="w-full h-full object-cover opacity-60 blur-[1px]" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         </div>
       )}
