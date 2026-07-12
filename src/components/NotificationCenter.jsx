@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Bell, BellRing, ArrowUpRight, X } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { getNotifications } from "../services/api";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
@@ -144,9 +144,7 @@ const SwipeableCard = ({
 };
 
 const NotificationCenter = () => {
-  const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
   const [bannerQueue, setBannerQueue] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -154,8 +152,6 @@ const NotificationCenter = () => {
     try {
       const res = await getNotifications();
       if (res.success && res.data) {
-        setNotifications(res.data);
-        
         // Calculate unread count based on last read timestamp
         const lastRead = localStorage.getItem("last_read_notifications") || 0;
         const unread = res.data.filter(
@@ -181,30 +177,6 @@ const NotificationCenter = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleOpenChange = (open) => {
-    setIsOpen(open);
-    if (open) {
-      // Mark all as read
-      const now = Date.now();
-      localStorage.setItem("last_read_notifications", now.toString());
-      setUnreadCount(0);
-    }
-  };
-
-  const formatTime = (dateStr) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("en-IN", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch (e) {
-      return dateStr;
-    }
-  };
-
   const handleDismissCurrentBanner = () => {
     if (bannerQueue.length === 0) return;
     const current = bannerQueue[0];
@@ -225,87 +197,19 @@ const NotificationCenter = () => {
 
   return (
     <>
-      <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative rounded-full h-9 w-9 sm:h-11 sm:w-11 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            {unreadCount > 0 ? (
-              <>
-                <BellRing className="w-5 h-5 text-primary animate-wiggle" />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background" />
-              </>
-            ) : (
-              <Bell className="w-5 h-5 text-foreground/70" />
-            )}
-          </Button>
-        </PopoverTrigger>
-        
-        <PopoverContent 
-          align="end" 
-          className="w-80 sm:w-[380px] p-0 rounded-3xl border border-border bg-card shadow-2xl overflow-hidden z-50"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-border">
-            <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
-              <span className="font-extrabold text-sm text-foreground">Notification Center</span>
-            </div>
-            {unreadCount > 0 && (
-              <span className="text-[10px] bg-primary/10 text-primary font-black px-2 py-0.5 rounded-full">
-                {unreadCount} New
-              </span>
-            )}
-          </div>
-
-          {/* Scrollable List */}
-          <div className="max-h-[350px] overflow-y-auto divide-y divide-border">
-            {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
-                  <Bell className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <p className="text-xs font-bold text-foreground">No alerts yet</p>
-                <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px]">
-                  You're all caught up! When updates or clinic announcements are sent, they'll show up here.
-                </p>
-              </div>
-            ) : (
-              notifications.map((item) => (
-                <div key={item.id} className="p-4 hover:bg-muted/30 transition-colors flex flex-col gap-2">
-                  <div className="flex justify-between items-start gap-4">
-                    <h4 className="font-bold text-xs sm:text-sm text-foreground leading-snug">
-                      {item.title}
-                    </h4>
-                    <span className="text-[9px] text-muted-foreground font-medium shrink-0">
-                      {formatTime(item.created_at)}
-                    </span>
-                  </div>
-                  
-                  <p className="text-xs text-muted-foreground font-medium leading-normal whitespace-pre-wrap">
-                    {item.body}
-                  </p>
-
-
-
-                  {item.url && (
-                    <a
-                      href={item.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-primary mt-1 hover:underline decoration-none w-fit"
-                    >
-                      Open Link <ArrowUpRight className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </PopoverContent>
-      </Popover>
+      <Link
+        to="/notifications"
+        className="relative rounded-full h-9 w-9 sm:h-11 sm:w-11 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center justify-center border border-border bg-background"
+      >
+        {unreadCount > 0 ? (
+          <>
+            <BellRing className="w-5 h-5 text-primary animate-wiggle" />
+            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background" />
+          </>
+        ) : (
+          <Bell className="w-5 h-5 text-foreground/70" />
+        )}
+      </Link>
 
       {/* PREMIUM STACKED IN-APP ANNOUNCEMENT POPUP MODALS */}
       {currentBanner && (

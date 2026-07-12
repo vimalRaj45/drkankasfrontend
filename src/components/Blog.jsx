@@ -85,6 +85,7 @@ const Blog = () => {
                   src={post.image} 
                   alt={post.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
                 />
                 <div className="absolute top-4 left-4">
                   <Badge className="bg-background/90 text-foreground backdrop-blur-md border-none uppercase text-[10px] font-bold tracking-wider px-3">

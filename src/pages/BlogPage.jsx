@@ -478,6 +478,7 @@ const BlogPostDetail = ({ post, onBack }) => {
           src={post.image}
           alt={post.title}
           className="w-full h-auto max-h-[500px] object-cover"
+          loading="lazy"
         />
       </div>
 
@@ -590,6 +591,7 @@ const BlogPostDetail = ({ post, onBack }) => {
                     src={relatedPost.image}
                     alt={relatedPost.title}
                     className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
+                    loading="lazy"
                   />
                 </div>
                 <h4 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
@@ -823,6 +825,7 @@ const BlogPage = () => {
                     src={featuredPost.image}
                     alt={featuredPost.title}
                     className="w-full h-[400px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
                   />
                   <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
                     <Badge className="mb-4 bg-primary text-white">{featuredPost.category}</Badge>
@@ -863,6 +866,7 @@ const BlogPage = () => {
                         src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
                       />
                       <Badge className="absolute top-4 left-4 bg-primary/90 text-white">
                         {post.category}

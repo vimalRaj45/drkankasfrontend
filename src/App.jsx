@@ -17,6 +17,7 @@ import AboutPage from "./pages/AboutPage";
 import ServicesPage from "./pages/ServicesPage";
 import BlogPage from "./pages/BlogPage";
 import ContactPage from "./pages/ContactPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 // Dialog for notifications
 import { 
@@ -180,6 +181,7 @@ function App() {
         <Route path="blog" element={<BlogPage />} />
         <Route path="contact" element={<ContactPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="treatment-flow/:serviceName" element={<TreatmentFlowPage />} />
         <Route path="book" element={<BookingPage />} />
