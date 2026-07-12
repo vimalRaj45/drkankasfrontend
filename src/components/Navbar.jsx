@@ -153,11 +153,11 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="sm"
-            className="notranslate rounded-full px-3 h-9 sm:h-11 hover:bg-muted text-foreground font-bold border border-border flex items-center gap-1.5"
+            className="notranslate rounded-full px-3 h-9 sm:h-11 hover:bg-muted text-foreground font-bold border border-border flex items-center gap-1.5 shrink-0"
             onClick={() => handleLanguageChange(lang === "en" ? "ta" : "en")}
           >
-            <Globe className="w-4 h-4 text-primary" />
-            <span className="text-xs">{lang === "en" ? "தமிழ்" : "English"}</span>
+            <Globe className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-xs shrink-0">{lang === "en" ? "தமிழ்" : "English"}</span>
           </Button>
 
            <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
