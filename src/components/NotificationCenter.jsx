@@ -40,7 +40,7 @@ const SwipeableCard = ({
       }}
       transition={{ type: "spring", stiffness: 350, damping: 25 }}
       layout
-      className="bg-card border border-border rounded-[2.5rem] w-full max-w-sm sm:max-w-md overflow-hidden shadow-2xl relative flex flex-col cursor-grab active:cursor-grabbing select-none z-[100]"
+      className="bg-card border border-border rounded-[2.5rem] w-full max-w-sm sm:max-w-md max-h-[80vh] overflow-hidden shadow-2xl relative flex flex-col cursor-grab active:cursor-grabbing select-none z-[100]"
     >
       {/* Drag handle pill */}
       <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/30 rounded-full z-50 pointer-events-none" />
@@ -59,7 +59,7 @@ const SwipeableCard = ({
 
       {/* Banner image */}
       <div 
-        className="relative w-full h-64 sm:h-72 bg-slate-950 overflow-hidden cursor-pointer group shrink-0"
+        className="relative w-full h-48 sm:h-60 bg-slate-950 overflow-hidden cursor-pointer group shrink-0"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <img 
@@ -82,10 +82,10 @@ const SwipeableCard = ({
       {/* Details pane */}
       <motion.div 
         layout
-        className="p-6 sm:p-8 flex flex-col gap-4 text-center bg-card border-t border-border"
+        className="p-5 sm:p-6 flex flex-col gap-3 text-center bg-card border-t border-border overflow-hidden flex-1"
       >
-        <div className="flex flex-col gap-1.5">
-          <h3 className="text-lg sm:text-xl font-black text-foreground tracking-tight leading-tight">
+        <div className="flex flex-col gap-1.5 shrink-0">
+          <h3 className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight">
             {banner.title}
           </h3>
           <span className="text-[9px] bg-primary/10 text-primary font-black px-2 py-0.5 rounded-full w-fit mx-auto uppercase">
@@ -93,28 +93,30 @@ const SwipeableCard = ({
           </span>
         </div>
 
-        <AnimatePresence initial={false}>
-          {isExpanded && (
-            <motion.p 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25 }}
-              className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed whitespace-pre-wrap max-h-36 overflow-y-auto"
-            >
-              {banner.body}
-            </motion.p>
-          )}
-        </AnimatePresence>
+        <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+          <AnimatePresence initial={false}>
+            {isExpanded && (
+              <motion.p 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="text-xs sm:text-sm text-muted-foreground font-semibold leading-relaxed text-left sm:text-center whitespace-pre-wrap py-1"
+              >
+                {banner.body}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* Buttons */}
-        <div className="flex gap-3 mt-1">
+        <div className="flex gap-3 mt-1 shrink-0">
           {banner.url && (
             <a
               href={banner.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-11 bg-primary hover:bg-primary/95 text-white font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center gap-1.5 flex-1 shadow-lg shadow-primary/20 transition-all decoration-none"
+              className="h-10 bg-primary hover:bg-primary/95 text-white font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center gap-1.5 flex-1 shadow-lg shadow-primary/20 transition-all decoration-none"
             >
               Open Link <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
@@ -124,7 +126,7 @@ const SwipeableCard = ({
               e.stopPropagation();
               onDismiss();
             }}
-            className="h-11 border border-border hover:bg-muted text-foreground font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center flex-1 transition-all cursor-pointer"
+            className="h-10 border border-border hover:bg-muted text-foreground font-extrabold text-[10px] uppercase tracking-widest rounded-full flex items-center justify-center flex-1 transition-all cursor-pointer"
           >
             Dismiss
           </button>
@@ -308,7 +310,7 @@ const NotificationCenter = () => {
       {/* PREMIUM STACKED IN-APP ANNOUNCEMENT POPUP MODALS */}
       {currentBanner && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
-          <div className="relative w-full max-w-sm sm:max-w-md flex items-center justify-center min-h-[480px]">
+          <div className="relative w-full max-w-sm sm:max-w-md">
             <AnimatePresence mode="popLayout">
               {bannerQueue.slice(0, 3).reverse().map((banner, idx, arr) => {
                 const isTop = idx === arr.length - 1;
@@ -340,7 +342,7 @@ const NotificationCenter = () => {
                     }}
                     exit={{ opacity: 0, y: 30, scale: 0.8 }}
                     transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    className="absolute bg-card border border-border rounded-[2.5rem] w-full h-[380px] shadow-lg pointer-events-none overflow-hidden"
+                    className="absolute top-0 left-0 w-full h-full bg-card border border-border rounded-[2.5rem] shadow-lg pointer-events-none overflow-hidden"
                   >
                     <div className="w-full h-full relative">
                       <img src={banner.image_url} alt="" className="w-full h-full object-cover opacity-60 blur-[1px]" />
