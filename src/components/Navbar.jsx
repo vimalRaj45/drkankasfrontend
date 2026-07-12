@@ -139,7 +139,7 @@ const Navbar = () => {
                     transition={{ type: "spring", stiffness: 350, damping: 28 }}
                   />
                 )}
-                {lang === 'ta' ? link.tamilName : link.name}
+                <span className="notranslate">{lang === 'ta' ? link.tamilName : link.name}</span>
               </Link>
             );
           })}
@@ -163,12 +163,12 @@ const Navbar = () => {
            <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
               <User className="w-4 h-4" />
-              {lang === 'ta' ? "சுயவிவரம்" : "Profile"}
+              <span className="notranslate">{lang === 'ta' ? "சுயவிவரம்" : "Profile"}</span>
             </Link>
           </Button>
           
           <Button className="rounded-full shadow-lg shadow-primary/25 hidden md:flex h-11" asChild>
-            <Link to="/book">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
+            <Link to="/book" className="notranslate">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
           </Button>
 
           {/* Mobile Menu */}
@@ -184,7 +184,7 @@ const Navbar = () => {
                   <div className="bg-white p-1 rounded-lg border border-border">
                     <img src={Logo} className="w-5 h-5 object-contain" alt="Logo" />
                   </div>
-                  <span className="font-black text-sm uppercase tracking-widest text-slate-800 dark:text-white">
+                  <span className="font-black text-sm uppercase tracking-widest text-slate-800 dark:text-white notranslate">
                     {lang === 'ta' ? "முன்பதிவு வழிகாட்டி" : "Clinical Menu"}
                   </span>
                 </SheetTitle>
@@ -202,7 +202,7 @@ const Navbar = () => {
                     <div className="p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-xs border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
                       {React.cloneElement(link.icon, { className: "w-3.5 h-3.5" })}
                     </div>
-                    {lang === 'ta' ? link.tamilName : link.name}
+                    <span className="notranslate">{lang === 'ta' ? link.tamilName : link.name}</span>
                   </Link>
                 ))}
                 
@@ -215,7 +215,7 @@ const Navbar = () => {
                   <div className="p-1.5 bg-white dark:bg-slate-900 rounded-lg shadow-xs border border-border group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
                     <User className="w-3.5 h-3.5" />
                   </div>
-                  {lang === 'ta' ? "சுயவிவரம்" : "My Profile"}
+                  <span className="notranslate">{lang === 'ta' ? "சுயவிவரம்" : "My Profile"}</span>
                 </Link>
               </div>
 
@@ -230,7 +230,7 @@ const Navbar = () => {
                   }}
                 >
                   <Bell className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  {lang === 'ta' ? "அறிவிப்புகளை அனுமதி" : "Allow Notifications"}
+                  <span className="notranslate">{lang === 'ta' ? "அறிவிப்புகளை அனுமதி" : "Allow Notifications"}</span>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -244,7 +244,7 @@ const Navbar = () => {
                   {lang === "en" ? "தமிழ்" : "English"}
                 </Button>
                  <Button className="w-full rounded-xl py-4 h-9 text-[10px] font-black uppercase tracking-widest mb-3 bg-primary shadow-lg shadow-primary/20" asChild onClick={() => setIsMenuOpen(false)}>
-                  <Link to="/book">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
+                  <Link to="/book" className="notranslate">{lang === 'ta' ? "முன்பதிவு" : "Book Appointment"}</Link>
                 </Button>
                 <div className="flex items-center justify-center gap-2 text-primary font-black text-[10px] uppercase tracking-tighter">
                   <Phone className="w-3 h-3" />
