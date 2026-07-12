@@ -264,12 +264,12 @@ const Hero = () => {
           <motion.div
             animate={{ y: [0, -10, 0] }}
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-            className="absolute top-6 -left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border p-3.5 rounded-2xl shadow-xl z-30 flex items-center gap-2.5 max-w-[160px] pointer-events-none"
+            className="absolute top-6 -left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border p-3.5 rounded-2xl shadow-xl z-30 flex items-center gap-2.5 pointer-events-none"
           >
             <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 whitespace-nowrap">
               <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">Clinic Verified</span>
               <span className="text-xs font-bold text-foreground leading-tight">ISO Certified</span>
             </div>
@@ -284,7 +284,7 @@ const Hero = () => {
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0 animate-pulse">
               <Sparkles className="w-4 h-4" />
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 whitespace-nowrap">
               <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">Top Rated</span>
               <span className="text-xs font-bold text-foreground leading-tight">Skin & Hair Care</span>
             </div>
