@@ -171,15 +171,14 @@ const Hero = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative z-10"
         >
-
-
           <div className="mb-6">
-            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-3 block">
-              Pioneering Clinical Excellence
-            </span>
-            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.15] text-foreground tracking-tight">
-              <span className="block mb-2">Advanced Care for</span>
-              <span className={`notranslate inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-sky-500 dark:from-blue-400 dark:to-sky-400 min-h-[1.2em] font-black ${
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 text-xs font-black uppercase tracking-widest mb-4 shadow-xs backdrop-blur-md animate-pulse">
+              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>Pioneering Clinical Excellence</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7.5xl font-black leading-[1.15] text-foreground tracking-tight">
+              <span className="block mb-2 drop-shadow-sm">Advanced Care for</span>
+              <span className={`notranslate inline-block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-500 dark:from-blue-400 dark:via-indigo-400 dark:to-sky-400 min-h-[1.2em] font-black drop-shadow-[0_2px_10px_rgba(59,130,246,0.15)] ${
                 lang === 'ta' 
                   ? "text-xl sm:text-3xl md:text-4xl lg:text-5xl" 
                   : "text-2xl sm:text-4xl md:text-5xl lg:text-6xl"
@@ -190,7 +189,7 @@ const Hero = () => {
             </h1>
           </div>
 
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 max-w-xl leading-relaxed font-medium">
             Expert dermatological care by Dr. (Major) R. Kanagaraj MBBS., MD (DVL). Specialized in advanced skin treatments, 
             hair restoration & cosmetic procedures. Trusted by 10,000+ happy patients.
           </p>
@@ -212,7 +211,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="rounded-full px-8 py-6 text-base border-2 border-blue-500/30 hover:border-blue-500 hover:bg-blue-500/5 transition-all group w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
+              className="rounded-full px-8 py-6 text-base border border-slate-200/80 dark:border-white/10 backdrop-blur-md bg-white/20 dark:bg-slate-900/20 hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-all group w-full sm:w-auto justify-center hover:scale-[1.02] active:scale-[0.98]"
               asChild
             >
               <a href="#services" className="flex items-center justify-center">
@@ -233,7 +232,7 @@ const Hero = () => {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + idx * 0.1, type: "spring", stiffness: 100 }}
-                className="flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-white/5 shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-blue-500/20 dark:hover:border-blue-500/30 transition-all duration-300 group"
+                className="flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200/50 dark:border-white/5 shadow-lg shadow-slate-100/50 dark:shadow-none hover:border-blue-500/20 dark:hover:border-blue-500/30 hover:bg-white/80 dark:hover:bg-slate-900/80 hover:-translate-y-1.5 hover:shadow-xl transition-all duration-300 group"
               >
                 <div className={`p-2 rounded-xl mb-2 sm:mb-3 ${stat.color} group-hover:scale-110 transition-transform duration-300`}>
                   <stat.icon className="w-5 h-5 shrink-0" />
@@ -261,39 +260,77 @@ const Hero = () => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="relative w-full max-w-lg lg:max-w-xl mx-auto z-10"
         >
-          {/* Slider window */}
-          <div className="relative aspect-square w-full rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-950 border border-slate-200/10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0 flex h-full w-full"
-              >
-                <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={flyers[currentIndex].src}
-                    alt={`Clinic Flyer ${flyers[currentIndex].id}`}
-                    className="w-full h-full object-contain select-none"
-                  />
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          {/* Floating Certified Badge */}
+          <motion.div
+            animate={{ y: [0, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+            className="absolute top-6 -left-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border p-3.5 rounded-2xl shadow-xl z-30 flex items-center gap-2.5 max-w-[160px] pointer-events-none"
+          >
+            <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">Clinic Verified</span>
+              <span className="text-xs font-bold text-foreground leading-tight">ISO Certified</span>
+            </div>
+          </motion.div>
+
+          {/* Floating Top Rated Badge */}
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 0.5 }}
+            className="absolute -bottom-4 -right-4 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border border-border p-3.5 rounded-2xl shadow-xl z-30 flex items-center gap-2.5 pointer-events-none"
+          >
+            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0 animate-pulse">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] text-muted-foreground font-black uppercase tracking-wider">Top Rated</span>
+              <span className="text-xs font-bold text-foreground leading-tight">Skin & Hair Care</span>
+            </div>
+          </motion.div>
+
+          {/* Slider window wrapping container */}
+          <div className="p-2 bg-white/30 dark:bg-slate-900/30 backdrop-blur-xl border border-white/20 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl relative">
+            <div className="relative aspect-square w-full rounded-[2rem] sm:rounded-[3rem] overflow-hidden bg-slate-950 border border-slate-200/10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIndex}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -50 }}
+                  transition={{ duration: 0.5 }}
+                  className="absolute inset-0 flex h-full w-full"
+                >
+                  <div className="relative w-full h-full bg-slate-950 flex items-center justify-center overflow-hidden">
+                    {/* Blurred background flyer image for ambient glow */}
+                    <img
+                      src={flyers[currentIndex].src}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-30 scale-110 pointer-events-none"
+                    />
+                    <img
+                      src={flyers[currentIndex].src}
+                      alt={`Clinic Flyer ${flyers[currentIndex].id}`}
+                      className="relative w-full h-full object-contain select-none z-10"
+                    />
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Navigation Arrows */}
           <button
             onClick={handlePrev}
-            className="absolute left-2 sm:left-[-2rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20"
+            className="absolute left-4 sm:left-[-1.5rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background/90 backdrop-blur-md border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20 hover:scale-105 active:scale-95"
             aria-label="Previous slide"
           >
             <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-2 sm:right-[-2.5rem] lg:right-[-2rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20"
+            className="absolute right-4 sm:right-[-1.5rem] top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-background/90 backdrop-blur-md border border-border shadow-xl flex items-center justify-center hover:bg-muted text-foreground transition-all z-20 hover:scale-105 active:scale-95"
             aria-label="Next slide"
           >
             <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
