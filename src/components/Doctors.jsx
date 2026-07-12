@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LazyImage from "./ui/LazyImage";
 import { 
   Instagram, 
   Linkedin, 
@@ -77,11 +78,10 @@ const Doctors = () => {
                 <div className="grid md:grid-cols-5 h-full">
                   {/* Doctor Image Header */}
                   <div className="md:col-span-2 relative aspect-[4/5] md:aspect-auto overflow-hidden">
-                    <img 
+                    <LazyImage 
                       src={doctor.image} 
                       alt={doctor.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
+                      imgClassName="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     {/* Social Overlay */}
                     <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">

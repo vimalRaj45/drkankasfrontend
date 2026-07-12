@@ -4,6 +4,7 @@ import { Bell, ArrowLeft, ArrowUpRight, Calendar, Trash2, Sparkles } from "lucid
 import { getNotifications } from "../services/api";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
+import LazyImage from "../components/ui/LazyImage";
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -142,13 +143,12 @@ const NotificationsPage = () => {
                 {/* Notification Image */}
                 {item.image_url && (
                   <div className="w-full md:w-80 h-48 md:h-auto min-h-[180px] bg-slate-100 dark:bg-slate-900 shrink-0 relative overflow-hidden">
-                    <img
+                    <LazyImage
                       src={item.image_url}
                       alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
-                      loading="lazy"
+                      imgClassName="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/40 md:from-transparent via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/40 md:from-transparent via-transparent to-transparent pointer-events-none z-10" />
                   </div>
                 )}
 

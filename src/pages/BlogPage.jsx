@@ -34,6 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import LazyImage from "@/components/ui/LazyImage";
 import { SectionHeading } from "@/components/SectionHeading";
 import Testimonials from "../components/Testimonials";
 
@@ -473,12 +474,11 @@ const BlogPostDetail = ({ post, onBack }) => {
       </div>
 
       {/* Featured Image */}
-      <div className="rounded-3xl overflow-hidden mb-8">
-        <img
+      <div className="rounded-3xl overflow-hidden mb-8 relative">
+        <LazyImage
           src={post.image}
           alt={post.title}
-          className="w-full h-auto max-h-[500px] object-cover"
-          loading="lazy"
+          imgClassName="w-full h-auto max-h-[500px] object-cover"
         />
       </div>
 
@@ -586,12 +586,11 @@ const BlogPostDetail = ({ post, onBack }) => {
                 onClick={() => onBack(relatedPost.id)}
                 className="group cursor-pointer"
               >
-                <div className="rounded-xl overflow-hidden mb-3">
-                  <img
+                <div className="rounded-xl overflow-hidden mb-3 relative h-40">
+                  <LazyImage
                     src={relatedPost.image}
                     alt={relatedPost.title}
-                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform"
-                    loading="lazy"
+                    imgClassName="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                 </div>
                 <h4 className="font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2">
@@ -820,12 +819,11 @@ const BlogPage = () => {
                 onClick={() => setSelectedPost(featuredPost)}
               >
                 <div className="relative rounded-3xl overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
-                  <img
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
+                  <LazyImage
                     src={featuredPost.image}
                     alt={featuredPost.title}
-                    className="w-full h-[400px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
+                    imgClassName="w-full h-[400px] md:h-[500px] object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute bottom-0 left-0 right-0 p-8 z-20">
                     <Badge className="mb-4 bg-primary text-white">{featuredPost.category}</Badge>
@@ -862,11 +860,10 @@ const BlogPage = () => {
                     onClick={() => setSelectedPost(post)}
                   >
                     <div className="relative overflow-hidden h-48">
-                      <img
+                      <LazyImage
                         src={post.image}
                         alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        loading="lazy"
+                        imgClassName="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <Badge className="absolute top-4 left-4 bg-primary/90 text-white">
                         {post.category}

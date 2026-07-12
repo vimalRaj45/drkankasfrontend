@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Calendar, User, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LazyImage from "./ui/LazyImage";
 import { SectionHeading } from "./SectionHeading";
 
 const blogPosts = [
@@ -81,11 +82,10 @@ const Blog = () => {
               className="group bg-card rounded-3xl overflow-hidden border border-border hover:shadow-2xl transition-all hover:-translate-y-2"
             >
               <div className="relative h-64 overflow-hidden">
-                <img 
+                <LazyImage 
                   src={post.image} 
                   alt={post.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
+                  imgClassName="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute top-4 left-4">
                   <Badge className="bg-background/90 text-foreground backdrop-blur-md border-none uppercase text-[10px] font-bold tracking-wider px-3">
