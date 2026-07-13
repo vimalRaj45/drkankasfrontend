@@ -203,11 +203,24 @@ const NotificationCenter = () => {
       >
         {unreadCount > 0 ? (
           <>
-            <BellRing className="w-5 h-5 text-primary animate-wiggle" />
+            <lottie-player
+              src="https://lottie.host/ea97efee-d19a-4c28-98e3-96b610c9d784/XoW2gC6Tid.json"
+              background="transparent"
+              speed="1"
+              style={{ width: "24px", height: "24px" }}
+              loop
+              autoplay
+            ></lottie-player>
             <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-background" />
           </>
         ) : (
-          <Bell className="w-5 h-5 text-foreground/70" />
+          <lottie-player
+            src="https://lottie.host/ea97efee-d19a-4c28-98e3-96b610c9d784/XoW2gC6Tid.json"
+            background="transparent"
+            speed="0.3"
+            style={{ width: "24px", height: "24px", opacity: 0.7 }}
+            autoplay
+          ></lottie-player>
         )}
       </Link>
 

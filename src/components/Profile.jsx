@@ -512,10 +512,18 @@ const Profile = () => {
                     </div>
                   </div>
                   <CardTitle className="text-2xl font-extrabold text-white leading-tight uppercase tracking-widest">{user.name}</CardTitle>
-                  <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-xs flex items-center gap-2 mt-1">
-                    <ShieldCheck className="w-3 h-3 text-secondary" />
-                    Verified Global Identity
-                  </CardDescription>
+                  <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] flex items-center gap-1.5 mt-1">
+                  <span className="w-5 h-5 shrink-0 flex items-center justify-center">
+                    <lottie-player
+                      src="https://lottie.host/80e5b95a-c21d-4074-a63e-ea13a681c624/fDk9yFkQ0f.json"
+                      background="transparent"
+                      speed="1"
+                      style={{ width: "100%", height: "100%" }}
+                      autoplay
+                    ></lottie-player>
+                  </span>
+                  Verified Global Identity
+                </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6 sm:p-10 -mt-10 bg-card rounded-t-[2.5rem] sm:rounded-t-[3rem] relative z-20 space-y-6">
                   <div className="space-y-2">
@@ -597,8 +605,15 @@ const Profile = () => {
               transition={{ duration: 0.6 }}
             >
               <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary p-3 rounded-2xl shadow-xl shadow-primary/20">
-                  <History className="w-5 h-5 text-white" />
+                <div className="bg-primary p-2.5 rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-center">
+                  <lottie-player
+                    src="https://lottie.host/d193fa7d-6060-4b2a-bf3b-9a7dc5f3bc7b/rJ2yY4yF3f.json"
+                    background="transparent"
+                    speed="1"
+                    style={{ width: "24px", height: "24px" }}
+                    loop
+                    autoplay
+                  ></lottie-player>
                 </div>
                 <h3 className="text-2xl font-extrabold text-foreground tracking-tighter">Medical Visit Logs</h3>
                 <Badge variant="outline" className="rounded-full bg-white ml-2 text-slate-500 font-bold py-1 px-4 border-slate-200 uppercase tracking-widest text-[9px]">
