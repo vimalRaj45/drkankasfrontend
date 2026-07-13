@@ -440,7 +440,7 @@ const AdminPanel = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-blue-100 rounded-[3rem] p-8 md:p-10 shadow-2xl shadow-blue-900/5 relative"
+          className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-blue-100 rounded-[3rem] p-6 sm:p-10 shadow-2xl shadow-blue-900/5 relative"
         >
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center border border-blue-100 mb-6">
@@ -556,9 +556,9 @@ const AdminPanel = () => {
     <div className="min-h-screen w-full bg-[#f4f7fc] text-slate-800 flex flex-col font-sans">
       <div className="w-full flex-grow flex flex-col">
         {/* Admin Header */}
-        <div className="bg-white border-b border-blue-100 text-slate-800 p-8 flex items-center justify-between relative overflow-hidden shadow-sm shrink-0">
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-2">
+        <div className="bg-white border-b border-blue-100 text-slate-800 p-4 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative overflow-hidden shadow-sm shrink-0">
+          <div className="relative z-10 w-full sm:w-auto">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <div className="bg-white px-3 py-1.5 rounded-xl shadow-md border border-blue-50 flex items-center">
                 <img src={Logo} className="h-8 w-auto object-contain" alt="Logo" />
               </div>
@@ -573,7 +573,7 @@ const AdminPanel = () => {
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full bg-slate-50 border-slate-200 hover:bg-blue-50 hover:text-blue-600 h-12 w-12 transition-all relative z-10"
+            className="rounded-full bg-slate-50 border-slate-200 hover:bg-blue-50 hover:text-blue-600 h-12 w-12 transition-all relative z-10 self-end sm:self-auto"
             onClick={handleLogout}
           >
             <X className="w-5 h-5 text-slate-600" />
@@ -583,22 +583,22 @@ const AdminPanel = () => {
         </div>
 
         {/* Filters & Actions Bar */}
-        <div className="p-8 border-b border-blue-50 flex flex-col gap-6 bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="relative w-full md:w-96">
+        <div className="p-4 sm:p-8 border-b border-blue-50 flex flex-col gap-6 bg-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div className="relative w-full lg:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
                 placeholder="Search Patient Name, Phone or ID..."
-                className="pl-12 h-12 rounded-2xl border-slate-200 bg-[#f8fafc] text-slate-850 focus:ring-primary focus:bg-white shadow-sm"
+                className="pl-12 h-12 rounded-2xl border-slate-200 bg-[#f8fafc] text-slate-850 focus:ring-primary focus:bg-white shadow-sm w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
             {/* View Selector & Utilities */}
-            <div className="flex items-center flex-wrap gap-4">
+            <div className="flex items-center flex-wrap gap-4 w-full lg:w-auto justify-start lg:justify-end">
               {/* View Selector Button Group */}
-              <div className="flex items-center bg-blue-50/50 p-1.5 rounded-2xl border border-blue-100/50">
+              <div className="flex items-center bg-blue-50/50 p-1.5 rounded-2xl border border-blue-100/50 w-full sm:w-auto justify-between sm:justify-start">
                 <Button
                   variant="ghost"
                   onClick={() => setViewType("grid")}
@@ -633,19 +633,19 @@ const AdminPanel = () => {
 
               <Button
                 onClick={() => setIsPushDialogOpen(true)}
-                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all"
+                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all flex-1 sm:flex-none justify-center"
               >
                 <Bell className="w-4 h-4 text-blue-500" />
                 Banner Upload
               </Button>
               <Button
                 onClick={handleOpenHoursDialog}
-                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all"
+                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all flex-1 sm:flex-none justify-center"
               >
                 <Clock className="w-4 h-4 text-blue-500" />
                 Hours
               </Button>
-              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20">
+              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20 flex-1 sm:flex-none justify-center">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
                 Sync Database
               </Button>
@@ -664,7 +664,7 @@ const AdminPanel = () => {
               <select
                 value={filterService}
                 onChange={(e) => setFilterService(e.target.value)}
-                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[150px]"
+                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[150px] w-full sm:w-auto"
               >
                 <option value="All">All Services</option>
                 <option value="General Consultation">General Consultation</option>
@@ -679,7 +679,7 @@ const AdminPanel = () => {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[140px]"
+                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[140px] w-full sm:w-auto"
               >
                 <option value="All">All Statuses</option>
                 <option value="PENDING">PENDING</option>
@@ -693,7 +693,7 @@ const AdminPanel = () => {
                 type="date"
                 value={filterDate}
                 onChange={(e) => setFilterDate(e.target.value)}
-                className="h-10 rounded-xl border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background max-w-[160px]"
+                className="h-10 rounded-xl border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background w-full sm:w-auto sm:max-w-[160px]"
               />
 
               {/* Reset Filters button */}
@@ -712,7 +712,7 @@ const AdminPanel = () => {
         </div>
 
         {/* Database Grid */}
-        <div className="flex-grow overflow-y-auto p-8 bg-muted/30 relative">
+        <div className="flex-grow overflow-y-auto p-4 sm:p-8 bg-muted/30 relative">
           {loading ? (
             <div className="h-full flex flex-col items-center justify-center opacity-50">
               <Loader2 className="w-16 h-16 text-primary animate-spin mb-6" />
@@ -929,7 +929,7 @@ const AdminPanel = () => {
 
       {/* Global Push Broadcast Dialog */}
       <Dialog open={isPushDialogOpen} onOpenChange={handlePushDialogClose}>
-        <DialogContent className="rounded-[2.5rem] p-10 max-w-4xl border-none shadow-2xl overflow-hidden">
+        <DialogContent className="rounded-[2.5rem] p-5 sm:p-10 w-[95vw] sm:w-full max-w-4xl max-h-[90vh] overflow-y-auto border-none shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
 
           <DialogHeader>
@@ -1087,7 +1087,7 @@ const AdminPanel = () => {
       </Dialog>
       {/* Patient Profile/Details Modal */}
       <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
-        <DialogContent className="rounded-[2.5rem] p-10 max-w-4xl border-none shadow-2xl">
+        <DialogContent className="rounded-[2.5rem] p-5 sm:p-10 w-[95vw] sm:w-full max-w-4xl max-h-[90vh] overflow-y-auto border-none shadow-2xl bg-card">
           <DialogHeader>
             <DialogTitle className="text-2xl font-extrabold text-foreground mb-2">Patient Profile Details</DialogTitle>
             <DialogDescription className="text-muted-foreground font-medium">
@@ -1215,7 +1215,7 @@ const AdminPanel = () => {
 
       {/* Clinic Hours Editor Dialog */}
       <Dialog open={isHoursDialogOpen} onOpenChange={setIsHoursDialogOpen}>
-        <DialogContent className="rounded-[2.5rem] p-10 max-w-md border-none shadow-2xl">
+        <DialogContent className="rounded-[2.5rem] p-5 sm:p-10 w-[95vw] sm:w-full max-w-md max-h-[90vh] overflow-y-auto border-none shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-extrabold text-foreground mb-2 flex items-center gap-2">
               <Clock className="w-6 h-6 text-primary" />
