@@ -10,19 +10,19 @@
   "theme_color": "#863bff",
   "icons": [
     {
-      "src": "/dr_kanaks_logo.png",
+      "src": "/favicon-clinic.png",
       "sizes": "any",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/dr_kanaks_logo.png",
+      "src": "/favicon-clinic.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/dr_kanaks_logo.png",
+      "src": "/favicon-clinic.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
