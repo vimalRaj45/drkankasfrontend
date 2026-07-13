@@ -371,3 +371,40 @@ export const adminLogin = async (password) => {
     return { success: false, error: error.message };
   }
 };
+
+export const adminSendOtp = async (phone) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/send-otp`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ phone })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error sending admin OTP:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const adminVerifyOtp = async (otp) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/verify-otp`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ otp })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      token: data.token || null,
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error verifying admin OTP:", error);
+    return { success: false, error: error.message };
+  }
+};

@@ -62,7 +62,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 // Existing API services
-import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminLogin } from '../services/api';
+import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminSendOtp, adminVerifyOtp } from '../services/api';
 import { useNavigate } from "react-router-dom";
 
 const AdminPanel = () => {
@@ -72,7 +72,10 @@ const AdminPanel = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [loginStep, setLoginStep] = useState(1); // 1: phone input, 2: OTP input
+  const [displayPhone, setDisplayPhone] = useState("");
   const [loginError, setLoginError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -83,22 +86,44 @@ const AdminPanel = () => {
     }
   }, []);
 
-  const handleLogin = async (e) => {
+  const handleSendOtp = async (e) => {
+    if (e) e.preventDefault();
+    setLoginError("");
+    setIsLoggingIn(true);
+    try {
+      const res = await adminSendOtp(phone);
+      if (res.success) {
+        const displayMatch = res.message.match(/\(([^)]+)\)/);
+        setDisplayPhone(displayMatch ? displayMatch[1] : "your registered number");
+        setLoginStep(2);
+        toast.success("OTP has been sent to WhatsApp!");
+      } else {
+        setLoginError(res.message || "Access denied. Unauthorized number.");
+        toast.error("Unauthorized!");
+      }
+    } catch (err) {
+      setLoginError("Failed to connect to authentication server.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoginError("");
     setIsLoggingIn(true);
     try {
-      const res = await adminLogin(password);
+      const res = await adminVerifyOtp(otp);
       if (res.success) {
         setShowAdmin(true);
         localStorage.setItem("admin_authenticated", "true");
         toast.success("Welcome back, Dr. Kanak!");
       } else {
-        setLoginError(res.message || "Invalid credentials. Access Denied.");
-        toast.error("Incorrect password!");
+        setLoginError(res.message || "Invalid or expired OTP. Please try again.");
+        toast.error("Verification failed!");
       }
     } catch (err) {
-      setLoginError("Failed to verify credentials.");
+      setLoginError("Verification failed.");
     } finally {
       setIsLoggingIn(false);
     }
@@ -426,37 +451,102 @@ const AdminPanel = () => {
             <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Access Restricted to Authorized Staff</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">Admin Password</Label>
-              <Input
-                type="password"
-                placeholder="Enter password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium"
-                required
-              />
-              {loginError && (
-                <p className="text-red-400 text-xs font-semibold pl-1 pt-1">{loginError}</p>
-              )}
-            </div>
+          {loginStep === 1 ? (
+            <form onSubmit={handleSendOtp} className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">WhatsApp Mobile Number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="tel"
+                    placeholder="Enter admin phone number..."
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                    className="h-12 pl-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium font-mono"
+                    maxLength={10}
+                    required
+                  />
+                </div>
+                {loginError && (
+                  <p className="text-red-400 text-xs font-semibold pl-1 pt-1">{loginError}</p>
+                )}
+              </div>
 
-            <Button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full h-12 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all flex items-center justify-center gap-2 mt-8"
-            >
-              {isLoggingIn ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Verifying...
-                </>
-              ) : (
-                "Authenticate & Login"
-              )}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                disabled={isLoggingIn}
+                className="w-full h-12 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all flex items-center justify-center gap-2 mt-8"
+              >
+                {isLoggingIn ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Sending OTP...
+                  </>
+                ) : (
+                  "Request Verification Code"
+                )}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOtp} className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center px-1">
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">One-Time Password (OTP)</Label>
+                  <button 
+                    type="button" 
+                    onClick={() => { setLoginStep(1); setLoginError(""); }}
+                    className="text-[10px] font-bold text-primary hover:underline uppercase"
+                  >
+                    Change Phone
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="Enter 6-digit OTP code..."
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    className="h-12 pl-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium font-mono text-center tracking-[0.2em] text-lg"
+                    maxLength={6}
+                    required
+                  />
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium leading-relaxed px-1">
+                  We've sent a 6-digit verification code to <span className="font-mono text-white font-bold">{displayPhone}</span> via WhatsApp.
+                </p>
+                {loginError && (
+                  <p className="text-red-400 text-xs font-semibold pl-1 pt-1">{loginError}</p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 mt-8">
+                <Button
+                  type="submit"
+                  disabled={isLoggingIn || otp.length !== 6}
+                  className="w-full h-12 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all flex items-center justify-center gap-2"
+                >
+                  {isLoggingIn ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    "Verify & Authenticate"
+                  )}
+                </Button>
+                
+                <button
+                  type="button"
+                  onClick={(e) => handleSendOtp(e)}
+                  disabled={isLoggingIn}
+                  className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-white transition-colors py-2"
+                >
+                  Resend OTP Code
+                </button>
+              </div>
+            </form>
+          )}
         </motion.div>
       </div>
     );
