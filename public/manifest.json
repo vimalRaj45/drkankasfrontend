@@ -10,20 +10,8 @@
   "theme_color": "#863bff",
   "icons": [
     {
-      "src": "/favicon-clinic.png",
-      "sizes": "any",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/favicon-clinic.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/favicon-clinic.png",
-      "sizes": "512x512",
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }

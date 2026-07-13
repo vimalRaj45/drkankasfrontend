@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star, Globe, Bell, Download } from "lucide-react";
+import { Menu, X, Phone, Heart, User, Calendar, MessageSquare, Briefcase, Users, Layout, Star, Globe, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Link, useLocation } from "react-router-dom";
@@ -23,8 +23,6 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [lang, setLang] = useState("en");
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [appInstalled, setAppInstalled] = useState(false);
 
   useEffect(() => {
     const checkLang = () => {
@@ -98,32 +96,8 @@ const Navbar = () => {
     document.documentElement.classList.remove("dark");
     localStorage.removeItem("theme");
 
-    // PWA Install prompt
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    window.addEventListener("appinstalled", () => {
-      setAppInstalled(true);
-      setDeferredPrompt(null);
-    });
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("beforeinstallprompt", handler);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const handleInstallApp = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setAppInstalled(true);
-    }
-    setDeferredPrompt(null);
-  };
 
   return (
     <header
@@ -186,19 +160,6 @@ const Navbar = () => {
             <span className="text-xs shrink-0">{lang === "en" ? "தமிழ்" : "English"}</span>
           </Button>
 
-          {/* Install App Button — Desktop */}
-          {deferredPrompt && !appInstalled && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="notranslate hidden sm:flex rounded-full px-3 h-9 sm:h-11 hover:bg-green-50 text-green-700 font-bold border border-green-200 bg-green-50/60 items-center gap-1.5 shrink-0 shadow-sm hover:border-green-400 transition-all"
-              onClick={handleInstallApp}
-            >
-              <Download className="w-4 h-4 shrink-0" />
-              <span className="text-xs shrink-0 notranslate">{lang === 'ta' ? "பயன்பாடு" : "Install App"}</span>
-            </Button>
-          )}
-
            <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
               <User className="w-4 h-4" />
@@ -260,15 +221,6 @@ const Navbar = () => {
 
               {/* Bottom Compact CTA */}
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border mt-auto">
-                {deferredPrompt && !appInstalled && (
-                  <Button
-                    className="notranslate w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20"
-                    onClick={() => { handleInstallApp(); setIsMenuOpen(false); }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>{lang === 'ta' ? "பயன்பாட்டை நிறுவு" : "Install App"}</span>
-                  </Button>
-                )}
                 <Button 
                   variant="outline" 
                   className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
