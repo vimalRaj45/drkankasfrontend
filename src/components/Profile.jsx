@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   Loader2,
   Printer,
-  Sparkles
+  Sparkles,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { toast } from "react-hot-toast";
 import { getUserAppointments, API_URL, checkUser, getNotifications } from '../services/api';
 import { Dialog, DialogContent } from "../components/ui/dialog";
+import { jsPDF } from "jspdf";
 
 const QueueProgress = ({ date }) => {
   const [completed, setCompleted] = useState(0);
@@ -121,208 +123,122 @@ const Profile = () => {
   }, []);
 
   const handlePrintToken = (apt) => {
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      toast.error("Popup blocked! Please allow popups to print your token.");
-      return;
+    try {
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, 150]
+      });
+
+      const docId = apt.id?.slice(-8) || "8821004";
+      const formattedDate = formatApptDateTime(apt.date, apt.time);
+
+      doc.setFillColor(255, 255, 255);
+      doc.rect(0, 0, 80, 150, "F");
+
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(4, 4, 72, 142, 4, 4, "D");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.setTextColor(37, 99, 235);
+      doc.text("DR. KANAK'S CLINIC", 40, 18, { align: "center" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(100, 116, 139);
+      doc.text("PRIORITY CONSULTATION SLIP", 40, 24, { align: "center" });
+
+      doc.setLineDashPattern([1.5, 1], 0);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.4);
+      doc.line(8, 28, 72, 28);
+      doc.setLineDashPattern([], 0);
+
+      doc.setFillColor(239, 246, 255);
+      doc.roundedRect(8, 32, 64, 24, 3, 3, "F");
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(7.5);
+      doc.setTextColor(37, 99, 235);
+      doc.text("APPOINTMENT TOKEN", 40, 40, { align: "center" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(30, 64, 175);
+      doc.text(String(apt.token || "REGULAR"), 40, 50, { align: "center" });
+
+      let yOffset = 64;
+      const drawDetailRow = (label, val, highlightColor = null) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        doc.setTextColor(100, 116, 139);
+        doc.text(label, 8, yOffset);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7.5);
+        if (highlightColor) {
+          doc.setTextColor(highlightColor[0], highlightColor[1], highlightColor[2]);
+        } else {
+          doc.setTextColor(15, 23, 42);
+        }
+        
+        const wrappedVal = doc.splitTextToSize(val, 34);
+        doc.text(wrappedVal, 72, yOffset, { align: "right" });
+        yOffset += (wrappedVal.length * 4.2) + 1.2;
+      };
+
+      drawDetailRow("Patient Name:", apt.name || "N/A");
+      drawDetailRow("Patient ID:", `PID-${docId}`);
+      drawDetailRow("Service:", apt.service || "N/A");
+      drawDetailRow("Schedule Slot:", formattedDate);
+      drawDetailRow("Booking Status:", String(apt.status).toUpperCase(), [16, 185, 129]);
+
+      if (apt.cancel_reason) {
+        yOffset += 2;
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.3);
+        
+        const textLines = doc.splitTextToSize(`"${apt.cancel_reason}"`, 56);
+        const boxHeight = (textLines.length * 3.5) + 8;
+        
+        doc.roundedRect(8, yOffset, 64, boxHeight, 2, 2, "FD");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(7);
+        doc.setTextColor(37, 99, 235);
+        const boxTitle = apt.status === 'CONFIRMED' ? 'VISIT GUIDANCE' : apt.status === 'CANCELLED' ? 'CLINICAL REASON' : 'DOCTOR GUIDANCE';
+        doc.text(boxTitle, 12, yOffset + 5);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(51, 65, 85);
+        doc.text(textLines, 12, yOffset + 9.5);
+        
+        yOffset += boxHeight + 4;
+      } else {
+        yOffset += 4;
+      }
+
+      doc.setDrawColor(241, 245, 249);
+      doc.setLineWidth(0.4);
+      doc.line(8, 128, 72, 128);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.5);
+      doc.setTextColor(148, 163, 184);
+      doc.text("Thank you for choosing Dr. Kanak's Clinic.", 40, 133, { align: "center" });
+      doc.text("Please show this digital priority slip at the front desk.", 40, 137, { align: "center" });
+      doc.text(`Contact Support: +91 ${apt.phone || "N/A"}`, 40, 141, { align: "center" });
+
+      doc.save(`Priority_Slip_PID_${docId}.pdf`);
+      toast.success("Priority slip PDF downloaded successfully!");
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      toast.error("Failed to generate PDF. Please try again.");
     }
-
-    const docId = apt.id?.slice(-8) || "8821004";
-    const formattedDate = formatApptDateTime(apt.date, apt.time);
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Priority Slip - PID-${docId}</title>
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-          body {
-            font-family: 'Inter', sans-serif;
-            color: #0f172a;
-            margin: 0;
-            padding: 40px;
-            background: #ffffff;
-            display: flex;
-            justify-content: center;
-          }
-          .ticket {
-            width: 450px;
-            border: 2px solid #e2e8f0;
-            border-radius: 24px;
-            padding: 30px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            position: relative;
-            background: #ffffff;
-          }
-          .header {
-            text-align: center;
-            border-bottom: 2px dashed #e2e8f0;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-          }
-          .clinic-name {
-            font-size: 20px;
-            font-weight: 800;
-            color: #2563eb;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 0;
-          }
-          .title {
-            font-size: 12px;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 4px;
-            margin-bottom: 0;
-          }
-          .token-section {
-            text-align: center;
-            background: #eff6ff;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-          }
-          .token-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: #2563eb;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 5px;
-          }
-          .token-number {
-            font-size: 32px;
-            font-weight: 900;
-            color: #1e40af;
-            margin: 0;
-          }
-          .details-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
-          }
-          .detail-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-          }
-          .detail-label {
-            font-weight: 600;
-            color: #64748b;
-          }
-          .detail-value {
-            font-weight: 700;
-            color: #0f172a;
-          }
-          .guidance-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 24px;
-            line-height: 1.6;
-          }
-          .guidance-title {
-            font-size: 10px;
-            font-weight: 700;
-            color: #2563eb;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-          }
-          .footer {
-            text-align: center;
-            font-size: 11px;
-            color: #94a3b8;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 16px;
-            font-weight: 500;
-            line-height: 1.5;
-          }
-          @media print {
-            body {
-              padding: 0;
-            }
-            .ticket {
-              border: none;
-              box-shadow: none;
-              padding: 10px;
-              width: 100%;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-          <div class="header">
-            <h1 class="clinic-name">Dr. Kanak's Clinic</h1>
-            <p class="title">Priority Consultation Slip</p>
-          </div>
-          
-          <div class="token-section">
-            <div class="token-label">Appointment Token</div>
-            <div class="token-number">${apt.token || "REGULAR"}</div>
-          </div>
-          
-          <div class="details-grid">
-            <div class="detail-row">
-              <span class="detail-label">Patient Name:</span>
-              <span class="detail-value">${apt.name}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Patient ID:</span>
-              <span class="detail-value" style="font-family: monospace;">PID-${docId}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Chosen Service:</span>
-              <span class="detail-value">${apt.service}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Schedule Slot:</span>
-              <span class="detail-value">${formattedDate}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Booking Status:</span>
-              <span class="detail-value" style="color: #10b981;">${apt.status}</span>
-            </div>
-          </div>
-
-          ${apt.cancel_reason ? `
-            <div class="guidance-box">
-              <div class="guidance-title">${apt.status === 'CONFIRMED' ? 'Visit Guidance' : apt.status === 'CANCELLED' ? 'Clinical Reason' : 'Doctor Guidance'}</div>
-              <div>"${apt.cancel_reason}"</div>
-            </div>
-          ` : ''}
-
-          <div class="footer">
-            Thank you for choosing Dr. Kanak's Clinic.<br>
-            Please show this digital priority slip at the front desk.<br>
-            Contact Support: +91 ${apt.phone}
-          </div>
-        </div>
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() {
-              window.close();
-            }, 1000);
-          }
-        <\/script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.open();
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
   };
 
   const syncAppointments = async (phone) => {
@@ -680,9 +596,9 @@ const Profile = () => {
                                 variant="ghost" 
                                 size="icon" 
                                 className="rounded-xl h-12 w-12 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all"
-                                title="Print Slip"
+                                title="Download PDF Token"
                               >
-                                <Printer className="w-5 h-5" />
+                                <Download className="w-5 h-5" />
                               </Button>
                             </div>
 
