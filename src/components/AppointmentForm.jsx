@@ -59,6 +59,7 @@ const AppointmentForm = ({ onSuccess }) => {
         clearInterval(checkTurnstile);
         window.turnstile.render("#turnstile-container", {
           sitekey: "0x4AAAAAAD1KgGwMC0H6cdla",
+          theme: "light",
           callback: (token) => {
             setTurnstileToken(token);
           },

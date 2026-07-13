@@ -51,6 +51,7 @@ const Testimonials = () => {
             }
             window.turnstile.render("#feedback-turnstile-container", {
               sitekey: "0x4AAAAAAD1KgGwMC0H6cdla",
+              theme: "light",
               callback: (token) => {
                 setFeedbackTurnstileToken(token);
               },
