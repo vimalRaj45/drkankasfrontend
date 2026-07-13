@@ -431,30 +431,30 @@ const AdminPanel = () => {
 
   if (!showAdmin) {
     return (
-      <div className="fixed inset-0 z-[1500] bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 z-[1500] bg-slate-50 flex items-center justify-center p-4 overflow-y-auto">
         {/* Background Gradients */}
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-sky-100/50 rounded-full blur-[120px] pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-10 shadow-2xl relative"
+          className="w-full max-w-md bg-white/80 backdrop-blur-xl border border-blue-100 rounded-[3rem] p-8 md:p-10 shadow-2xl shadow-blue-900/5 relative"
         >
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20 mb-6">
-              <Lock className="w-8 h-8 text-primary" />
+            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center border border-blue-100 mb-6">
+              <Lock className="w-8 h-8 text-blue-600" />
             </div>
             <img src={Logo} alt="Clinic Logo" className="h-12 object-contain mb-4" />
-            <h2 className="font-display font-extrabold text-2xl text-white tracking-tight mb-2">Clinical Portal</h2>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Access Restricted to Authorized Staff</p>
+            <h2 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight mb-2">Clinical Portal</h2>
+            <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Access Restricted to Authorized Staff</p>
           </div>
 
           {loginStep === 1 ? (
             <form onSubmit={handleSendOtp} className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">WhatsApp Mobile Number</Label>
+                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 pl-1">WhatsApp Mobile Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
@@ -462,7 +462,7 @@ const AdminPanel = () => {
                     placeholder="Enter admin phone number..."
                     value={phone}
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                    className="h-12 pl-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium font-mono"
+                    className="h-12 pl-12 rounded-2xl border-slate-200 bg-white text-slate-900 focus:ring-primary focus:border-primary placeholder:text-slate-400 font-medium font-mono"
                     maxLength={10}
                     required
                   />
@@ -491,11 +491,11 @@ const AdminPanel = () => {
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div className="space-y-2">
                 <div className="flex justify-between items-center px-1">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">One-Time Password (OTP)</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">One-Time Password (OTP)</Label>
                   <button 
                     type="button" 
                     onClick={() => { setLoginStep(1); setLoginError(""); }}
-                    className="text-[10px] font-bold text-primary hover:underline uppercase"
+                    className="text-[10px] font-bold text-blue-600 hover:underline uppercase"
                   >
                     Change Phone
                   </button>
@@ -507,13 +507,13 @@ const AdminPanel = () => {
                     placeholder="Enter 6-digit OTP code..."
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                    className="h-12 pl-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium font-mono text-center tracking-[0.2em] text-lg"
+                    className="h-12 pl-12 rounded-2xl border-slate-200 bg-white text-slate-900 focus:ring-primary focus:border-primary placeholder:text-slate-400 font-medium font-mono text-center tracking-[0.2em] text-lg"
                     maxLength={6}
                     required
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium leading-relaxed px-1">
-                  We've sent a 6-digit verification code to <span className="font-mono text-white font-bold">{displayPhone}</span> via WhatsApp.
+                <p className="text-[10px] text-slate-500 font-medium leading-relaxed px-1">
+                  We've sent a 6-digit verification code to <span className="font-mono text-slate-800 font-bold">{displayPhone}</span> via WhatsApp.
                 </p>
                 {loginError && (
                   <p className="text-red-400 text-xs font-semibold pl-1 pt-1">{loginError}</p>
@@ -524,7 +524,7 @@ const AdminPanel = () => {
                 <Button
                   type="submit"
                   disabled={isLoggingIn || otp.length !== 6}
-                  className="w-full h-12 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all flex items-center justify-center gap-2"
+                  className="w-full h-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2"
                 >
                   {isLoggingIn ? (
                     <>
@@ -540,7 +540,7 @@ const AdminPanel = () => {
                   type="button"
                   onClick={(e) => handleSendOtp(e)}
                   disabled={isLoggingIn}
-                  className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-white transition-colors py-2"
+                  className="text-[10px] font-bold uppercase tracking-widest text-slate-405 hover:text-slate-700 transition-colors py-2"
                 >
                   Resend OTP Code
                 </button>
@@ -553,19 +553,19 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground flex flex-col">
+    <div className="min-h-screen w-full bg-[#f4f7fc] text-slate-800 flex flex-col font-sans">
       <div className="w-full flex-grow flex flex-col">
         {/* Admin Header */}
-        <div className="bg-slate-900 dark:bg-slate-950 text-white p-10 flex items-center justify-between relative overflow-hidden">
+        <div className="bg-white border-b border-blue-100 text-slate-800 p-8 flex items-center justify-between relative overflow-hidden shadow-sm shrink-0">
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-white px-3 py-1.5 rounded-xl shadow-lg border border-white/10 flex items-center">
+              <div className="bg-white px-3 py-1.5 rounded-xl shadow-md border border-blue-50 flex items-center">
                 <img src={Logo} className="h-8 w-auto object-contain" alt="Logo" />
               </div>
-              <h2 className="text-3xl font-extrabold tracking-tighter">Clinical Dashboard V4.0</h2>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tighter text-slate-900">Clinical Dashboard V4.0</h2>
             </div>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-              <ShieldCheck className="w-3 h-3 text-primary" />
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
               Authenticated Admin Session &middot; Secure 256-bit Encryption
             </p>
           </div>
@@ -573,23 +573,23 @@ const AdminPanel = () => {
           <Button
             variant="outline"
             size="icon"
-            className="rounded-full bg-white/5 border-white/10 hover:bg-foreground hover:text-background h-14 w-14 transition-all"
+            className="rounded-full bg-slate-50 border-slate-200 hover:bg-blue-50 hover:text-blue-600 h-12 w-12 transition-all relative z-10"
             onClick={handleLogout}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 text-slate-600" />
           </Button>
 
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] -z-0 translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-100/40 rounded-full blur-[80px] -z-0 translate-x-1/2 -translate-y-1/2" />
         </div>
 
         {/* Filters & Actions Bar */}
-        <div className="p-8 border-b border-border flex flex-col gap-6 bg-muted/30">
+        <div className="p-8 border-b border-blue-50 flex flex-col gap-6 bg-white">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div className="relative w-full md:w-96">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
                 placeholder="Search Patient Name, Phone or ID..."
-                className="pl-12 h-12 rounded-2xl border-slate-200 bg-white focus:ring-primary shadow-sm"
+                className="pl-12 h-12 rounded-2xl border-slate-200 bg-[#f8fafc] text-slate-850 focus:ring-primary focus:bg-white shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -598,12 +598,12 @@ const AdminPanel = () => {
             {/* View Selector & Utilities */}
             <div className="flex items-center flex-wrap gap-4">
               {/* View Selector Button Group */}
-              <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-border">
+              <div className="flex items-center bg-blue-50/50 p-1.5 rounded-2xl border border-blue-100/50">
                 <Button
                   variant="ghost"
                   onClick={() => setViewType("grid")}
                   className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
-                    viewType === "grid" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                    viewType === "grid" ? "bg-white shadow-md text-blue-600 font-extrabold" : "text-slate-500 hover:bg-blue-50/50"
                   )}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -613,7 +613,7 @@ const AdminPanel = () => {
                   variant="ghost"
                   onClick={() => setViewType("table")}
                   className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
-                    viewType === "table" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                    viewType === "table" ? "bg-white shadow-md text-blue-600 font-extrabold" : "text-slate-500 hover:bg-blue-50/50"
                   )}
                 >
                   <List className="w-4 h-4" />
@@ -623,7 +623,7 @@ const AdminPanel = () => {
                   variant="ghost"
                   onClick={() => setViewType("kanban")}
                   className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
-                    viewType === "kanban" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                    viewType === "kanban" ? "bg-white shadow-md text-blue-600 font-extrabold" : "text-slate-500 hover:bg-blue-50/50"
                   )}
                 >
                   <Columns className="w-4 h-4" />
@@ -633,19 +633,19 @@ const AdminPanel = () => {
 
               <Button
                 onClick={() => setIsPushDialogOpen(true)}
-                className="rounded-2xl h-12 px-5 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all"
               >
-                <Bell className="w-4 h-4 text-primary" />
+                <Bell className="w-4 h-4 text-blue-500" />
                 Banner Upload
               </Button>
               <Button
                 onClick={handleOpenHoursDialog}
-                className="rounded-2xl h-12 px-5 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+                className="rounded-2xl h-12 px-5 gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200/50 font-bold transition-all"
               >
-                <Clock className="w-4 h-4 text-primary" />
+                <Clock className="w-4 h-4 text-blue-500" />
                 Hours
               </Button>
-              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-5 gap-2 bg-primary font-bold shadow-lg shadow-primary/20">
+              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/20">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
                 Sync Database
               </Button>
@@ -728,21 +728,21 @@ const AdminPanel = () => {
             </div>
           ) : viewType === "table" ? (
             /* TABLE VIEW */
-            <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden shadow-xl">
+            <div className="bg-white border border-blue-100 rounded-[2.5rem] overflow-hidden shadow-md shadow-blue-900/5">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-muted/40 border-b border-border">
-                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Patient Details</th>
+                    <tr className="bg-[#f8fafc] border-b border-blue-50">
+                      <th className="p-5 text-[10px] font-black uppercase text-slate-500 tracking-wider">Patient Details</th>
                       <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Schedule</th>
                       <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Service</th>
                       <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Reference Note</th>
                       <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody className="divide-y divide-blue-50/30">
                     {filteredAppointments.map((apt) => (
-                      <tr key={apt.id} className="hover:bg-muted/10 transition-colors group">
+                      <tr key={apt.id} className="hover:bg-blue-50/10 transition-colors group">
                         <td className="p-5">
                           <div 
                             onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
@@ -793,8 +793,8 @@ const AdminPanel = () => {
                 const colApts = filteredAppointments.filter(apt => (apt.status || 'PENDING') === col.id);
                 
                 return (
-                  <div key={col.id} className="bg-card border border-border rounded-[2.5rem] p-5 shadow-lg flex flex-col max-h-[70vh] min-h-[400px]">
-                    <div className="flex items-center justify-between mb-4 border-b border-border pb-3 shrink-0">
+                  <div key={col.id} className="bg-white border border-blue-100/85 rounded-[2.5rem] p-5 shadow-md shadow-blue-900/5 flex flex-col max-h-[70vh] min-h-[400px]">
+                    <div className="flex items-center justify-between mb-4 border-b border-blue-50 pb-3 shrink-0">
                       <div className="flex items-center gap-2">
                         <span className={cn("w-2 h-2 rounded-full", 
                           col.id === 'PENDING' ? 'bg-amber-400' :
@@ -815,7 +815,7 @@ const AdminPanel = () => {
                         colApts.map((apt) => (
                           <div
                             key={apt.id}
-                            className="bg-muted/30 border border-border/60 hover:border-primary/40 rounded-2xl p-4 transition-all shadow-sm hover:shadow-md flex flex-col gap-3 group relative cursor-pointer"
+                            className="bg-[#f8fafc] border border-blue-50/80 hover:border-blue-300 hover:bg-white rounded-2xl p-4 transition-all shadow-sm hover:shadow-md flex flex-col gap-3 group relative cursor-pointer"
                             onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
                           >
                             <div>
@@ -865,22 +865,22 @@ const AdminPanel = () => {
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
                 >
-                  <Card className="border border-border shadow-xl shadow-slate-200/40 dark:shadow-none rounded-[2.5rem] bg-card overflow-hidden group">
+                  <Card className="border border-blue-100/60 shadow-lg shadow-blue-900/5 rounded-[2.5rem] bg-white overflow-hidden group">
                     <CardHeader
                       className="p-8 pb-4 flex flex-row items-center justify-between cursor-pointer"
                       onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
                     >
                       <div>
-                        <Badge className="bg-foreground text-background mb-2 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg border-none">PID: {apt.id}</Badge>
-                        <CardTitle className="text-xl font-extrabold text-primary underline leading-none group-hover:text-primary transition-colors">{apt.name}</CardTitle>
+                        <Badge className="bg-blue-50 text-blue-600 border border-blue-100 mb-2 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg">PID: {apt.id.slice(-8)}</Badge>
+                        <CardTitle className="text-xl font-extrabold text-blue-600 underline leading-none group-hover:text-blue-700 transition-colors">{apt.name}</CardTitle>
                       </div>
                     </CardHeader>
                     <CardContent className="p-8 pt-0 space-y-6">
-                      <div className="bg-muted/50 p-4 rounded-2xl border border-border w-full">
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-primary" /> Schedule Slot
+                      <div className="bg-[#f8fafc] p-4 rounded-2xl border border-blue-50/50 w-full">
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-blue-500" /> Schedule Slot
                         </p>
-                        <p className="text-sm font-black text-foreground">
+                        <p className="text-sm font-black text-slate-800">
                           {formatApptDateTime(apt.date, apt.time)}
                         </p>
                       </div>
@@ -904,8 +904,8 @@ const AdminPanel = () => {
                         )}
                       </div>
                     </CardContent>
-                    <CardFooter className="p-4 border-t border-border bg-muted/20 flex items-center justify-between gap-4">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                    <CardFooter className="p-4 border-t border-blue-50 bg-[#f8fafc]/60 flex items-center justify-between gap-4">
+                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500">
                         Status:
                       </span>
                       <select
