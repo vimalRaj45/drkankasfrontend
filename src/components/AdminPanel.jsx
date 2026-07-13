@@ -553,12 +553,8 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="fixed inset-0 z-[1000] bg-slate-950/60 backdrop-blur-xl flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-7xl h-[90vh] bg-card rounded-[3.5rem] shadow-2xl border border-border overflow-hidden flex flex-col"
-      >
+    <div className="min-h-screen w-full bg-background text-foreground flex flex-col">
+      <div className="w-full flex-grow flex flex-col">
         {/* Admin Header */}
         <div className="bg-slate-900 dark:bg-slate-950 text-white p-10 flex items-center justify-between relative overflow-hidden">
           <div className="relative z-10">
@@ -929,7 +925,7 @@ const AdminPanel = () => {
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* Global Push Broadcast Dialog */}
       <Dialog open={isPushDialogOpen} onOpenChange={handlePushDialogClose}>

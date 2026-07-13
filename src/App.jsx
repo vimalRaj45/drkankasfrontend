@@ -167,11 +167,13 @@ function App() {
     }
   }, [pathname, hash]);
 
+  const isAdminPath = pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary">
       <LoadingScreen />
-      <Navbar />
-      <FloatingActions />
+      {!isAdminPath && <Navbar />}
+      {!isAdminPath && <FloatingActions />}
       
       <Routes>
         <Route index element={<Landing />} />
@@ -189,7 +191,7 @@ function App() {
         <Route path="*" element={<Landing />} />
       </Routes>
 
-      <Footer />
+      {!isAdminPath && <Footer />}
       <Toaster 
         position="bottom-right" 
         reverseOrder={false}
