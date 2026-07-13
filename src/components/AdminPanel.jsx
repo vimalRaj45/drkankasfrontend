@@ -24,7 +24,10 @@ import {
   Zap,
   Send,
   Upload,
-  Edit2
+  Edit2,
+  Columns,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,13 +83,20 @@ const AdminPanel = () => {
   const [editStatus, setEditStatus] = useState("");
   const [editReason, setEditReason] = useState("");
   const [editSuggestion, setEditSuggestion] = useState("");
+  const [editNotes, setEditNotes] = useState("");
   const [isSavingPatientInfo, setIsSavingPatientInfo] = useState(false);
+
+  const [viewType, setViewType] = useState("grid");
+  const [filterService, setFilterService] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterDate, setFilterDate] = useState("");
 
   useEffect(() => {
     if (selectedPatient) {
       setEditStatus(selectedPatient.status || "PENDING");
       setEditReason(selectedPatient.cancel_reason || "");
       setEditSuggestion(selectedPatient.suggestion || "");
+      setEditNotes(selectedPatient.consultation_notes || "");
     }
   }, [selectedPatient]);
 
@@ -94,7 +104,7 @@ const AdminPanel = () => {
     if (!selectedPatient) return;
     setIsSavingPatientInfo(true);
     try {
-      const res = await updateStatus(selectedPatient.id, editStatus, "dr_kanaks", editReason, editSuggestion);
+      const res = await updateStatus(selectedPatient.id, editStatus, "dr_kanaks", editReason, editSuggestion, editNotes);
       if (res.success || res.status === 'success') {
         toast.success("Patient clinical records updated successfully!");
         setIsPatientModalOpen(false);
@@ -331,11 +341,27 @@ const AdminPanel = () => {
     }
   };
 
-  const filteredAppointments = appointments.filter(apt =>
-    apt.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    apt.phone?.includes(searchTerm) ||
-    apt.id?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAppointments = appointments.filter(apt => {
+    const matchesSearch = 
+      !searchTerm ||
+      apt.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      apt.phone?.includes(searchTerm) ||
+      apt.id?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesService = 
+      filterService === "All" || 
+      apt.service === filterService;
+      
+    const matchesStatus = 
+      filterStatus === "All" || 
+      apt.status === filterStatus;
+      
+    const matchesDate = 
+      !filterDate || 
+      apt.date === filterDate;
+      
+    return matchesSearch && matchesService && matchesStatus && matchesDate;
+  });
 
   if (!showAdmin) {
     return (
@@ -384,35 +410,131 @@ const AdminPanel = () => {
         </div>
 
         {/* Filters & Actions Bar */}
-        <div className="p-8 border-b border-border flex flex-wrap items-center justify-between gap-6 bg-muted/30">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search Patient Name, Phone or ID..."
-              className="pl-12 h-12 rounded-2xl border-slate-200 bg-white focus:ring-primary shadow-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div className="p-8 border-b border-border flex flex-col gap-6 bg-muted/30">
+          <div className="flex flex-wrap items-center justify-between gap-6">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search Patient Name, Phone or ID..."
+                className="pl-12 h-12 rounded-2xl border-slate-200 bg-white focus:ring-primary shadow-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            {/* View Selector & Utilities */}
+            <div className="flex items-center flex-wrap gap-4">
+              {/* View Selector Button Group */}
+              <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl border border-border">
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewType("grid")}
+                  className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
+                    viewType === "grid" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  Grid
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewType("table")}
+                  className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
+                    viewType === "table" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <List className="w-4 h-4" />
+                  Table
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewType("kanban")}
+                  className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
+                    viewType === "kanban" ? "bg-white dark:bg-slate-850 shadow-md text-primary" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <Columns className="w-4 h-4" />
+                  Kanban
+                </Button>
+              </div>
+
+              <Button
+                onClick={() => setIsPushDialogOpen(true)}
+                className="rounded-2xl h-12 px-5 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+              >
+                <Bell className="w-4 h-4 text-primary" />
+                Banner Upload
+              </Button>
+              <Button
+                onClick={handleOpenHoursDialog}
+                className="rounded-2xl h-12 px-5 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
+              >
+                <Clock className="w-4 h-4 text-primary" />
+                Hours
+              </Button>
+              <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-5 gap-2 bg-primary font-bold shadow-lg shadow-primary/20">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
+                Sync Database
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={() => setIsPushDialogOpen(true)}
-              className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
-            >
-              <Bell className="w-4 h-4 text-primary" />
-              Banner Upload
-            </Button>
-            <Button
-              onClick={handleOpenHoursDialog}
-              className="rounded-2xl h-12 px-6 gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold border-2 border-white/5"
-            >
-              <Clock className="w-4 h-4 text-primary" />
-              Clinic Hours
-            </Button>
-            <Button onClick={fetchAppointments} disabled={loading} className="rounded-2xl h-12 px-6 gap-2 bg-primary font-bold shadow-lg shadow-primary/20">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4 rotate-90" />}
-              Sync Database
-            </Button>
+
+          {/* Advanced Search & Filtering Drawer */}
+          <div className="flex flex-wrap items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-3xl border border-border shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider pl-2">
+              <Filter className="w-4 h-4 text-primary" />
+              Advanced Filters
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 flex-1">
+              {/* Service Selector */}
+              <select
+                value={filterService}
+                onChange={(e) => setFilterService(e.target.value)}
+                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[150px]"
+              >
+                <option value="All">All Services</option>
+                <option value="General Consultation">General Consultation</option>
+                <option value="Hair Transplant">Hair Transplant</option>
+                <option value="Hair Care">Hair Care</option>
+                <option value="Skin Care">Skin Care</option>
+                <option value="Treatments">Treatments</option>
+                <option value="Aftercare">Aftercare</option>
+              </select>
+
+              {/* Status Selector */}
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="h-10 rounded-xl border border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background outline-none min-w-[140px]"
+              >
+                <option value="All">All Statuses</option>
+                <option value="PENDING">PENDING</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="CANCELLED">CANCELLED</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
+
+              {/* Date Input */}
+              <Input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="h-10 rounded-xl border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background max-w-[160px]"
+              />
+
+              {/* Reset Filters button */}
+              {(filterService !== "All" || filterStatus !== "All" || filterDate) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setFilterService("All"); setFilterStatus("All"); setFilterDate(""); }}
+                  className="text-primary font-bold text-xs uppercase hover:bg-primary/5 rounded-lg px-3"
+                >
+                  Reset Filters
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -431,7 +553,137 @@ const AdminPanel = () => {
               <h4 className="text-2xl font-extrabold text-foreground mb-2">No Matching Records Found</h4>
               <p className="text-muted-foreground font-medium max-w-sm">Try adjusting your search criteria or contact backend support if records appear missing.</p>
             </div>
+          ) : viewType === "table" ? (
+            /* TABLE VIEW */
+            <div className="bg-card border border-border rounded-[2.5rem] overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-muted/40 border-b border-border">
+                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Patient Details</th>
+                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Schedule</th>
+                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Service</th>
+                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider">Reference Note</th>
+                      <th className="p-5 text-[10px] font-black uppercase text-muted-foreground tracking-wider text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {filteredAppointments.map((apt) => (
+                      <tr key={apt.id} className="hover:bg-muted/10 transition-colors group">
+                        <td className="p-5">
+                          <div 
+                            onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
+                            className="font-extrabold text-primary underline cursor-pointer hover:text-primary/80"
+                          >
+                            {apt.name}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground font-mono mt-1">
+                            PID: {apt.id.slice(-8)} &middot; +91 {apt.phone}
+                          </div>
+                        </td>
+                        <td className="p-5 text-xs font-bold text-foreground">
+                          {formatApptDateTime(apt.date, apt.time)}
+                        </td>
+                        <td className="p-5 text-xs font-bold text-secondary">
+                          {apt.service}
+                        </td>
+                        <td className="p-5 text-xs text-muted-foreground font-medium italic max-w-xs truncate">
+                          {apt.consultation_notes || "—"}
+                        </td>
+                        <td className="p-5 text-center">
+                          <select
+                            value={apt.status || 'PENDING'}
+                            onChange={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
+                            className="bg-background border border-border text-foreground px-3 py-1.5 rounded-xl font-bold text-xs outline-none focus:ring-1 focus:ring-primary w-32 mx-auto"
+                          >
+                            <option value="PENDING">PENDING</option>
+                            <option value="CONFIRMED">CONFIRMED</option>
+                            <option value="CANCELLED">CANCELLED</option>
+                            <option value="COMPLETED">COMPLETED</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : viewType === "kanban" ? (
+            /* KANBAN BOARD VIEW */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+              {[
+                { id: "PENDING", title: "Pending Request" },
+                { id: "CONFIRMED", title: "Confirmed Slot" },
+                { id: "CANCELLED", title: "Cancelled Out" },
+                { id: "COMPLETED", title: "Completed Visit" }
+              ].map((col) => {
+                const colApts = filteredAppointments.filter(apt => (apt.status || 'PENDING') === col.id);
+                
+                return (
+                  <div key={col.id} className="bg-card border border-border rounded-[2.5rem] p-5 shadow-lg flex flex-col max-h-[70vh] min-h-[400px]">
+                    <div className="flex items-center justify-between mb-4 border-b border-border pb-3 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <span className={cn("w-2 h-2 rounded-full", 
+                          col.id === 'PENDING' ? 'bg-amber-400' :
+                          col.id === 'CONFIRMED' ? 'bg-green-400' :
+                          col.id === 'CANCELLED' ? 'bg-red-400' : 'bg-blue-400'
+                        )} />
+                        <h4 className="font-extrabold text-sm text-foreground tracking-tight">{col.title}</h4>
+                      </div>
+                      <Badge variant="outline" className="font-bold rounded-full bg-muted/50">{colApts.length}</Badge>
+                    </div>
+
+                    <div className="space-y-4 overflow-y-auto flex-1 pr-1 min-h-0">
+                      {colApts.length === 0 ? (
+                        <div className="h-32 flex items-center justify-center border border-dashed border-border rounded-2xl text-center text-xs text-muted-foreground italic font-medium">
+                          No items here
+                        </div>
+                      ) : (
+                        colApts.map((apt) => (
+                          <div
+                            key={apt.id}
+                            className="bg-muted/30 border border-border/60 hover:border-primary/40 rounded-2xl p-4 transition-all shadow-sm hover:shadow-md flex flex-col gap-3 group relative cursor-pointer"
+                            onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
+                          >
+                            <div>
+                              <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">PID: {apt.id.slice(-8)}</div>
+                              <h5 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors mt-0.5">{apt.name}</h5>
+                            </div>
+
+                            <div className="text-xs text-muted-foreground font-semibold leading-relaxed">
+                              <div>{formatApptDateTime(apt.date, apt.time)}</div>
+                              <div className="text-secondary mt-1">{apt.service}</div>
+                            </div>
+
+                            {apt.consultation_notes && (
+                              <div className="text-[10px] text-muted-foreground italic bg-background/50 border border-border/40 p-2 rounded-xl mt-1 line-clamp-2">
+                                Note: {apt.consultation_notes}
+                              </div>
+                            )}
+
+                            <div className="pt-2 border-t border-border/40 mt-1 flex items-center justify-between gap-2" onClick={(e) => e.stopPropagation()}>
+                              <span className="text-[8px] font-bold uppercase text-muted-foreground tracking-wider">Move:</span>
+                              <select
+                                value={apt.status || 'PENDING'}
+                                onChange={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
+                                className="bg-background border border-border text-foreground px-2 py-1 rounded-lg font-bold text-[10px] outline-none focus:ring-1 focus:ring-primary w-24"
+                              >
+                                <option value="PENDING">PENDING</option>
+                                <option value="CONFIRMED">CONFIRMED</option>
+                                <option value="CANCELLED">CANCELLED</option>
+                                <option value="COMPLETED">COMPLETED</option>
+                              </select>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
+            /* GRID VIEW */
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredAppointments.map((apt) => (
                 <motion.div
@@ -483,19 +735,16 @@ const AdminPanel = () => {
                       <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
                         Status:
                       </span>
-                      <input
-                        type="text"
-                        defaultValue={apt.status || 'PENDING'}
-                        onBlur={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleDynamicStatusChange(apt.id, e.currentTarget.value);
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        className="bg-background border border-border text-foreground px-3 py-1.5 rounded-xl font-bold text-xs text-center outline-none focus:ring-1 focus:ring-primary w-32"
-                        placeholder="Enter status..."
-                      />
+                      <select
+                        value={apt.status || 'PENDING'}
+                        onChange={(e) => handleDynamicStatusChange(apt.id, e.target.value)}
+                        className="bg-background border border-border text-foreground px-3 py-1.5 rounded-xl font-bold text-xs outline-none focus:ring-1 focus:ring-primary w-32 text-center"
+                      >
+                        <option value="PENDING">PENDING</option>
+                        <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                        <option value="COMPLETED">COMPLETED</option>
+                      </select>
                     </CardFooter>
                   </Card>
                 </motion.div>
@@ -745,11 +994,21 @@ const AdminPanel = () => {
                 </div>
 
                 <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Clinical Reason / Visit Guidance Notes</Label>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Clinical Reason / Visit Guidance Notes (Public)</Label>
                   <textarea
                     value={editReason}
                     onChange={(e) => setEditReason(e.target.value)}
                     placeholder="Enter clinical notes, guidance or reasons..."
+                    className="w-full min-h-[80px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Private Reference Notes (For Doctor Reference Only)</Label>
+                  <textarea
+                    value={editNotes}
+                    onChange={(e) => setEditNotes(e.target.value)}
+                    placeholder="Enter private reference notes, medical history summaries or diagnostic remarks..."
                     className="w-full min-h-[80px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground"
                   />
                 </div>

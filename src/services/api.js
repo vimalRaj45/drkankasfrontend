@@ -80,7 +80,7 @@ export const getAppointments = async (page = 1, limit = 10) => {
   }
 };
 
-export const updateStatus = async (appointmentId, status, adminToken = "dr_kanaks", reason = "", suggestedDate = "") => {
+export const updateStatus = async (appointmentId, status, adminToken = "dr_kanaks", reason = "", suggestedDate = "", notes = "") => {
   try {
     const response = await fetch(`${API_URL}/update-status`, {
       method: "POST",
@@ -90,7 +90,8 @@ export const updateStatus = async (appointmentId, status, adminToken = "dr_kanak
         status: status,
         admin_token: adminToken,
         cancel_reason: reason,
-        suggestion: suggestedDate
+        suggestion: suggestedDate,
+        consultation_notes: notes
       })
     });
     const data = await response.json();
