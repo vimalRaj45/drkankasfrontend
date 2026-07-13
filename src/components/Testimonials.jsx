@@ -34,8 +34,44 @@ const Testimonials = () => {
   const [feedbackRating, setFeedbackRating] = useState(null);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackName, setFeedbackName] = useState("");
+  const [feedbackTurnstileToken, setFeedbackTurnstileToken] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(1); // 1: Rating, 2: Feedback/Redirect
+
+  useEffect(() => {
+    let checkTurnstile;
+    if (showFeedbackModal && step === 2) {
+      checkTurnstile = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkTurnstile);
+          try {
+            const container = document.getElementById("feedback-turnstile-container");
+            if (container) {
+              container.innerHTML = "";
+            }
+            window.turnstile.render("#feedback-turnstile-container", {
+              sitekey: "0x4AAAAAAD1KgGwMC0H6cdla",
+              callback: (token) => {
+                setFeedbackTurnstileToken(token);
+              },
+              "expired-callback": () => {
+                setFeedbackTurnstileToken(null);
+              },
+              "error-callback": () => {
+                setFeedbackTurnstileToken(null);
+              }
+            });
+          } catch (e) {
+            console.error("Turnstile render error:", e);
+          }
+        }
+      }, 100);
+    }
+    return () => {
+      if (checkTurnstile) clearInterval(checkTurnstile);
+    };
+  }, [showFeedbackModal, step]);
+
   useEffect(() => {
     // Ensure Common Ninja re-triggers and initializes correctly
     const initCommonNinja = () => {
@@ -95,9 +131,14 @@ const Testimonials = () => {
       return;
     }
 
+    if (!feedbackTurnstileToken) {
+      toast.error("Please complete the security challenge verification.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const response = await submitGoogleFeedback(feedbackRating, feedbackText, feedbackName);
+      const response = await submitGoogleFeedback(feedbackRating, feedbackText, feedbackName, feedbackTurnstileToken);
       
       if (response.success) {
         toast.success('Feedback received safely. Thank you for helping us improve!', {
@@ -125,6 +166,7 @@ const Testimonials = () => {
     setFeedbackRating(null);
     setFeedbackText("");
     setFeedbackName("");
+    setFeedbackTurnstileToken(null);
     setIsSubmitting(false);
     setStep(1);
   };
@@ -366,13 +408,15 @@ const Testimonials = () => {
                       onChange={(e) => setFeedbackText(e.target.value)} 
                       placeholder="Share your experience here..." 
                       rows={5} 
-                      className={`w-full border rounded-2xl p-6 text-sm font-semibold transition-all resize-none leading-relaxed outline-none shadow-sm ${isDarkMode ? 'dark:!bg-black/40 border-white/5 !text-white placeholder:text-slate-600' : '!bg-white border-slate-300 !text-slate-900 placeholder:text-slate-400'}`}
+                      className={`w-full border rounded-2xl p-6 text-sm font-semibold transition-all resize-none leading-relaxed outline-none shadow-sm ${isDarkMode ? 'dark:!bg-black/40 border-white/5 !text-white placeholder:text-slate-650' : '!bg-white border-slate-300 !text-slate-900 placeholder:text-slate-400'}`}
                       style={{ 
                         backgroundColor: isDarkMode ? 'rgba(0,0,0,0.4)' : '#ffffff', 
                         color: isDarkMode ? '#ffffff' : '#0f172a' 
                       }}
                     />
                   </div>
+
+                  <div id="feedback-turnstile-container" className="my-2 flex justify-center min-h-[65px]"></div>
 
                   <div className="flex flex-col gap-4 mt-2">
                     <Button 

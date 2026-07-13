@@ -50,7 +50,29 @@ const AppointmentForm = ({ onSuccess }) => {
   const [date, setDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [paymentStep, setPaymentStep] = useState(null); // null | 'submitting' | 'confirmed'
+  const [turnstileToken, setTurnstileToken] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkTurnstile = setInterval(() => {
+      if (window.turnstile) {
+        clearInterval(checkTurnstile);
+        window.turnstile.render("#turnstile-container", {
+          sitekey: "0x4AAAAAAD1KgGwMC0H6cdla",
+          callback: (token) => {
+            setTurnstileToken(token);
+          },
+          "expired-callback": () => {
+            setTurnstileToken(null);
+          },
+          "error-callback": () => {
+            setTurnstileToken(null);
+          }
+        });
+      }
+    }, 100);
+    return () => clearInterval(checkTurnstile);
+  }, []);
 
   // Static standard clinical hours
   const availableSlots = [
@@ -112,6 +134,11 @@ const AppointmentForm = ({ onSuccess }) => {
       return;
     }
 
+    if (!turnstileToken) {
+      toast.error("Please complete the security challenge verification.");
+      return;
+    }
+
     setLoading(true);
     setPaymentStep('submitting');
 
@@ -141,6 +168,7 @@ const AppointmentForm = ({ onSuccess }) => {
         appointment_time: formData.time,
         service: formData.service,
         message: formData.message,
+        turnstile_token: turnstileToken,
       });
 
       if (!bookRes.success) {
@@ -276,6 +304,8 @@ const AppointmentForm = ({ onSuccess }) => {
             <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Message (Optional)</Label>
             <Textarea name="message" value={formData.message} onChange={handleChange} placeholder="Brief on concerns..." className="min-h-[80px] rounded-xl text-sm" />
           </div>
+
+          <div id="turnstile-container" className="my-4 flex justify-center min-h-[65px]"></div>
 
           <div className="space-y-3 pt-2">
             <Button

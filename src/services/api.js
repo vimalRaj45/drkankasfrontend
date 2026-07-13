@@ -158,12 +158,12 @@ export const subscribeUser = async (userId, subscription) => {
     return { success: false, error: error.message };
   }
 };
-export const submitGoogleFeedback = async (rating, feedback, name = "") => {
+export const submitGoogleFeedback = async (rating, feedback, name = "", turnstile_token = "") => {
   try {
     const response = await fetch(`${API_URL}/feedback`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ rating, feedback, name, source: 'Google Review System' })
+      body: JSON.stringify({ rating, feedback, name, source: 'Google Review System', turnstile_token })
     });
     return await response.json();
   } catch (error) {
@@ -262,12 +262,12 @@ export const deleteNotification = async (id, adminToken = "dr_kanaks") => {
  * RAZORPAY PAYMENT INTEGRATION
  * Step 1: Book appointment and get Razorpay order details
  */
-export const bookAppointmentWithPayment = async ({ name, phone, appointment_date, appointment_time, service, message }) => {
+export const bookAppointmentWithPayment = async ({ name, phone, appointment_date, appointment_time, service, message, turnstile_token }) => {
   try {
     const response = await fetch(`${API_URL}/api/book`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ name, phone, appointment_date, appointment_time, service, message })
+      body: JSON.stringify({ name, phone, appointment_date, appointment_time, service, message, turnstile_token })
     });
     const data = await response.json();
 
