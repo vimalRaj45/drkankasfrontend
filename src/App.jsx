@@ -129,14 +129,21 @@ function App() {
       e.preventDefault();
       // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      // Automatically show our custom install prompt
+      // Mark as available globally so Navbar button can show
+      window.__pwaInstallAvailable = true;
+      window.dispatchEvent(new Event('pwaInstallAvailable'));
+    };
+
+    const handleTriggerInstall = () => {
       setShowInstallPrompt(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('triggerInstallPrompt', handleTriggerInstall);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('triggerInstallPrompt', handleTriggerInstall);
     };
   }, []);
 
