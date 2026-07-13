@@ -107,8 +107,25 @@ export const updateStatus = async (appointmentId, status, adminToken = "dr_kanak
 
 export const getUserAppointments = async (phone) => {
   try {
-    // SECURITY IMPROVEMENT: Use the public /my-appointments route instead of searching with an admin token
-    const response = await fetch(`${API_URL}/my-appointments/${phone}`);
+    let savedUser = JSON.parse(localStorage.getItem('clinic_user')) || {};
+    let secretKey = savedUser.id;
+
+    // Self-healing: Retrieve user object from DB if local storage lacks the UUID key
+    if (!secretKey && phone) {
+      const checkRes = await checkUser(phone);
+      if (checkRes.success && checkRes.user && checkRes.user.id) {
+        savedUser = {
+          ...savedUser,
+          id: checkRes.user.id,
+          name: checkRes.user.name || savedUser.name
+        };
+        localStorage.setItem('clinic_user', JSON.stringify(savedUser));
+        secretKey = checkRes.user.id;
+      }
+    }
+
+    // SECURITY IMPROVEMENT: Pass the secret_key query parameter for secure key-based validation
+    const response = await fetch(`${API_URL}/my-appointments/${phone}?secret_key=${secretKey || ""}`);
     const data = await response.json();
 
     if (data.status === "success" && data.data) {
