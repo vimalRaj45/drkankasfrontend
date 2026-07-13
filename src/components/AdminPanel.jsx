@@ -27,7 +27,8 @@ import {
   Edit2,
   Columns,
   LayoutGrid,
-  List
+  List,
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,7 +63,7 @@ import {
 import { Label } from "@/components/ui/label";
 
 // Existing API services
-import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminSendOtp, adminVerifyOtp } from '../services/api';
+import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminSendOtp, adminVerifyOtp, getAdminFeedback, deleteAdminFeedback } from '../services/api';
 import { useNavigate } from "react-router-dom";
 
 const AdminPanel = () => {
@@ -156,6 +157,29 @@ const AdminPanel = () => {
   const [filterService, setFilterService] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterDate, setFilterDate] = useState("");
+
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+
+  const fetchFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const res = await getAdminFeedback();
+      if (res.success && res.data) {
+        setFeedbacks(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to load feedbacks:", err);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
+  useEffect(() => {
+    if (viewType === "reviews") {
+      fetchFeedbacks();
+    }
+  }, [viewType]);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -629,6 +653,16 @@ const AdminPanel = () => {
                   <Columns className="w-4 h-4" />
                   Kanban
                 </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => setViewType("reviews")}
+                  className={cn("rounded-xl px-4 py-2 h-9 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5", 
+                    viewType === "reviews" ? "bg-white shadow-md text-blue-600 font-extrabold" : "text-slate-500 hover:bg-blue-50/50"
+                  )}
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Reviews
+                </Button>
               </div>
 
               <Button
@@ -855,17 +889,98 @@ const AdminPanel = () => {
                 );
               })}
             </div>
+          ) : viewType === "reviews" ? (
+            /* REVIEWS & FEEDBACK VIEW */
+            <div className="space-y-6">
+              {loadingFeedbacks ? (
+                <div className="flex flex-col items-center justify-center py-20 opacity-50">
+                  <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Loading Reviews...</span>
+                </div>
+              ) : feedbacks.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="bg-blue-50 p-6 rounded-full mb-4">
+                    <MessageSquare className="w-12 h-12 text-blue-500" />
+                  </div>
+                  <h4 className="text-lg font-extrabold text-slate-800">No Patient Reviews Yet</h4>
+                  <p className="text-xs text-slate-500 max-w-xs mt-1">Feedback messages submitted through the testimonial form will appear here.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {feedbacks.map((fb) => (
+                    <motion.div
+                      key={fb.id}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-white border border-blue-100 rounded-[2rem] p-6 shadow-md shadow-blue-900/5 hover:border-blue-200 transition-all flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-1">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={cn(
+                                  "w-4 h-4",
+                                  i < fb.rating ? "text-amber-400 fill-amber-400" : "text-slate-200"
+                                )}
+                              />
+                            ))}
+                          </div>
+                          <Badge className="bg-slate-50 text-slate-500 border border-slate-100 text-[8px] font-mono tracking-wider">
+                            {formatCreatedTime(fb.created_at)}
+                          </Badge>
+                        </div>
+
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                          Patient: <span className="text-slate-800 font-extrabold normal-case">{fb.name || "Anonymous"}</span>
+                        </p>
+                        
+                        <p className="text-sm font-medium text-slate-600 italic bg-[#f8fafc] p-4 rounded-2xl border border-blue-50/50 mt-3 relative min-h-[80px]">
+                          "{fb.feedback || "No comment left."}"
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-50">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                          Source: {fb.source || "Google Review System"}
+                        </span>
+                        
+                        <Button
+                          variant="ghost"
+                          onClick={async () => {
+                            if (confirm("Are you sure you want to delete this review?")) {
+                              const res = await deleteAdminFeedback(fb.id);
+                              if (res.success) {
+                                toast.success("Review deleted successfully!");
+                                fetchFeedbacks();
+                              } else {
+                                toast.error("Failed to delete review.");
+                              }
+                            }
+                          }}
+                          className="h-8 w-8 p-0 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
+                          title="Delete Review"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
           ) : (
-            /* GRID VIEW */
+            /* GRID VIEW (DEFAULT) */
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredAppointments.map((apt) => (
                 <motion.div
                   key={apt.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ y: -5 }}
+                  className="group"
                 >
-                  <Card className="border border-blue-100/60 shadow-lg shadow-blue-900/5 rounded-[2.5rem] bg-white overflow-hidden group">
+                  <Card className="bg-white border border-blue-100/60 rounded-[2.5rem] overflow-hidden shadow-lg shadow-blue-900/5 hover:border-blue-200/80 transition-all flex flex-col justify-between h-full group-hover:-translate-y-1 duration-300">
                     <CardHeader
                       className="p-8 pb-4 flex flex-row items-center justify-between cursor-pointer"
                       onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}

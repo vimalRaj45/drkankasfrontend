@@ -182,7 +182,11 @@ export const submitGoogleFeedback = async (rating, feedback, name = "", turnstil
       headers,
       body: JSON.stringify({ rating, feedback, name, source: 'Google Review System', turnstile_token })
     });
-    return await response.json();
+    const data = await response.json();
+    return {
+      success: data.status === "success" || data.success === true,
+      message: data.message
+    };
   } catch (error) {
     console.error('Error submitting feedback:', error);
     return { success: false, error: error.message };
@@ -421,6 +425,36 @@ export const adminVerifyOtp = async (otp) => {
     };
   } catch (error) {
     console.error("Error verifying admin OTP:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getAdminFeedback = async (adminToken = "dr_kanaks") => {
+  try {
+    const response = await fetch(`${API_URL}/api/feedback?admin_token=${adminToken}`);
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      data: data.data || []
+    };
+  } catch (error) {
+    console.error("Error fetching admin feedback:", error);
+    return { success: false, data: [] };
+  }
+};
+
+export const deleteAdminFeedback = async (id, adminToken = "dr_kanaks") => {
+  try {
+    const response = await fetch(`${API_URL}/api/feedback/${id}?admin_token=${adminToken}`, {
+      method: "DELETE"
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error deleting feedback:", error);
     return { success: false, error: error.message };
   }
 };
