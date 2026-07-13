@@ -1087,58 +1087,62 @@ const AdminPanel = () => {
       </Dialog>
       {/* Patient Profile/Details Modal */}
       <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
-        <DialogContent className="rounded-[2.5rem] p-10 max-w-lg border-none shadow-2xl">
+        <DialogContent className="rounded-[2.5rem] p-10 max-w-4xl border-none shadow-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-extrabold text-foreground mb-2">Patient Profile Details</DialogTitle>
             <DialogDescription className="text-muted-foreground font-medium">
-              Comprehensive personal booking records for this clinical slot.
+              Comprehensive personal booking records and clinical actions for this patient.
             </DialogDescription>
           </DialogHeader>
 
           {selectedPatient && (
-            <div className="space-y-6 pt-4 text-left">
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Full Name</Label>
-                <p className="text-lg font-extrabold text-foreground">{selectedPatient.name}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 text-left">
+              {/* Left Column: Patient Profile Details */}
+              <div className="space-y-5">
                 <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Phone Number</Label>
-                  <a href={`tel:${selectedPatient.phone}`} className="text-sm font-bold text-primary hover:underline font-mono">
-                    +91 {selectedPatient.phone}
-                  </a>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Full Name</Label>
+                  <p className="text-lg font-extrabold text-foreground">{selectedPatient.name}</p>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Phone Number</Label>
+                    <a href={`tel:${selectedPatient.phone}`} className="text-sm font-bold text-primary hover:underline font-mono">
+                      +91 {selectedPatient.phone}
+                    </a>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Patient ID</Label>
+                    <p className="text-xs font-mono text-muted-foreground break-all">{selectedPatient.id}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Chosen Slot Time</Label>
+                    <p className="text-sm font-black text-foreground">{formatApptDateTime(selectedPatient.date, selectedPatient.time)}</p>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Booked On (Submission)</Label>
+                    <p className="text-sm font-black text-foreground">{formatCreatedTime(selectedPatient.created_at)}</p>
+                  </div>
+                </div>
+
                 <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Patient ID</Label>
-                  <p className="text-xs font-mono text-muted-foreground break-all">{selectedPatient.id}</p>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Chosen Service</Label>
+                  <p className="text-sm font-bold text-secondary">{selectedPatient.service}</p>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Chosen Slot Time</Label>
-                  <p className="text-sm font-black text-foreground">{formatApptDateTime(selectedPatient.date, selectedPatient.time)}</p>
-                </div>
-                <div>
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Booked On (Submission)</Label>
-                  <p className="text-sm font-black text-foreground">{formatCreatedTime(selectedPatient.created_at)}</p>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Current Problems</Label>
+                  <p className="text-sm text-muted-foreground bg-muted/40 p-4 rounded-2xl border border-border font-medium italic whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
+                    {selectedPatient.message || "No message provided."}
+                  </p>
                 </div>
               </div>
 
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Chosen Service</Label>
-                <p className="text-sm font-bold text-secondary">{selectedPatient.service}</p>
-              </div>
-
-              <div>
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1">Current Problems</Label>
-                <p className="text-sm text-muted-foreground bg-muted/40 p-4 rounded-2xl border border-border font-medium italic whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
-                  {selectedPatient.message || "No message provided."}
-                </p>
-              </div>
-
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-4">
+              {/* Right Column: Doctor Actions */}
+              <div className="space-y-4 md:border-l border-slate-100 dark:border-slate-800 md:pl-8 pt-6 md:pt-0">
                 <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary">Doctor Clinical Actions</h4>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -1160,7 +1164,7 @@ const AdminPanel = () => {
                     <Input
                       value={editSuggestion}
                       onChange={(e) => setEditSuggestion(e.target.value)}
-                      placeholder="e.g. Next Mon 10:30 AM"
+                      placeholder="e.g. Next Mon"
                       className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold"
                     />
                   </div>
@@ -1172,7 +1176,7 @@ const AdminPanel = () => {
                     value={editReason}
                     onChange={(e) => setEditReason(e.target.value)}
                     placeholder="Enter clinical notes, guidance or reasons..."
-                    className="w-full min-h-[80px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground"
+                    className="w-full min-h-[70px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground resize-none"
                   />
                 </div>
 
@@ -1182,14 +1186,14 @@ const AdminPanel = () => {
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
                     placeholder="Enter private reference notes, medical history summaries or diagnostic remarks..."
-                    className="w-full min-h-[80px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground"
+                    className="w-full min-h-[70px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground resize-none"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          <DialogFooter className="mt-8 gap-3 flex-col sm:flex-row">
+          <DialogFooter className="mt-8 gap-3 flex-col sm:flex-row border-t border-slate-100 dark:border-slate-800 pt-6">
             <Button 
               variant="outline"
               className="rounded-full h-12 flex-1 font-bold" 
