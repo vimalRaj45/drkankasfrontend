@@ -228,18 +228,16 @@ const Navbar = () => {
                   </Link>
                 ))}
                 
-                {/* Install App in Mobile Menu */}
-                {isInstallable && (
-                  <button
-                    onClick={() => { window.dispatchEvent(new Event('triggerInstallPrompt')); setIsMenuOpen(false); }}
-                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/5 text-primary font-bold text-xs transition-all w-full group"
-                  >
-                    <div className="p-1.5 bg-primary/10 rounded-lg border border-primary/20">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    </div>
-                    <span className="notranslate">Install App</span>
-                  </button>
-                )}
+                {/* Download App - Always Visible in Mobile Menu */}
+                <button
+                  onClick={() => { window.dispatchEvent(new Event('triggerInstallPrompt')); setIsMenuOpen(false); }}
+                  className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/5 text-primary font-bold text-xs transition-all w-full group"
+                >
+                  <div className="p-1.5 bg-primary/10 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  </div>
+                  <span className="notranslate">Download App</span>
+                </button>
 
                 {/* Profile Link in Mobile */}
                 <Link
