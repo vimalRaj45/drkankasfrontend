@@ -261,8 +261,7 @@ export const updateNotification = async (id, title, body, url, image, adminToken
 export const deleteNotification = async (id, adminToken = "dr_kanaks") => {
   try {
     const response = await fetch(`${API_URL}/api/notifications/${id}?admin_token=${adminToken}`, {
-      method: "DELETE",
-      headers
+      method: "DELETE"
     });
     const data = await response.json();
     return {
