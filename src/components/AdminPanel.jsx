@@ -77,6 +77,38 @@ const AdminPanel = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
 
+  const [editStatus, setEditStatus] = useState("");
+  const [editReason, setEditReason] = useState("");
+  const [editSuggestion, setEditSuggestion] = useState("");
+  const [isSavingPatientInfo, setIsSavingPatientInfo] = useState(false);
+
+  useEffect(() => {
+    if (selectedPatient) {
+      setEditStatus(selectedPatient.status || "PENDING");
+      setEditReason(selectedPatient.cancel_reason || "");
+      setEditSuggestion(selectedPatient.suggestion || "");
+    }
+  }, [selectedPatient]);
+
+  const handleSavePatientInfo = async () => {
+    if (!selectedPatient) return;
+    setIsSavingPatientInfo(true);
+    try {
+      const res = await updateStatus(selectedPatient.id, editStatus, "dr_kanaks", editReason, editSuggestion);
+      if (res.success || res.status === 'success') {
+        toast.success("Patient clinical records updated successfully!");
+        setIsPatientModalOpen(false);
+        fetchAppointments();
+      } else {
+        toast.error(`Update failed: ${res.message}`);
+      }
+    } catch (err) {
+      toast.error("Failed to connect to update status endpoint.");
+    } finally {
+      setIsSavingPatientInfo(false);
+    }
+  };
+
   // Clinic Hours State
   const [isHoursDialogOpen, setIsHoursDialogOpen] = useState(false);
   const [clinicHours, setClinicHours] = useState("");
@@ -683,12 +715,63 @@ const AdminPanel = () => {
                   {selectedPatient.message || "No message provided."}
                 </p>
               </div>
+
+              <div className="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-4">
+                <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary">Doctor Clinical Actions</h4>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Update Status</Label>
+                    <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value)}
+                      className="flex h-12 w-full rounded-xl border border-border bg-muted/30 px-3 focus:bg-background focus:ring-primary shadow-sm font-bold text-xs outline-none"
+                    >
+                      <option value="PENDING">PENDING</option>
+                      <option value="CONFIRMED">CONFIRMED</option>
+                      <option value="CANCELLED">CANCELLED</option>
+                      <option value="COMPLETED">COMPLETED</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Re-plan / Suggestion</Label>
+                    <Input
+                      value={editSuggestion}
+                      onChange={(e) => setEditSuggestion(e.target.value)}
+                      placeholder="e.g. Next Mon 10:30 AM"
+                      className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Clinical Reason / Visit Guidance Notes</Label>
+                  <textarea
+                    value={editReason}
+                    onChange={(e) => setEditReason(e.target.value)}
+                    placeholder="Enter clinical notes, guidance or reasons..."
+                    className="w-full min-h-[80px] rounded-xl border border-border bg-muted/30 p-3 focus:bg-background focus:ring-primary shadow-sm font-medium text-xs outline-none transition-all text-foreground"
+                  />
+                </div>
+              </div>
             </div>
           )}
 
-          <DialogFooter className="mt-8">
-            <Button className="rounded-full h-12 w-full font-bold bg-primary hover:bg-primary/90" onClick={() => setIsPatientModalOpen(false)}>
-              Close Profile
+          <DialogFooter className="mt-8 gap-3 flex-col sm:flex-row">
+            <Button 
+              variant="outline"
+              className="rounded-full h-12 flex-1 font-bold" 
+              onClick={() => setIsPatientModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="rounded-full h-12 flex-1 font-bold bg-primary hover:bg-primary/90 flex items-center justify-center gap-2" 
+              onClick={handleSavePatientInfo}
+              disabled={isSavingPatientInfo}
+            >
+              {isSavingPatientInfo && <Loader2 className="w-4 h-4 animate-spin" />}
+              Save Updates
             </Button>
           </DialogFooter>
         </DialogContent>

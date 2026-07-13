@@ -5,9 +5,11 @@ import { getNotifications } from "../services/api";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import LazyImage from "../components/ui/LazyImage";
+import { Dialog, DialogContent } from "../components/ui/dialog";
 
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const fetchNotifications = async () => {
@@ -138,7 +140,8 @@ const NotificationsPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-card border border-border rounded-3xl overflow-hidden hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-800 transition-all shadow-md group flex flex-col md:flex-row"
+                onClick={() => setSelectedNotification(item)}
+                className="bg-card border border-border rounded-3xl overflow-hidden hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-800 transition-all shadow-md group flex flex-col md:flex-row cursor-pointer"
               >
                 {/* Notification Image */}
                 {item.image_url && (
@@ -181,7 +184,12 @@ const NotificationsPage = () => {
                         className="rounded-full font-bold shadow-md shadow-primary/10 gap-1.5 uppercase text-[10px] tracking-wider h-10 px-5"
                         asChild
                       >
-                        <a href={item.url} target="_blank" rel="noopener noreferrer">
+                        <a 
+                          href={item.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           Explore Offer <ArrowUpRight className="w-4 h-4" />
                         </a>
                       </Button>
@@ -193,6 +201,59 @@ const NotificationsPage = () => {
           </div>
         )}
       </div>
+
+      {/* Lightbox / Announcement Details Modal */}
+      <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+        <DialogContent className="rounded-[2.5rem] p-6 sm:p-10 max-w-2xl border-none shadow-2xl overflow-hidden">
+          {selectedNotification && (
+            <div className="space-y-6 pt-4 text-left">
+              {selectedNotification.image_url && (
+                <div className="w-full h-64 sm:h-80 bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden border border-border">
+                  <img
+                    src={selectedNotification.image_url}
+                    alt={selectedNotification.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5 text-primary">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Announcement
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {formatTime(selectedNotification.created_at)}
+                  </span>
+                </div>
+
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                  {selectedNotification.title}
+                </h2>
+
+                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed whitespace-pre-wrap">
+                  {selectedNotification.body}
+                </p>
+              </div>
+
+              {selectedNotification.url && (
+                <div className="pt-2 flex justify-end">
+                  <Button
+                    className="rounded-full font-bold shadow-md shadow-primary/10 gap-1.5 uppercase text-xs tracking-wider h-12 px-6"
+                    asChild
+                  >
+                    <a href={selectedNotification.url} target="_blank" rel="noopener noreferrer">
+                      Explore Offer <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

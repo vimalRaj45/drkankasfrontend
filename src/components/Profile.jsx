@@ -18,7 +18,9 @@ import {
   MapPin,
   FileText,
   CheckCircle2,
-  Loader2
+  Loader2,
+  Printer,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +28,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "react-hot-toast";
-import { getUserAppointments, API_URL, checkUser } from '../services/api';
+import { getUserAppointments, API_URL, checkUser, getNotifications } from '../services/api';
+import { Dialog, DialogContent } from "../components/ui/dialog";
 
 const QueueProgress = ({ date }) => {
   const [completed, setCompleted] = useState(0);
@@ -96,6 +99,231 @@ const Profile = () => {
   const [loginPhone, setLoginPhone] = useState("");
   const [checking, setChecking] = useState(false);
   const navigate = useNavigate();
+
+  const [announcements, setAnnouncements] = useState([]);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+
+  useEffect(() => {
+    const fetchAnnouncements = async () => {
+      try {
+        const res = await getNotifications();
+        if (res.success && res.data) {
+          const sorted = [...res.data]
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            .slice(0, 3);
+          setAnnouncements(sorted);
+        }
+      } catch (err) {
+        console.error("Failed to load announcements for profile feed", err);
+      }
+    };
+    fetchAnnouncements();
+  }, []);
+
+  const handlePrintToken = (apt) => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast.error("Popup blocked! Please allow popups to print your token.");
+      return;
+    }
+
+    const docId = apt.id?.slice(-8) || "8821004";
+    const formattedDate = formatApptDateTime(apt.date, apt.time);
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Priority Slip - PID-${docId}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+          body {
+            font-family: 'Inter', sans-serif;
+            color: #0f172a;
+            margin: 0;
+            padding: 40px;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+          }
+          .ticket {
+            width: 450px;
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            position: relative;
+            background: #ffffff;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+          }
+          .clinic-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+          }
+          .title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 4px;
+            margin-bottom: 0;
+          }
+          .token-section {
+            text-align: center;
+            background: #eff6ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+          }
+          .token-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 5px;
+          }
+          .token-number {
+            font-size: 32px;
+            font-weight: 900;
+            color: #1e40af;
+            margin: 0;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+          }
+          .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #64748b;
+          }
+          .detail-value {
+            font-weight: 700;
+            color: #0f172a;
+          }
+          .guidance-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 24px;
+            line-height: 1.6;
+          }
+          .guidance-title {
+            font-size: 10px;
+            font-weight: 700;
+            color: #2563eb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+          }
+          .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
+            font-weight: 500;
+            line-height: 1.5;
+          }
+          @media print {
+            body {
+              padding: 0;
+            }
+            .ticket {
+              border: none;
+              box-shadow: none;
+              padding: 10px;
+              width: 100%;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="header">
+            <h1 class="clinic-name">Dr. Kanak's Clinic</h1>
+            <p class="title">Priority Consultation Slip</p>
+          </div>
+          
+          <div class="token-section">
+            <div class="token-label">Appointment Token</div>
+            <div class="token-number">${apt.token || "REGULAR"}</div>
+          </div>
+          
+          <div class="details-grid">
+            <div class="detail-row">
+              <span class="detail-label">Patient Name:</span>
+              <span class="detail-value">${apt.name}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Patient ID:</span>
+              <span class="detail-value" style="font-family: monospace;">PID-${docId}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Chosen Service:</span>
+              <span class="detail-value">${apt.service}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Schedule Slot:</span>
+              <span class="detail-value">${formattedDate}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Booking Status:</span>
+              <span class="detail-value" style="color: #10b981;">${apt.status}</span>
+            </div>
+          </div>
+
+          ${apt.cancel_reason ? `
+            <div class="guidance-box">
+              <div class="guidance-title">${apt.status === 'CONFIRMED' ? 'Visit Guidance' : apt.status === 'CANCELLED' ? 'Clinical Reason' : 'Doctor Guidance'}</div>
+              <div>"${apt.cancel_reason}"</div>
+            </div>
+          ` : ''}
+
+          <div class="footer">
+            Thank you for choosing Dr. Kanak's Clinic.<br>
+            Please show this digital priority slip at the front desk.<br>
+            Contact Support: +91 ${apt.phone}
+          </div>
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() {
+              window.close();
+            }, 1000);
+          }
+        <\/script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
 
   const syncAppointments = async (phone) => {
     if (!phone) return;
@@ -265,53 +493,100 @@ const Profile = () => {
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8">
-          {/* User Info Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="lg:col-span-1"
-          >
-            <Card className="border border-border shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-[3rem] overflow-hidden bg-card h-full relative group">
-              <CardHeader className="bg-slate-900 dark:bg-slate-950 text-white p-6 sm:p-10 pb-16 rounded-b-[3rem] sm:rounded-b-[4rem]">
-                <div className="w-20 h-20 bg-white/10 p-1 rounded-[2rem] mb-6 relative group-hover:scale-105 transition-transform">
-                  <div className="w-full h-full bg-white dark:bg-slate-100 rounded-full flex items-center justify-center p-3">
-                    <User className="w-full h-full text-slate-900 fill-slate-900/10" />
+          {/* Left Column: User Info & Live Announcements */}
+          <div className="lg:col-span-1 flex flex-col gap-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="w-full"
+            >
+              <Card className="border border-border shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-[3rem] overflow-hidden bg-card h-full relative group">
+                <CardHeader className="bg-slate-900 dark:bg-slate-950 text-white p-6 sm:p-10 pb-16 rounded-b-[3rem] sm:rounded-b-[4rem]">
+                  <div className="w-20 h-20 bg-white/10 p-1 rounded-[2rem] mb-6 relative group-hover:scale-105 transition-transform">
+                    <div className="w-full h-full bg-white dark:bg-slate-100 rounded-full flex items-center justify-center p-3">
+                      <User className="w-full h-full text-slate-900 fill-slate-900/10" />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-slate-900 flex items-center justify-center">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                    </div>
                   </div>
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-slate-900 flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                  <CardTitle className="text-2xl font-extrabold text-white leading-tight uppercase tracking-widest">{user.name}</CardTitle>
+                  <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-xs flex items-center gap-2 mt-1">
+                    <ShieldCheck className="w-3 h-3 text-secondary" />
+                    Verified Global Identity
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 sm:p-10 -mt-10 bg-card rounded-t-[2.5rem] sm:rounded-t-[3rem] relative z-20 space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Phone Identity</Label>
+                    <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
+                      <Phone className="w-5 h-5 text-secondary" />
+                      {user.phone}
+                    </div>
                   </div>
-                </div>
-                <CardTitle className="text-2xl font-extrabold text-white leading-tight uppercase tracking-widest">{user.name}</CardTitle>
-                <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-xs flex items-center gap-2 mt-1">
-                  <ShieldCheck className="w-3 h-3 text-secondary" />
-                  Verified Global Identity
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 sm:p-10 -mt-10 bg-card rounded-t-[2.5rem] sm:rounded-t-[3rem] relative z-20 space-y-6">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Phone Identity</Label>
-                  <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
-                    <Phone className="w-5 h-5 text-secondary" />
-                    {user.phone}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Unique Patient ID</Label>
+                    <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
+                      <FileText className="w-5 h-5 text-primary" />
+                      PID-{user.id?.slice(-8) || "8821004"}
+                    </div>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Unique Patient ID</Label>
-                  <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
-                    <FileText className="w-5 h-5 text-primary" />
-                    PID-{user.id?.slice(-8) || "8821004"}
+                  <div className="pt-6">
+                    <Button variant="link" className="p-0 text-secondary font-extrabold h-auto flex items-center gap-2 hover:translate-x-1 transition-transform decoration-none">
+                      Update Clinical Profile
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
                   </div>
-                </div>
-                <div className="pt-6">
-                  <Button variant="link" className="p-0 text-secondary font-extrabold h-auto flex items-center gap-2 hover:translate-x-1 transition-transform decoration-none">
-                    Update Clinical Profile
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Live Announcements Feed */}
+            {announcements.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="w-full"
+              >
+                <Card className="border border-border shadow-xl rounded-[2.5rem] bg-card overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2 text-foreground">
+                      <Sparkles className="w-5 h-5 text-primary" /> Clinic Updates
+                    </CardTitle>
+                    <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Latest Announcements</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4 px-6 pb-6">
+                    {announcements.map((item) => (
+                      <div 
+                        key={item.id}
+                        onClick={() => setSelectedAnnouncement(item)}
+                        className="p-3 bg-muted/40 hover:bg-muted/80 rounded-2xl border border-border cursor-pointer transition-all group flex items-start gap-3"
+                      >
+                        {item.image_url && (
+                          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-border">
+                            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors truncate">{item.title}</h4>
+                          <p className="text-[10px] text-slate-500 font-medium line-clamp-2 mt-0.5 leading-relaxed">{item.body}</p>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <Button variant="link" className="p-0 text-xs font-bold text-primary flex items-center gap-1.5 h-auto decoration-none" asChild>
+                      <Link to="/notifications">
+                        All Announcements <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </div>
 
           {/* Appointment History Column */}
           <div className="lg:col-span-3">
@@ -400,8 +675,14 @@ const Profile = () => {
                               )}>
                                 {apt.status}
                               </Badge>
-                              <Button variant="ghost" size="icon" className="rounded-xl h-12 w-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:bg-primary/5 text-slate-400 hover:text-primary transition-colors">
-                                <ExternalLink className="w-5 h-5" />
+                              <Button 
+                                onClick={() => handlePrintToken(apt)}
+                                variant="ghost" 
+                                size="icon" 
+                                className="rounded-xl h-12 w-12 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all"
+                                title="Print Slip"
+                              >
+                                <Printer className="w-5 h-5" />
                               </Button>
                             </div>
 
@@ -422,12 +703,20 @@ const Profile = () => {
                                   apt.status === 'CANCELLED' ? "text-red-600 bg-red-50 dark:bg-red-950/30 border-red-100" : "text-primary bg-primary/5 dark:bg-primary/10 border-primary/10"
                                 )}>
                                   <p className="mb-1 uppercase tracking-tighter opacity-70">
-                                    {apt.status === 'CONFIRMED' ? "Visit Guidance:" : "Clinical Reason:"}
+                                    {apt.status === 'CONFIRMED' 
+                                      ? "Visit Guidance:" 
+                                      : apt.status === 'CANCELLED' 
+                                      ? "Clinical Reason:" 
+                                      : apt.status === 'COMPLETED'
+                                      ? "Clinical Notes & Advice:"
+                                      : "Clinical Notes:"}
                                   </p>
                                   {apt.cancel_reason || (
                                     apt.status === 'CONFIRMED'
                                       ? "Your clinical session has been officially confirmed. Please arrive 10 mins prior."
-                                      : "This session has been cancelled by the clinical board."
+                                      : apt.status === 'CANCELLED'
+                                      ? "This session has been cancelled by the clinical board."
+                                      : "No specific guidance notes provided for this session."
                                   )}
                                   {apt.suggestion && (
                                     <div className="mt-2 pt-2 border-t border-current/10 font-extrabold uppercase tracking-tighter">
@@ -464,6 +753,55 @@ const Profile = () => {
 
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[120px] -z-0" />
+
+      {/* Lightbox / Announcement Details Modal */}
+      <Dialog open={!!selectedAnnouncement} onOpenChange={(open) => !open && setSelectedAnnouncement(null)}>
+        <DialogContent className="rounded-[2.5rem] p-6 sm:p-10 max-w-2xl border-none shadow-2xl overflow-hidden">
+          {selectedAnnouncement && (
+            <div className="space-y-6 pt-4 text-left">
+              {selectedAnnouncement.image_url && (
+                <div className="w-full h-64 sm:h-80 bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden border border-border">
+                  <img
+                    src={selectedAnnouncement.image_url}
+                    alt={selectedAnnouncement.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                  <span className="flex items-center gap-1.5 text-primary">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Announcement
+                  </span>
+                </div>
+
+                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+                  {selectedAnnouncement.title}
+                </h2>
+
+                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed whitespace-pre-wrap">
+                  {selectedAnnouncement.body}
+                </p>
+              </div>
+
+              {selectedAnnouncement.url && (
+                <div className="pt-2 flex justify-end">
+                  <Button
+                    className="rounded-full font-bold shadow-md shadow-primary/10 gap-1.5 uppercase text-xs tracking-wider h-12 px-6"
+                    asChild
+                  >
+                    <a href={selectedAnnouncement.url} target="_blank" rel="noopener noreferrer">
+                      Explore Offer <ArrowRight className="w-4 h-4" />
+                    </a>
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
