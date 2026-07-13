@@ -124,12 +124,15 @@ function App() {
   };
 
   useEffect(() => {
+    // If already running as installed PWA (standalone), mark as installed immediately
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+      window.__pwaInstalled = true;
+      window.dispatchEvent(new Event('pwaAppInstalled'));
+    }
+
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      // Mark as available globally so Navbar button can show
       window.__pwaInstallAvailable = true;
       window.dispatchEvent(new Event('pwaInstallAvailable'));
     };
@@ -138,12 +141,22 @@ function App() {
       setShowInstallPrompt(true);
     };
 
+    // When user completes installation, hide the button
+    const handleAppInstalled = () => {
+      window.__pwaInstalled = true;
+      window.__pwaInstallAvailable = false;
+      setDeferredPrompt(null);
+      window.dispatchEvent(new Event('pwaAppInstalled'));
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('triggerInstallPrompt', handleTriggerInstall);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('triggerInstallPrompt', handleTriggerInstall);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
