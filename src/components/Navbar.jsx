@@ -23,10 +23,6 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [lang, setLang] = useState("en");
-  const [isInstallable, setIsInstallable] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(
-    window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone
-  );
 
   useEffect(() => {
     const checkLang = () => {
@@ -100,23 +96,7 @@ const Navbar = () => {
     document.documentElement.classList.remove("dark");
     localStorage.removeItem("theme");
 
-    // PWA install availability
-    if (window.__pwaInstallAvailable && !window.__pwaInstalled) setIsInstallable(true);
-    const onAvailable = () => {
-      if (!window.__pwaInstalled) setIsInstallable(true);
-    };
-    const onInstalled = () => {
-      setIsInstalled(true);
-      setIsInstallable(false);
-    };
-    window.addEventListener('pwaInstallAvailable', onAvailable);
-    window.addEventListener('pwaAppInstalled', onInstalled);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener('pwaInstallAvailable', onAvailable);
-      window.removeEventListener('pwaAppInstalled', onInstalled);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -180,20 +160,7 @@ const Navbar = () => {
             <span className="text-xs shrink-0">{lang === "en" ? "தமிழ்" : "English"}</span>
           </Button>
 
-          {/* Install App Button - Desktop */}
-          {isInstallable && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="notranslate rounded-full px-3 h-9 sm:h-11 hover:bg-primary/5 text-primary font-bold border border-primary/30 flex items-center gap-1.5 shrink-0 hidden sm:flex"
-              onClick={() => window.dispatchEvent(new Event('triggerInstallPrompt'))}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-              <span className="text-xs">Install App</span>
-            </Button>
-          )}
-
-          <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
+           <Button variant="outline" className="hidden sm:flex rounded-full gap-2 border-border bg-background hover:bg-muted text-foreground font-bold shadow-sm" asChild>
             <Link to="/profile">
               <User className="w-4 h-4" />
               <span className="notranslate">{lang === 'ta' ? "சுயவிவரம்" : "Profile"}</span>
@@ -239,19 +206,6 @@ const Navbar = () => {
                   </Link>
                 ))}
                 
-                {/* Download App - Only show if NOT already installed */}
-                {!isInstalled && (
-                  <button
-                    onClick={() => { window.dispatchEvent(new Event('triggerInstallPrompt')); setIsMenuOpen(false); }}
-                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-primary/5 text-primary font-bold text-xs transition-all w-full group"
-                  >
-                    <div className="p-1.5 bg-primary/10 rounded-lg border border-primary/20 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors">
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    </div>
-                    <span className="notranslate">Download App</span>
-                  </button>
-                )}
-
                 {/* Profile Link in Mobile */}
                 <Link
                   to="/profile"
