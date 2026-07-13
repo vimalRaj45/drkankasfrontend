@@ -416,7 +416,7 @@ const BlogPostDetail = ({ post, onBack }) => {
   const [liked, setLiked] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = window.location.href;
+  const shareUrl = `${window.location.origin}/blog?id=${post.id}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -483,7 +483,7 @@ const BlogPostDetail = ({ post, onBack }) => {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-border">
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
@@ -653,8 +653,22 @@ const BlogPage = () => {
   const [savedPosts, setSavedPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
 
+  const handleSelectPost = (post) => {
+    setSelectedPost(post);
+    if (post) {
+      window.history.pushState({}, "", `/blog?id=${post.id}`);
+    } else {
+      window.history.pushState({}, "", `/blog`);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get('id');
+    if (postId && blogPostsData[postId]) {
+      setSelectedPost(blogPostsData[postId]);
+    }
   }, []);
 
   // Filter posts based on search and category
@@ -686,10 +700,10 @@ const BlogPage = () => {
             post={selectedPost} 
             onBack={(newId) => {
               if (newId && typeof newId === 'number') {
-                setSelectedPost(blogPostsData[newId]);
+                handleSelectPost(blogPostsData[newId]);
                 window.scrollTo(0, 0);
               } else {
-                setSelectedPost(null);
+                handleSelectPost(null);
               }
             }} 
           />
@@ -816,7 +830,7 @@ const BlogPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mb-12 cursor-pointer"
-                onClick={() => setSelectedPost(featuredPost)}
+                onClick={() => handleSelectPost(featuredPost)}
               >
                 <div className="relative rounded-3xl overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10 pointer-events-none" />
@@ -857,7 +871,7 @@ const BlogPage = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                     className="group bg-card rounded-2xl overflow-hidden border border-border hover:shadow-xl transition-all hover:-translate-y-1 cursor-pointer"
-                    onClick={() => setSelectedPost(post)}
+                    onClick={() => handleSelectPost(post)}
                   >
                     <div className="relative overflow-hidden h-48">
                       <LazyImage
