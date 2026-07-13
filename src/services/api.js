@@ -352,3 +352,22 @@ export const saveSetting = async (key, value, admin_token) => {
     return { success: false, error: error.message };
   }
 };
+
+export const adminLogin = async (password) => {
+  try {
+    const response = await fetch(`${API_URL}/api/admin/login`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ password })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      token: data.token || null,
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Admin login error:", error);
+    return { success: false, error: error.message };
+  }
+};

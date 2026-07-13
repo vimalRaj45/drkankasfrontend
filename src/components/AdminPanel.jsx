@@ -62,13 +62,54 @@ import {
 import { Label } from "@/components/ui/label";
 
 // Existing API services
-import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting } from '../services/api';
+import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminLogin } from '../services/api';
+import { useNavigate } from "react-router-dom";
 
 const AdminPanel = () => {
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdmin, setShowAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  useEffect(() => {
+    const auth = localStorage.getItem("admin_authenticated");
+    if (auth === "true") {
+      setShowAdmin(true);
+    }
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoginError("");
+    setIsLoggingIn(true);
+    try {
+      const res = await adminLogin(password);
+      if (res.success) {
+        setShowAdmin(true);
+        localStorage.setItem("admin_authenticated", "true");
+        toast.success("Welcome back, Dr. Kanak!");
+      } else {
+        setLoginError(res.message || "Invalid credentials. Access Denied.");
+        toast.error("Incorrect password!");
+      }
+    } catch (err) {
+      setLoginError("Failed to verify credentials.");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setShowAdmin(false);
+    localStorage.removeItem("admin_authenticated");
+    toast.success("Logged out successfully.");
+    navigate("/");
+  };
 
   // Push Broadcast State
   const [isPushDialogOpen, setIsPushDialogOpen] = useState(false);
@@ -365,13 +406,59 @@ const AdminPanel = () => {
 
   if (!showAdmin) {
     return (
-      <Button
-        onClick={() => setShowAdmin(true)}
-        className="fixed bottom-10 right-10 z-[100] h-14 w-14 rounded-full shadow-2xl bg-slate-900 border-2 border-white/10 p-0 overflow-hidden group hover:w-48 hover:rounded-2xl transition-all duration-300"
-      >
-        <Lock className="w-5 h-5 text-white group-hover:mr-2" />
-        <span className="hidden group-hover:inline text-xs font-bold uppercase tracking-widest text-white">Clinical Admin Panel</span>
-      </Button>
+      <div className="fixed inset-0 z-[1500] bg-slate-950 flex items-center justify-center p-4 overflow-y-auto">
+        {/* Background Gradients */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-md bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-10 shadow-2xl relative"
+        >
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20 mb-6">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <img src={Logo} alt="Clinic Logo" className="h-12 object-contain mb-4" />
+            <h2 className="font-display font-extrabold text-2xl text-white tracking-tight mb-2">Clinical Portal</h2>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Access Restricted to Authorized Staff</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pl-1">Admin Password</Label>
+              <Input
+                type="password"
+                placeholder="Enter password..."
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-12 rounded-2xl border-white/10 bg-slate-950/50 text-white focus:ring-primary placeholder:text-slate-650 font-medium"
+                required
+              />
+              {loginError && (
+                <p className="text-red-400 text-xs font-semibold pl-1 pt-1">{loginError}</p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full h-12 rounded-2xl bg-primary text-white font-bold shadow-lg shadow-primary/20 hover:bg-primary/95 transition-all flex items-center justify-center gap-2 mt-8"
+            >
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Verifying...
+                </>
+              ) : (
+                "Authenticate & Login"
+              )}
+            </Button>
+          </form>
+        </motion.div>
+      </div>
     );
   }
 
@@ -401,7 +488,7 @@ const AdminPanel = () => {
             variant="outline"
             size="icon"
             className="rounded-full bg-white/5 border-white/10 hover:bg-foreground hover:text-background h-14 w-14 transition-all"
-            onClick={() => setShowAdmin(false)}
+            onClick={handleLogout}
           >
             <X className="w-6 h-6" />
           </Button>
