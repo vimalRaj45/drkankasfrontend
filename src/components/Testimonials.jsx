@@ -30,6 +30,7 @@ import 'primereact/resources/primereact.min.css';
 
 const Testimonials = () => {
   const primeToast = useRef(null);
+  const isDarkMode = false;
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackRating, setFeedbackRating] = useState(null);
   const [feedbackText, setFeedbackText] = useState("");
