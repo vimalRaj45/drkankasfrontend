@@ -28,7 +28,8 @@ import {
   Columns,
   LayoutGrid,
   List,
-  Star
+  Star,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -174,11 +175,13 @@ const AdminPanel = () => {
   };
 
   const handleLogout = () => {
-    setShowAdmin(false);
     localStorage.removeItem("admin_authenticated");
+    setShowAdmin(false);
     toast.success("Logged out successfully.");
     navigate("/");
   };
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Push Broadcast State
   const [isPushDialogOpen, setIsPushDialogOpen] = useState(false);
@@ -362,7 +365,6 @@ const AdminPanel = () => {
   };
 
   const handleDeleteBannerClick = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this announcement banner?")) return;
     try {
       const res = await deleteNotification(id);
       if (res.success) {
@@ -639,11 +641,11 @@ const AdminPanel = () => {
 
           <Button
             variant="outline"
-            size="icon"
-            className="rounded-full bg-slate-50 border-slate-200 hover:bg-blue-50 hover:text-blue-600 h-12 w-12 transition-all relative z-10 self-end sm:self-auto"
-            onClick={handleLogout}
+            className="rounded-2xl bg-red-50/80 border-red-200/60 text-red-600 hover:bg-red-600 hover:text-white font-extrabold h-11 px-5 gap-2 transition-all shadow-sm relative z-10 self-end sm:self-auto"
+            onClick={() => setShowLogoutConfirm(true)}
           >
-            <X className="w-5 h-5 text-slate-600" />
+            <LogOut className="w-4 h-4" />
+            Logout
           </Button>
 
           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-100/40 rounded-full blur-[80px] -z-0 translate-x-1/2 -translate-y-1/2" />
@@ -1153,14 +1155,12 @@ const AdminPanel = () => {
                         <Button
                           variant="ghost"
                           onClick={async () => {
-                            if (confirm("Are you sure you want to delete this review?")) {
-                              const res = await deleteAdminFeedback(fb.id);
-                              if (res.success) {
-                                toast.success("Review deleted successfully!");
-                                fetchFeedbacks();
-                              } else {
-                                toast.error("Failed to delete review.");
-                              }
+                            const res = await deleteAdminFeedback(fb.id);
+                            if (res.success) {
+                              toast.success("Review deleted successfully!");
+                              fetchFeedbacks();
+                            } else {
+                              toast.error("Failed to delete review.");
                             }
                           }}
                           className="h-8 w-8 p-0 rounded-xl hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors"
@@ -1572,6 +1572,39 @@ const AdminPanel = () => {
             >
               {savingHours && <Loader2 className="w-4 h-4 animate-spin" />}
               Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <DialogContent className="rounded-[2.5rem] p-6 sm:p-10 w-[95vw] sm:w-full max-w-md border-none shadow-2xl bg-card">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-extrabold text-foreground mb-2 flex items-center gap-2">
+              <LogOut className="w-6 h-6 text-red-500" />
+              Confirm Admin Logout?
+            </DialogTitle>
+            <DialogDescription className="text-slate-500 font-medium leading-relaxed">
+              Are you sure you want to log out of your administrative session? You will need to authenticate again to access clinical records.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6 gap-3 flex flex-col sm:flex-row">
+            <Button
+              variant="outline"
+              className="rounded-full h-12 flex-1 font-bold border-slate-200"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="rounded-full h-12 flex-1 font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20"
+              onClick={() => {
+                setShowLogoutConfirm(false);
+                handleLogout();
+              }}
+            >
+              Confirm Logout
             </Button>
           </DialogFooter>
         </DialogContent>
