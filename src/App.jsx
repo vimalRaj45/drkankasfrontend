@@ -96,6 +96,15 @@ function App() {
   useEffect(() => {
     const handleInitialAsk = () => {
       if (!("Notification" in window) || !('serviceWorker' in navigator)) return;
+
+      const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
+      const userId = savedUser?.id;
+      // Only allow notifications for logged-in users
+      if (!userId || userId.startsWith('GUEST_')) {
+        console.log("Push System: User not logged in. Suppressing notification prompt.");
+        return;
+      }
+
       if (Notification.permission === "granted") {
         subscribeAndSync(); 
         return;
@@ -105,11 +114,12 @@ function App() {
       }
     };
 
-    // Listen for the custom event triggered after booking
+    // Listen for the custom event triggered after booking or login
     window.addEventListener('triggerPushPrompt', handleInitialAsk);
     
-    // If they already granted permission in the past, silently sync to verify things are OK
-    if ("Notification" in window && Notification.permission === "granted") {
+    // If they already granted permission in the past and are logged in, silently sync
+    const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
+    if (savedUser?.id && !savedUser.id.startsWith('GUEST_') && "Notification" in window && Notification.permission === "granted") {
       subscribeAndSync();
     }
 

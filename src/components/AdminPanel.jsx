@@ -73,6 +73,49 @@ const AdminPanel = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const todayStr = React.useMemo(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }, []);
+
+  const [analyticsTab, setAnalyticsTab] = useState("overall");
+
+  const overallStats = React.useMemo(() => {
+    if (!appointments || appointments.length === 0) {
+      return { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
+    }
+    return {
+      total: appointments.length,
+      pending: appointments.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length,
+      confirmed: appointments.filter(a => (a.status || '').toUpperCase() === 'CONFIRMED').length,
+      completed: appointments.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length,
+      cancelled: appointments.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+    };
+  }, [appointments]);
+
+  const todayStats = React.useMemo(() => {
+    if (!appointments || appointments.length === 0) {
+      return { total: 0, pending: 0, confirmed: 0, completed: 0, cancelled: 0 };
+    }
+    const todayApts = appointments.filter(apt => {
+      if (!apt.appointment_date && !apt.date) return false;
+      const rawDate = apt.appointment_date || apt.date;
+      const aptDateStr = new Date(rawDate).toISOString().split('T')[0];
+      return aptDateStr === todayStr;
+    });
+
+    return {
+      total: todayApts.length,
+      pending: todayApts.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length,
+      confirmed: todayApts.filter(a => (a.status || '').toUpperCase() === 'CONFIRMED').length,
+      completed: todayApts.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length,
+      cancelled: todayApts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
+    };
+  }, [appointments, todayStr]);
+
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [loginStep, setLoginStep] = useState(1); // 1: phone input, 2: OTP input
@@ -606,6 +649,156 @@ const AdminPanel = () => {
           <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-100/40 rounded-full blur-[80px] -z-0 translate-x-1/2 -translate-y-1/2" />
         </div>
 
+        {/* Clinical Analytics Overview Banner */}
+        <div className="bg-[#f8fafc] border-b border-blue-100 p-4 sm:p-6 px-4 sm:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-600/20">
+                <Calendar className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 leading-none">
+                  {analyticsTab === "overall" ? "Overall Clinical Analytics" : "Today's Queue Analytics"}
+                </h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                  {analyticsTab === "overall" ? "All-Time Patient Database Overview" : `Live Queue Summary · ${todayStr}`}
+                </p>
+              </div>
+            </div>
+
+            {/* Tab Mode Switcher & Quick Filter */}
+            <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-blue-100 shadow-sm">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => { setAnalyticsTab("overall"); setFilterDate(""); }}
+                className={cn(
+                  "rounded-xl px-4 h-9 text-xs font-black transition-all",
+                  analyticsTab === "overall"
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                    : "text-slate-600 hover:bg-blue-50"
+                )}
+              >
+                Overall ({overallStats.total})
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => { setAnalyticsTab("today"); setFilterDate(todayStr); }}
+                className={cn(
+                  "rounded-xl px-4 h-9 text-xs font-black transition-all",
+                  analyticsTab === "today"
+                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                    : "text-slate-600 hover:bg-blue-50"
+                )}
+              >
+                Today ({todayStats.total})
+              </Button>
+            </div>
+          </div>
+
+          {/* Metric Cards Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+            {/* Total Card */}
+            <div 
+              onClick={() => {
+                if (analyticsTab === "today") {
+                  setFilterDate(todayStr); setFilterStatus("All");
+                } else {
+                  setFilterDate(""); setFilterStatus("All");
+                }
+              }}
+              className="bg-white p-3.5 sm:p-4 rounded-2xl border border-blue-100 shadow-sm cursor-pointer hover:border-blue-300 transition-all group"
+            >
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                {analyticsTab === "overall" ? "Overall Total" : "Today's Total"}
+              </p>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                  {analyticsTab === "overall" ? overallStats.total : todayStats.total}
+                </span>
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                  {analyticsTab === "overall" && todayStats.total > 0 ? `+${todayStats.total} today` : "Bookings"}
+                </span>
+              </div>
+            </div>
+
+            {/* Pending Card */}
+            <div 
+              onClick={() => {
+                if (analyticsTab === "today") {
+                  setFilterDate(todayStr); setFilterStatus("PENDING");
+                } else {
+                  setFilterDate(""); setFilterStatus("PENDING");
+                }
+              }}
+              className="bg-white p-3.5 sm:p-4 rounded-2xl border border-amber-100 shadow-sm cursor-pointer hover:border-amber-300 transition-all group"
+            >
+              <p className="text-[10px] font-black uppercase text-amber-500 tracking-wider">
+                {analyticsTab === "overall" ? "Overall Pending" : "Today Pending"}
+              </p>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-amber-600">
+                  {analyticsTab === "overall" ? overallStats.pending : todayStats.pending}
+                </span>
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                  Queue
+                </span>
+              </div>
+            </div>
+
+            {/* Confirmed Card */}
+            <div 
+              onClick={() => {
+                if (analyticsTab === "today") {
+                  setFilterDate(todayStr); setFilterStatus("CONFIRMED");
+                } else {
+                  setFilterDate(""); setFilterStatus("CONFIRMED");
+                }
+              }}
+              className="bg-white p-3.5 sm:p-4 rounded-2xl border border-blue-100 shadow-sm cursor-pointer hover:border-blue-300 transition-all group"
+            >
+              <p className="text-[10px] font-black uppercase text-blue-500 tracking-wider">
+                {analyticsTab === "overall" ? "Overall Confirmed" : "Today Confirmed"}
+              </p>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-blue-600">
+                  {analyticsTab === "overall" ? overallStats.confirmed : todayStats.confirmed}
+                </span>
+                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                  Active
+                </span>
+              </div>
+            </div>
+
+            {/* Completed Card */}
+            <div 
+              onClick={() => {
+                if (analyticsTab === "today") {
+                  setFilterDate(todayStr); setFilterStatus("COMPLETED");
+                } else {
+                  setFilterDate(""); setFilterStatus("COMPLETED");
+                }
+              }}
+              className="bg-white p-3.5 sm:p-4 rounded-2xl border border-emerald-100 shadow-sm cursor-pointer hover:border-emerald-300 transition-all group"
+            >
+              <p className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">
+                {analyticsTab === "overall" ? "Overall Completed" : "Today Completed"}
+              </p>
+              <div className="flex items-baseline justify-between mt-1">
+                <span className="text-2xl sm:text-3xl font-black text-emerald-600">
+                  {analyticsTab === "overall" ? overallStats.completed : todayStats.completed}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Visited
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Filters & Actions Bar */}
         <div className="p-4 sm:p-8 border-b border-blue-50 flex flex-col gap-6 bg-white">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -723,12 +916,23 @@ const AdminPanel = () => {
               </select>
 
               {/* Date Input */}
-              <Input
-                type="date"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-                className="h-10 rounded-xl border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background w-full sm:w-auto sm:max-w-[160px]"
-              />
+              <div className="flex items-center gap-1.5 w-full sm:w-auto">
+                <Input
+                  type="date"
+                  value={filterDate}
+                  onChange={(e) => setFilterDate(e.target.value)}
+                  className="h-10 rounded-xl border-border bg-muted/30 px-3 text-xs font-bold text-foreground focus:bg-background w-full sm:w-auto sm:max-w-[160px]"
+                />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={filterDate === todayStr ? "default" : "outline"}
+                  onClick={() => setFilterDate(filterDate === todayStr ? "" : todayStr)}
+                  className="h-10 rounded-xl text-xs font-extrabold px-3 shrink-0"
+                >
+                  Today
+                </Button>
+              </div>
 
               {/* Reset Filters button */}
               {(filterService !== "All" || filterStatus !== "All" || filterDate) && (

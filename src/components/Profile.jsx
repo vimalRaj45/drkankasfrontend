@@ -105,6 +105,47 @@ const Profile = () => {
   const [announcements, setAnnouncements] = useState([]);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
+  // Compute Last Clinical Visit
+  const lastVisit = React.useMemo(() => {
+    if (!appointments || appointments.length === 0) return null;
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    // Check for COMPLETED visits first
+    const completed = appointments.filter(a => (a.status || '').toUpperCase() === 'COMPLETED');
+    if (completed.length > 0) {
+      return [...completed].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
+    }
+    
+    // Otherwise check for past visits (date < today)
+    const past = appointments.filter(a => a.date && a.date < todayStr);
+    if (past.length > 0) {
+      return [...past].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
+    }
+    
+    // Otherwise return the most recent appointment
+    return [...appointments].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))[0];
+  }, [appointments]);
+
+  const lastVisitTiming = React.useMemo(() => {
+    if (!lastVisit || !lastVisit.date) return "";
+    try {
+      const visitDate = new Date(lastVisit.date);
+      const today = new Date();
+      visitDate.setHours(0,0,0,0);
+      today.setHours(0,0,0,0);
+      const diffTime = today - visitDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      if (diffDays > 1) return `${diffDays} days ago`;
+      if (diffDays < 0) return `Scheduled in ${Math.abs(diffDays)} days`;
+    } catch (e) {
+      return "";
+    }
+    return "";
+  }, [lastVisit]);
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
@@ -303,6 +344,7 @@ const Profile = () => {
         localStorage.setItem('clinic_user', JSON.stringify(res.user));
         setUser(res.user);
         syncAppointments(res.user.phone);
+        window.dispatchEvent(new Event('triggerPushPrompt'));
         toast.success("Welcome back! Your clinical profile has been loaded.");
       } else {
         toast.error("No profile found with this number. Please book an appointment to register!");
@@ -457,6 +499,71 @@ const Profile = () => {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Last Clinical Visit Card */}
+            {lastVisit && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.05 }}
+                className="w-full"
+              >
+                <Card className="border border-primary/20 shadow-xl rounded-[2.5rem] bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <History className="w-24 h-24 text-primary" />
+                  </div>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-black tracking-widest text-[9px] uppercase px-3 py-1 rounded-full">
+                        Last Clinical Visit
+                      </Badge>
+                      {lastVisitTiming && (
+                        <span className="text-[10px] font-bold text-muted-foreground font-mono">
+                          {lastVisitTiming}
+                        </span>
+                      )}
+                    </div>
+                    <CardTitle className="text-xl font-extrabold text-foreground mt-3 flex items-center gap-2">
+                      <Stethoscope className="w-5 h-5 text-primary shrink-0" />
+                      {lastVisit.service}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 px-6 pb-6 pt-2">
+                    <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 dark:text-slate-200">
+                      <CalendarCheck className="w-4 h-4 text-primary" />
+                      {formatApptDateTime(lastVisit.date, lastVisit.time)}
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-2 border-t border-border/60">
+                      <div className="flex items-center gap-2">
+                        <Badge className={cn(
+                          "text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border-none",
+                          lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
+                          lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                        )}>
+                          {lastVisit.status || "COMPLETED"}
+                        </Badge>
+                        {lastVisit.token && (
+                          <span className="text-[10px] font-mono font-bold text-muted-foreground">
+                            Token #{lastVisit.token}
+                          </span>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handlePrintToken(lastVisit)}
+                        className="h-8 px-2 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl flex items-center gap-1"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        Slip
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
             {/* Live Announcements Feed */}
             {announcements.length > 0 && (
