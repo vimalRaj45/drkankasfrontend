@@ -146,6 +146,47 @@ const Profile = () => {
     return "";
   }, [lastVisit]);
 
+  // Compute Current Active / Upcoming Booking
+  const currentBooking = React.useMemo(() => {
+    if (!appointments || appointments.length === 0) return null;
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    // Active bookings: status is PENDING or CONFIRMED, or appointment date >= today and not completed/cancelled
+    const active = appointments.filter(a => {
+      const statusUpper = (a.status || '').toUpperCase();
+      if (statusUpper === 'COMPLETED' || statusUpper === 'CANCELLED') return false;
+      const isPendingOrConfirmed = statusUpper === 'PENDING' || statusUpper === 'CONFIRMED';
+      const isFutureOrToday = a.date && a.date >= todayStr;
+      return isPendingOrConfirmed || isFutureOrToday;
+    });
+
+    if (active.length > 0) {
+      // Sort to get the nearest upcoming appointment
+      return [...active].sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))[0];
+    }
+    return null;
+  }, [appointments]);
+
+  const currentBookingTiming = React.useMemo(() => {
+    if (!currentBooking || !currentBooking.date) return "";
+    try {
+      const bookingDate = new Date(currentBooking.date);
+      const today = new Date();
+      bookingDate.setHours(0,0,0,0);
+      today.setHours(0,0,0,0);
+      const diffTime = bookingDate - today;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0) return "Today's Appointment";
+      if (diffDays === 1) return "Tomorrow";
+      if (diffDays > 1) return `In ${diffDays} days`;
+      if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+    } catch (e) {
+      return "";
+    }
+    return "";
+  }, [currentBooking]);
+
   useEffect(() => {
     const fetchAnnouncements = async () => {
       try {
@@ -450,72 +491,148 @@ const Profile = () => {
           </motion.div>
         </div>
 
-        {/* Featured Top Last Visit Banner */}
-        {lastVisit && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-10"
-          >
-            <Card className="border-2 border-primary/30 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
-              {/* Cinematic Background Glow */}
-              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
+        {/* Top Section Banners: Current Booking & Last Visit */}
+        {(currentBooking || lastVisit) && (
+          <div className="mb-10 space-y-6">
+            {/* Current Active Booking Banner */}
+            {currentBooking && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <Card className="border-2 border-emerald-500/40 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
 
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-                <div className="space-y-3 max-w-2xl">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Badge className="bg-primary text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-primary/30">
-                      ⚡ Most Recent Visit
-                    </Badge>
-                    {lastVisitTiming && (
-                      <span className="text-xs font-bold text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-                        {lastVisitTiming}
-                      </span>
-                    )}
-                    <Badge className={cn(
-                      "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
-                      lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
-                      lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
-                    )}>
-                      {lastVisit.status || "COMPLETED"}
-                    </Badge>
-                  </div>
-
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                    <Stethoscope className="w-7 h-7 text-primary shrink-0" />
-                    {lastVisit.service}
-                  </h3>
-
-                  <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
-                    <div className="flex items-center gap-2">
-                      <CalendarCheck className="w-4 h-4 text-primary" />
-                      {formatApptDateTime(lastVisit.date, lastVisit.time)}
-                    </div>
-                    {lastVisit.token && (
-                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
-                        Token #{lastVisit.token}
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div className="space-y-3 max-w-2xl">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <Badge className="bg-emerald-500 text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                          Current Active Booking
+                        </Badge>
+                        {currentBookingTiming && (
+                          <span className="text-xs font-bold text-emerald-200 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                            {currentBookingTiming}
+                          </span>
+                        )}
+                        <Badge className={cn(
+                          "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
+                          currentBooking.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                        )}>
+                          {currentBooking.status || "PENDING"}
+                        </Badge>
                       </div>
-                    )}
-                    <div className="text-xs text-slate-400 font-mono">
-                      ID: {lastVisit.id?.slice(-8)}
+
+                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                        <Stethoscope className="w-7 h-7 text-emerald-400 shrink-0" />
+                        {currentBooking.service}
+                      </h3>
+
+                      <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
+                        <div className="flex items-center gap-2">
+                          <CalendarCheck className="w-4 h-4 text-emerald-400" />
+                          {formatApptDateTime(currentBooking.date, currentBooking.time)}
+                        </div>
+                        {currentBooking.token && (
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-300 bg-emerald-500/20 px-3 py-1 rounded-lg border border-emerald-500/30">
+                            Token #{currentBooking.token}
+                          </div>
+                        )}
+                        <div className="text-xs text-slate-400 font-mono">
+                          ID: {currentBooking.id?.slice(-8)}
+                        </div>
+                      </div>
+
+                      {/* Queue Status if Confirmed */}
+                      {currentBooking.status === 'CONFIRMED' && (
+                        <div className="pt-2">
+                          <QueueProgress date={currentBooking.date} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
+                      <Button
+                        onClick={() => handlePrintToken(currentBooking)}
+                        className="h-12 px-6 rounded-2xl font-extrabold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-2"
+                      >
+                        <Printer className="w-4 h-4" />
+                        Print Booking Slip
+                      </Button>
                     </div>
                   </div>
-                </div>
+                </Card>
+              </motion.div>
+            )}
 
-                <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
-                  <Button
-                    onClick={() => handlePrintToken(lastVisit)}
-                    className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center gap-2"
-                  >
-                    <Printer className="w-4 h-4" />
-                    Download Visit Token Slip
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
+            {/* Last Clinical Visit Banner */}
+            {lastVisit && (lastVisit.id !== currentBooking?.id) && (
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+              >
+                <Card className="border-2 border-primary/30 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
+                  <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
+
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div className="space-y-3 max-w-2xl">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <Badge className="bg-primary text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-primary/30">
+                          ⚡ Last Clinical Visit
+                        </Badge>
+                        {lastVisitTiming && (
+                          <span className="text-xs font-bold text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                            {lastVisitTiming}
+                          </span>
+                        )}
+                        <Badge className={cn(
+                          "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
+                          lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
+                          lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                        )}>
+                          {lastVisit.status || "COMPLETED"}
+                        </Badge>
+                      </div>
+
+                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                        <Stethoscope className="w-7 h-7 text-primary shrink-0" />
+                        {lastVisit.service}
+                      </h3>
+
+                      <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
+                        <div className="flex items-center gap-2">
+                          <CalendarCheck className="w-4 h-4 text-primary" />
+                          {formatApptDateTime(lastVisit.date, lastVisit.time)}
+                        </div>
+                        {lastVisit.token && (
+                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
+                            Token #{lastVisit.token}
+                          </div>
+                        )}
+                        <div className="text-xs text-slate-400 font-mono">
+                          ID: {lastVisit.id?.slice(-8)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
+                      <Button
+                        onClick={() => handlePrintToken(lastVisit)}
+                        className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center gap-2"
+                      >
+                        <Printer className="w-4 h-4" />
+                        Download Visit Token Slip
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
+          </div>
         )}
 
         <div className="grid lg:grid-cols-4 gap-8">

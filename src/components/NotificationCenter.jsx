@@ -148,6 +148,33 @@ const NotificationCenter = () => {
   const [bannerQueue, setBannerQueue] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const [isAuthorized, setIsAuthorized] = useState(() => {
+    const savedUser = JSON.parse(localStorage.getItem('clinic_user') || 'null');
+    if (savedUser && savedUser.id && !savedUser.id.startsWith('GUEST_')) return true;
+    const savedAppointments = JSON.parse(localStorage.getItem('clinic_appointments') || '[]');
+    return savedAppointments && savedAppointments.length > 0;
+  });
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const savedUser = JSON.parse(localStorage.getItem('clinic_user') || 'null');
+      if (savedUser && savedUser.id && !savedUser.id.startsWith('GUEST_')) {
+        setIsAuthorized(true);
+        return;
+      }
+      const savedAppointments = JSON.parse(localStorage.getItem('clinic_appointments') || '[]');
+      setIsAuthorized(savedAppointments && savedAppointments.length > 0);
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    window.addEventListener('triggerPushPrompt', checkAuth);
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('triggerPushPrompt', checkAuth);
+    };
+  }, []);
+
   const fetchNotifications = async () => {
     try {
       const res = await getNotifications();
@@ -170,12 +197,13 @@ const NotificationCenter = () => {
   };
 
   useEffect(() => {
+    if (!isAuthorized) return;
     fetchNotifications();
 
     // Poll for new notifications every 60 seconds
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isAuthorized]);
 
   const handleDismissCurrentBanner = () => {
     if (bannerQueue.length === 0) return;
@@ -194,6 +222,10 @@ const NotificationCenter = () => {
   };
 
   const currentBanner = bannerQueue[0];
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <>

@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import LoadingScreen from "./components/LoadingScreen";
 import AdminPanel from "./components/AdminPanel";
 import FloatingActions from "./components/FloatingActions";
+import AmbientBackground from "./components/AmbientBackground";
 
 // Pages
 import Landing from "./pages/Landing";
@@ -180,7 +181,8 @@ function App() {
   const isAdminPath = pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary">
+    <div className="min-h-screen bg-background font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary relative z-0">
+      <AmbientBackground />
       <LoadingScreen />
       {!isAdminPath && <Navbar />}
       {!isAdminPath && <FloatingActions />}

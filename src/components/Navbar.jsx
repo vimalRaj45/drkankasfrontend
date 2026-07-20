@@ -221,17 +221,27 @@ const Navbar = () => {
 
               {/* Bottom Compact CTA */}
               <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border mt-auto">
-                <Button 
-                  variant="outline" 
-                  className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
-                  onClick={() => {
-                    window.dispatchEvent(new Event('triggerPushPrompt'));
-                    setIsMenuOpen(false);
-                  }}
-                >
-                  <Bell className="w-3.5 h-3.5 text-primary animate-pulse" />
-                  <span className="notranslate">{lang === 'ta' ? "அறிவிப்புகளை அனுமதி" : "Allow Notifications"}</span>
-                </Button>
+                {(() => {
+                  const savedUser = JSON.parse(localStorage.getItem('clinic_user') || 'null');
+                  const savedAppointments = JSON.parse(localStorage.getItem('clinic_appointments') || '[]');
+                  const isNotificationAllowed = (savedUser && savedUser.id && !savedUser.id.startsWith('GUEST_')) || (savedAppointments && savedAppointments.length > 0);
+                  
+                  if (!isNotificationAllowed) return null;
+
+                  return (
+                    <Button 
+                      variant="outline" 
+                      className="w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
+                      onClick={() => {
+                        window.dispatchEvent(new Event('triggerPushPrompt'));
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      <Bell className="w-3.5 h-3.5 text-primary animate-pulse" />
+                      <span className="notranslate">{lang === 'ta' ? "அறிவிப்புகளை அனுமதி" : "Allow Notifications"}</span>
+                    </Button>
+                  );
+                })()}
                 <Button 
                   variant="outline" 
                   className="notranslate w-full rounded-xl mb-3 h-9 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 border-slate-200"
