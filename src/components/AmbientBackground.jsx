@@ -26,8 +26,8 @@ const AmbientBackground = () => {
       "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
     );
 
-    // Green Hearts configuration (35 beating green hearts 💚)
-    const heartCount = 35;
+    // Green Hearts configuration (32 floating green hearts 💚)
+    const heartCount = 32;
     const hearts = [];
 
     const greenColors = [
@@ -41,12 +41,12 @@ const AmbientBackground = () => {
       hearts.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        size: Math.random() * 10 + 11,            // Size between 11px and 21px
-        speedY: Math.random() * 0.4 + 0.4,        // Pleasant downward drift speed (0.4 to 0.8 px/s)
-        swaySpeed: Math.random() * 0.012 + 0.005, // Smooth sway speed
-        beatSpeed: Math.random() * 0.04 + 0.03,   // Lively heartbeat pulse speed
-        swayAmount: Math.random() * 1.2 + 0.4,    // Sway amplitude
-        opacity: Math.random() * 0.14 + 0.14,     // Balanced, clear opacity (0.14 to 0.28)
+        size: Math.random() * 10 + 12,            // Size between 12px and 22px
+        speedY: Math.random() * 0.35 + 0.2,       // Gentle downward drift speed
+        swaySpeed: Math.random() * 0.01 + 0.004,  // Sway speed
+        beatSpeed: Math.random() * 0.04 + 0.02,   // Heartbeat pulse speed
+        swayAmount: Math.random() * 1.0 + 0.4,    // Sway amplitude
+        opacity: Math.random() * 0.08 + 0.04,     // Subtle opacity (0.04 to 0.12) for light theme
         colorTemplate: greenColors[Math.floor(Math.random() * greenColors.length)],
         phase: Math.random() * Math.PI * 2,
         beatPhase: Math.random() * Math.PI * 2,
@@ -59,7 +59,7 @@ const AmbientBackground = () => {
       ctx.translate(x, y);
       const scale = (size / 24) * pulseScale;
       ctx.scale(scale, scale);
-      ctx.translate(-12, -12); // Center scale origin for heartbeat effect
+      ctx.translate(-12, -12); // Center scale origin
 
       const fillColor = colorTemplate.replace('opacity', opacity.toFixed(2));
       ctx.fillStyle = fillColor;
@@ -72,22 +72,22 @@ const AmbientBackground = () => {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Animate and draw Beating Green Hearts smoothly over top of the page
+      // Animate and draw Beating Green Hearts smoothly
       hearts.forEach((heart) => {
         // Fall down smoothly
         heart.y += heart.speedY;
 
         // Sway gently side to side
         heart.phase += heart.swaySpeed;
-        const currentX = heart.x + Math.sin(heart.phase) * heart.swayAmount * 10;
+        const currentX = heart.x + Math.sin(heart.phase) * heart.swayAmount * 8;
 
         // Heartbeat pulse animation
         heart.beatPhase += heart.beatSpeed;
-        const pulseScale = 1 + Math.sin(heart.beatPhase * 3) * 0.15;
+        const pulseScale = 1 + Math.sin(heart.beatPhase * 3) * 0.12;
 
         // Reset to top when falling past bottom
-        if (heart.y > height + 30) {
-          heart.y = -30;
+        if (heart.y > height + 25) {
+          heart.y = -25;
           heart.x = Math.random() * width;
         }
 
@@ -108,7 +108,7 @@ const AmbientBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[9999] w-full h-full opacity-85"
+      className="fixed inset-0 pointer-events-none z-[99] w-full h-full opacity-100"
     />
   );
 };

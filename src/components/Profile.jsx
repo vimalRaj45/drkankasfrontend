@@ -379,32 +379,56 @@ const Profile = () => {
 
   const syncAppointments = async (phone) => {
     if (!phone) return;
-    const result = await getUserAppointments(phone);
-    if (result.success && result.data) {
-      // Logic to detect status changes for toast notifications
-      const oldApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+    try {
+      const result = await getUserAppointments(phone);
+      const localApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+      
+      let combined = [];
+      if (result && result.success && Array.isArray(result.data)) {
+        combined = [...result.data];
+      }
+      
+      // Merge local appointments
+      localApts.forEach(loc => {
+        if (!combined.some(c => c.id === loc.id || (c.date === loc.date && c.service === loc.service))) {
+          combined.push(loc);
+        }
+      });
 
-      result.data.forEach(newApt => {
+      // Detect status changes for toast notifications
+      const oldApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+      combined.forEach(newApt => {
         const matchingOldApt = oldApts.find(old => old.id === newApt.id);
         if (matchingOldApt && matchingOldApt.status !== newApt.status) {
-          // Status changed!
           toast.success(`Visit Update: Your appointment for ${newApt.service} is now ${newApt.status}! 🏥`, {
             icon: "🔔"
           });
         }
       });
 
-      // Update local storage representation and local state
-      localStorage.setItem('clinic_appointments', JSON.stringify(result.data));
-      setAppointments(result.data);
+      if (combined.length > 0) {
+        localStorage.setItem('clinic_appointments', JSON.stringify(combined));
+        setAppointments(combined);
+      }
+    } catch (err) {
+      console.error("Failed to sync appointments", err);
+      const cached = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+      if (cached.length > 0) {
+        setAppointments(cached);
+      }
     }
   };
 
-  // Sync from backend every 10 seconds
+  // Sync from backend every 10 seconds & load cached appointments instantly
   useEffect(() => {
     const savedUser = JSON.parse(localStorage.getItem('clinic_user'));
     if (savedUser) {
       setUser(savedUser);
+      // Immediately load cached appointments so there is NO initial blank state
+      const cachedApts = JSON.parse(localStorage.getItem('clinic_appointments')) || [];
+      if (cachedApts.length > 0) {
+        setAppointments(cachedApts);
+      }
       // Initial fetch
       syncAppointments(savedUser.phone);
 
@@ -451,633 +475,596 @@ const Profile = () => {
     }
   };
 
+  // ─── Login / Guest Gate ─────────────────────────────────────────────────────
   if (!user) {
     return (
-      <section className="py-20 sm:py-32 bg-slate-50/30 flex items-center justify-center min-h-[70vh]">
-        <div className="container mx-auto px-4 max-w-md">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Card className="border border-border/50 shadow-2xl rounded-[2.5rem] overflow-hidden bg-card">
-              <CardHeader className="text-center pb-4 pt-8">
-                <div className="mx-auto w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                  <User className="w-7 h-7 text-primary" />
-                </div>
-                <CardTitle className="text-2xl font-black tracking-tight">Access Your Profile</CardTitle>
-                <CardDescription className="text-muted-foreground font-medium pt-1 px-2">
-                  Enter your registered mobile number to check booking history, vitals, and treatment history.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="px-6 sm:px-8 pb-8">
-                <form onSubmit={handlePhoneLogin} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-2">Mobile Number</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="phone"
-                        type="tel"
-                        maxLength={10}
-                        placeholder="98765 43210"
-                        className="pl-12 h-12 rounded-xl border-slate-200 focus:ring-primary shadow-sm"
-                        value={loginPhone}
-                        onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
-                      />
-                    </div>
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full h-12 rounded-full font-bold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
-                    disabled={checking}
-                  >
-                    {checking ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
-                    Verify & Access
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
+      <section className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center px-4 py-16">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl" />
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-sm relative z-10"
+        >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/25 mb-4">
+              <Stethoscope className="w-8 h-8 text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Patient Portal</h1>
+            <p className="text-slate-500 text-sm mt-1 font-semibold">Dr. Kanak's Clinic</p>
+          </div>
+
+          {/* Card */}
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl shadow-blue-900/5">
+            <h2 className="text-lg font-extrabold text-slate-900 mb-1">Access Your Records</h2>
+            <p className="text-slate-500 text-sm mb-6">Enter your registered mobile number</p>
+
+            <form onSubmit={handlePhoneLogin} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Mobile Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    maxLength={10}
+                    placeholder="98765 43210"
+                    className="pl-11 h-13 text-base bg-slate-50/50 border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-2xl focus:border-blue-500 focus:ring-blue-500/20 w-full"
+                    style={{ fontSize: '16px' }}
+                    value={loginPhone}
+                    onChange={(e) => setLoginPhone(e.target.value.replace(/\D/g, ''))}
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-13 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all"
+                style={{ height: '52px' }}
+                disabled={checking}
+              >
+                {checking ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                Verify & Access
+              </Button>
+            </form>
+
+            <p className="text-center text-xs text-slate-500 mt-4 font-medium">
+              No account? <Link to="/book" className="text-blue-600 font-bold hover:underline">Book an appointment</Link>
+            </p>
+          </div>
+        </motion.div>
       </section>
     );
   }
 
+  // ─── Status colour helpers ────────────────────────────────────────────────
+  const statusColor = (s) => {
+    const st = (s || "").toUpperCase();
+    if (st === "CONFIRMED") return { bg: "bg-blue-50 text-blue-600 border-blue-100", dot: "bg-blue-500" };
+    if (st === "COMPLETED") return { bg: "bg-emerald-50 text-emerald-600 border-emerald-100", dot: "bg-emerald-500" };
+    if (st === "CANCELLED") return { bg: "bg-red-50 text-red-600 border-red-100", dot: "bg-red-500" };
+    return { bg: "bg-amber-50 text-amber-600 border-amber-100", dot: "bg-amber-500" };
+  };
+
+  // ─── Main Profile Page ────────────────────────────────────────────────────
   return (
-    <section id="profile" className="py-24 bg-background overflow-hidden relative scroll-mt-20 transition-colors duration-500">
-      <div className="container mx-auto px-4 relative z-10">
+    <div id="profile" className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 scroll-mt-20">
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-          <div className="max-w-2xl">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-3 py-1 bg-secondary/10 rounded-full mb-4"
-            >
-              <TrendingUp className="w-4 h-4 text-secondary" />
-              <span className="text-[10px] font-bold text-secondary uppercase tracking-widest leading-none">Global Patient Hub</span>
-            </motion.div>
+      {/* ── Hero Header Banner ─────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-blue-50 border-b border-slate-100 pt-24 pb-6 px-4">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
 
-            <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="text-4xl md:text-5xl font-extrabold text-foreground mb-6 leading-tight"
-            >
-              Welcome Back, <br />
-              <span className="text-secondary italic">{user.name}</span>
-            </motion.h2>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-          >
-            <Button variant="outline" className="rounded-full shadow-lg border-2 border-red-100 text-red-500 font-bold hover:bg-red-50 hover:text-red-600 h-auto py-4 px-8" onClick={handleLogout}>
-              Secure Logout
-              <LogOut className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </motion.div>
-        </div>
-
-        {/* Top Section Banners: Current Booking & Last Visit */}
-        {(currentBooking || lastVisit) && (
-          <div className="mb-10 space-y-6">
-            {/* Current Active Booking Banner */}
-            {currentBooking && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <Card className="border-2 border-emerald-500/40 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
-                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
-
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-                    <div className="space-y-3 max-w-2xl">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Badge className="bg-emerald-500 text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-emerald-500/30 flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-                          Current Active Booking
-                        </Badge>
-                        {currentBookingTiming && (
-                          <span className="text-xs font-bold text-emerald-200 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-                            {currentBookingTiming}
-                          </span>
-                        )}
-                        <Badge className={cn(
-                          "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
-                          currentBooking.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
-                        )}>
-                          {currentBooking.status || "PENDING"}
-                        </Badge>
-                      </div>
-
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                        <Stethoscope className="w-7 h-7 text-emerald-400 shrink-0" />
-                        {currentBooking.service}
-                      </h3>
-
-                      <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
-                        <div className="flex items-center gap-2">
-                          <CalendarCheck className="w-4 h-4 text-emerald-400" />
-                          {formatApptDateTime(currentBooking.date, currentBooking.time)}
-                        </div>
-                        {currentBooking.token && (
-                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-emerald-300 bg-emerald-500/20 px-3 py-1 rounded-lg border border-emerald-500/30">
-                            Token #{currentBooking.token}
-                          </div>
-                        )}
-                        <div className="text-xs text-slate-400 font-mono">
-                          ID: {currentBooking.id?.slice(-8)}
-                        </div>
-                      </div>
-
-                      {/* Queue Status if Confirmed */}
-                      {currentBooking.status === 'CONFIRMED' && (
-                        <div className="pt-2">
-                          <QueueProgress date={currentBooking.date} />
-                        </div>
-                      )}
-
-                      {/* Doctor Suggestion & Clinical Guidance Notes */}
-                      {(currentBooking.suggestion || currentBooking.reason || currentBooking.notes) && (
-                        <div className="mt-3 p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md space-y-2">
-                          {currentBooking.suggestion && (
-                            <div className="flex items-start gap-2.5 text-xs text-emerald-200">
-                              <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                              <div>
-                                <span className="font-extrabold text-white uppercase tracking-wider text-[10px] block mb-0.5">Doctor Suggestion:</span>
-                                <p className="font-medium leading-relaxed text-slate-200">{currentBooking.suggestion}</p>
-                              </div>
-                            </div>
-                          )}
-                          {(currentBooking.reason || currentBooking.notes) && (
-                            <div className="flex items-start gap-2.5 text-xs text-slate-300">
-                              <FileText className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
-                              <div>
-                                <span className="font-extrabold text-white uppercase tracking-wider text-[10px] block mb-0.5">Clinical Reason / Visit Guidance Notes (Public):</span>
-                                <p className="font-medium leading-relaxed text-slate-200">{currentBooking.reason || currentBooking.notes}</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3 self-stretch sm:self-start lg:self-center shrink-0 w-full sm:w-auto">
-                      <Button
-                        onClick={() => handlePrintToken(currentBooking)}
-                        className="h-12 px-6 rounded-2xl font-extrabold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm"
-                      >
-                        <Printer className="w-4 h-4" />
-                        Print Booking Slip
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-
-            {/* Last Clinical Visit Banner (only shown if no active booking) */}
-            {lastVisit && !currentBooking && (lastVisit.id !== currentBooking?.id) && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-              >
-                <Card className="border-2 border-primary/30 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
-                  <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
-
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-                    <div className="space-y-3 max-w-2xl">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Badge className="bg-primary text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-primary/30">
-                          ⚡ Last Clinical Visit
-                        </Badge>
-                        {lastVisitTiming && (
-                          <span className="text-xs font-bold text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
-                            {lastVisitTiming}
-                          </span>
-                        )}
-                        <Badge className={cn(
-                          "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
-                          lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
-                          lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
-                        )}>
-                          {lastVisit.status || "COMPLETED"}
-                        </Badge>
-                      </div>
-
-                      <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-                        <Stethoscope className="w-7 h-7 text-primary shrink-0" />
-                        {lastVisit.service}
-                      </h3>
-
-                      <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
-                        <div className="flex items-center gap-2">
-                          <CalendarCheck className="w-4 h-4 text-primary" />
-                          {formatApptDateTime(lastVisit.date, lastVisit.time)}
-                        </div>
-                        {lastVisit.token && (
-                          <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
-                            Token #{lastVisit.token}
-                          </div>
-                        )}
-                        <div className="text-xs text-slate-400 font-mono">
-                          ID: {lastVisit.id?.slice(-8)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 self-stretch sm:self-start lg:self-center shrink-0 w-full sm:w-auto">
-                      <Button
-                        onClick={() => handlePrintToken(lastVisit)}
-                        className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm"
-                      >
-                        <Printer className="w-4 h-4" />
-                        Download Visit Token Slip
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-        )}
-
-        <div className="grid lg:grid-cols-4 gap-8">
-          {/* Left Column: User Info & Live Announcements */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="w-full"
-            >
-              <Card className="border border-border shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-[3rem] overflow-hidden bg-card h-full relative group">
-                <CardHeader className="bg-slate-900 dark:bg-slate-950 text-white p-6 sm:p-10 pb-16 rounded-b-[3rem] sm:rounded-b-[4rem]">
-                  <div className="w-20 h-20 bg-white/10 p-1 rounded-[2rem] mb-6 relative group-hover:scale-105 transition-transform">
-                    <div className="w-full h-full bg-white dark:bg-slate-100 rounded-full flex items-center justify-center p-3">
-                      <User className="w-full h-full text-slate-900 fill-slate-900/10" />
-                    </div>
-                    <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-slate-900 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
-                    </div>
-                  </div>
-                  <CardTitle className="text-2xl font-extrabold text-white leading-tight uppercase tracking-widest">{user.name}</CardTitle>
-                  <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-xs flex items-center gap-2 mt-1">
-                    <ShieldCheck className="w-3 h-3 text-secondary" />
-                    Verified Global Identity
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 sm:p-10 -mt-10 bg-card rounded-t-[2.5rem] sm:rounded-t-[3rem] relative z-20 space-y-6">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Phone Identity</Label>
-                    <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
-                      <Phone className="w-5 h-5 text-secondary" />
-                      {user.phone}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-2">Unique Patient ID</Label>
-                    <div className="bg-muted/50 p-4 rounded-2xl flex items-center gap-4 border border-border font-mono text-foreground font-bold transition-colors">
-                      <FileText className="w-5 h-5 text-primary" />
-                      PID-{user.id?.slice(-8) || "8821004"}
-                    </div>
-                  </div>
-                  <div className="pt-6">
-                    <Button variant="link" className="p-0 text-secondary font-extrabold h-auto flex items-center gap-2 hover:translate-x-1 transition-transform decoration-none">
-                      Update Clinical Profile
-                      <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-
-
-            {/* Live Announcements Feed */}
-            {announcements.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="w-full"
-              >
-                <Card className="border border-border shadow-xl rounded-[2.5rem] bg-card overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-black tracking-tight flex items-center gap-2 text-foreground">
-                      <Sparkles className="w-5 h-5 text-primary" /> Clinic Updates
-                    </CardTitle>
-                    <CardDescription className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Latest Announcements</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4 px-6 pb-6">
-                    {announcements.map((item) => (
-                      <div 
-                        key={item.id}
-                        onClick={() => setSelectedAnnouncement(item)}
-                        className="p-3 bg-muted/40 hover:bg-muted/80 rounded-2xl border border-border cursor-pointer transition-all group flex items-start gap-3"
-                      >
-                        {item.image_url && (
-                          <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-border">
-                            <img src={item.image_url} alt="" className="w-full h-full object-cover" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors truncate">{item.title}</h4>
-                          <p className="text-[10px] text-slate-500 font-medium line-clamp-2 mt-0.5 leading-relaxed">{item.body}</p>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    <Button variant="link" className="p-0 text-xs font-bold text-primary flex items-center gap-1.5 h-auto decoration-none" asChild>
-                      <Link to="/notifications">
-                        All Announcements <ArrowRight className="w-3.5 h-3.5" />
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-
-          {/* Appointment History Column */}
-          <div className="lg:col-span-3">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary p-3 rounded-2xl shadow-xl shadow-primary/20">
-                    <History className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-extrabold text-foreground tracking-tighter">Medical Visit Logs</h3>
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personal Clinical Records</p>
-                  </div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Top row: avatar + name + logout */}
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="relative shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                  <User className="w-6 h-6 text-blue-600" />
                 </div>
-                <Badge variant="outline" className="rounded-full bg-white self-start sm:self-auto text-slate-500 font-bold py-1 px-4 border-slate-200 uppercase tracking-widest text-[9px]">
-                  {filteredAppointments.length} of {appointments.length} Logs
-                </Badge>
+                <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+                </span>
               </div>
-
-              {/* Search & Status Filter Bar */}
-              <div className="bg-card border border-border p-3 sm:p-4 rounded-3xl mb-6 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4 overflow-hidden">
-                <div className="relative flex-1 w-full">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="Search by treatment, date, status, or token..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-10 rounded-2xl border-slate-200 text-xs font-semibold focus:ring-primary shadow-xs w-full"
-                  />
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full sm:w-auto shrink-0">
-                  {["All", "Upcoming", "Confirmed", "Completed", "Pending"].map((filter) => (
-                    <Button
-                      key={filter}
-                      size="sm"
-                      variant={statusFilter === filter ? "default" : "outline"}
-                      onClick={() => setStatusFilter(filter)}
-                      className={cn(
-                        "rounded-xl h-9 text-[11px] font-extrabold px-3 transition-all shrink-0",
-                        statusFilter === filter
-                          ? "bg-primary text-white shadow-md shadow-primary/20 border-none"
-                          : "border-slate-200 text-slate-600 hover:bg-slate-100"
-                      )}
-                    >
-                      {filter}
-                    </Button>
-                  ))}
-                </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Patient Portal</p>
+                <h1 className="text-lg font-black text-slate-900 tracking-tight truncate leading-tight">{user.name}</h1>
               </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-bold active:scale-95 transition-all shrink-0"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              Logout
+            </button>
+          </div>
 
-              {filteredAppointments.length > 0 ? (
-                <div className="space-y-4">
-                  {filteredAppointments.map((apt, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.1, duration: 0.5 }}
-                      whileHover={{ scale: 1.01 }}
-                    >
-                      <Card className="border border-border shadow-xl shadow-slate-200/50 dark:shadow-none rounded-[2rem] overflow-hidden bg-card p-6 relative group transition-all hover:shadow-primary/10">
-                        <div className="grid md:grid-cols-4 gap-6 items-center">
-                          {/* Service Icon */}
-                          <div className="md:col-span-1 flex items-center gap-4">
-                            <div className="bg-primary/5 p-4 rounded-2xl group-hover:bg-primary transition-colors">
-                              <Stethoscope className="w-6 h-6 text-primary group-hover:text-white" />
-                            </div>
-                            <div className="md:hidden">
-                              <h4 className="font-extrabold text-slate-900 dark:text-foreground leading-none mb-1">{apt.service}</h4>
-                              <div className="flex gap-2 items-center flex-wrap">
-                                <Badge variant="outline" className="text-[10px] uppercase font-bold text-secondary border-secondary/20 font-mono tracking-widest">
-                                  ID: {apt.id.slice(-8)}
-                                </Badge>
-                                {apt.token && (
-                                  <Badge className="text-[10px] uppercase font-black bg-primary text-white border-none tracking-widest px-3">
-                                    TOKEN: {apt.token}
-                                  </Badge>
-                                )}
-                              </div>
-                              {apt.status === 'CONFIRMED' && (
-                                <div className="mt-2">
-                                  <QueueProgress date={apt.date} />
-                                </div>
-                              )}
-                            </div>
-                          </div>
+          {/* Quick info pills row */}
+          <div className="flex flex-wrap gap-2 mb-5">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-100 text-xs font-bold text-slate-600 shadow-xs">
+              <Phone className="w-3 h-3 text-blue-500" />
+              {user.phone}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-100 text-xs font-bold text-slate-600 shadow-xs">
+              <ShieldCheck className="w-3 h-3 text-blue-500" />
+              PID-{user.id?.slice(-8) || "8821004"}
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-600">
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+              Verified
+            </div>
+          </div>
 
-                          {/* Service Detail */}
-                          <div className="hidden md:block md:col-span-1">
-                            <h4 className="font-extrabold text-slate-900 dark:text-foreground leading-none mb-2">{apt.service}</h4>
-                            <div className="flex flex-col gap-1">
-                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest font-mono">ID: {apt.id.slice(-8)}</p>
-                              {apt.token && (
-                                <div className="bg-primary/10 text-primary w-fit px-2 py-0.5 rounded text-[10px] font-black tracking-widest">
-                                  #{apt.token}
-                                </div>
-                              )}
-                              {/* --- LIVE QUEUE STATUS --- */}
-                              {apt.status === 'CONFIRMED' && (
-                                <QueueProgress date={apt.date} />
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="md:col-span-1 flex items-center gap-8 md:justify-center">
-                            <div className="flex flex-col">
-                              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100">
-                                <CalendarCheck className="w-4 h-4 text-primary" />
-                                {formatApptDateTime(apt.date, apt.time)}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="md:col-span-1 flex flex-col items-center justify-between md:items-end gap-3 border-t md:border-t-0 pt-4 md:pt-0">
-                            <div className="flex items-center justify-between w-full md:w-auto md:justify-end gap-4 pt-4 md:pt-0">
-                              <Badge className={cn(
-                                "rounded-xl py-2 px-6 font-extrabold uppercase tracking-widest text-[9px] shadow-sm",
-                                apt.status === "PENDING" ? "bg-amber-100 text-amber-600 hover:bg-amber-100 border border-amber-200" :
-                                  apt.status === "CANCELLED" ? "bg-red-100 text-red-600 hover:bg-red-100 border border-red-200" :
-                                    "bg-green-100 text-green-600 hover:bg-green-100 border border-green-200"
-                              )}>
-                                {apt.status}
-                              </Badge>
-                              <Button 
-                                onClick={() => handlePrintToken(apt)}
-                                variant="ghost" 
-                                size="icon" 
-                                className="rounded-xl h-12 w-12 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-primary/5 text-slate-400 hover:text-primary transition-all"
-                                title="Download PDF Token"
-                              >
-                                <Download className="w-5 h-5" />
-                              </Button>
-                            </div>
-
-                            {/* Patient Concerns & Clinical Guidance */}
-                            <div className="flex flex-col gap-3 w-full md:max-w-[250px]">
-                              {/* Original Booking Message */}
-                              {apt.message && apt.message !== "No message" && (
-                                <div className="text-[9px] bg-muted/50 p-2 rounded-lg border border-border italic text-muted-foreground text-center md:text-right">
-                                  <span className="opacity-50 uppercase tracking-tighter not-italic font-bold block mb-1">Your Concerns:</span>
-                                  "{apt.message}"
-                                </div>
-                              )}
-
-                              {/* Clinical Response / Instructions */}
-                              {apt.status !== 'PENDING' && (
-                                <div className={cn(
-                                  "text-[10px] font-bold p-3 rounded-xl border shadow-sm text-center md:text-right transition-all",
-                                  apt.status === 'CANCELLED' ? "text-red-600 bg-red-50 dark:bg-red-950/30 border-red-100" : "text-primary bg-primary/5 dark:bg-primary/10 border-primary/10"
-                                )}>
-                                  <p className="mb-1 uppercase tracking-tighter opacity-70">
-                                    {apt.status === 'CONFIRMED' 
-                                      ? "Visit Guidance:" 
-                                      : apt.status === 'CANCELLED' 
-                                      ? "Clinical Reason:" 
-                                      : apt.status === 'COMPLETED'
-                                      ? "Clinical Notes & Advice:"
-                                      : "Clinical Notes:"}
-                                  </p>
-                                  {apt.cancel_reason || (
-                                    apt.status === 'CONFIRMED'
-                                      ? "Your clinical session has been officially confirmed. Please arrive 10 mins prior."
-                                      : apt.status === 'CANCELLED'
-                                      ? "This session has been cancelled by the clinical board."
-                                      : "No specific guidance notes provided for this session."
-                                  )}
-                                  {apt.suggestion && (
-                                    <div className="mt-2 pt-2 border-t border-current/10 font-extrabold uppercase tracking-tighter">
-                                      RE-PLAN: {apt.suggestion}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-card p-10 sm:p-20 rounded-[2.5rem] sm:rounded-[3.5rem] shadow-2xl shadow-slate-200/50 dark:shadow-none border border-dashed border-border flex flex-col items-center justify-center text-center">
-                  <div className="bg-muted/50 p-6 sm:p-8 rounded-full mb-8">
-                    <CalendarCheck className="w-8 h-8 sm:w-12 sm:h-12 text-slate-300" />
-                  </div>
-                  <h4 className="text-xl sm:text-2xl font-extrabold text-foreground mb-2">No Visit Logs Found</h4>
-                  <p className="text-muted-foreground font-medium max-w-xs mb-8 text-sm sm:text-base">
-                    It seems you haven't booked any clinical sessions yet. Secure your first priority slot today!
-                  </p>
-                  <Button size="lg" className="rounded-full px-10 h-14 bg-slate-900 hover:bg-primary transition-all font-bold shadow-xl shadow-slate-900/20" asChild>
-                    <Link to="/book">Register New Session</Link>
-                  </Button>
-                </div>
-              )}
-            </motion.div>
+          {/* Quick stats row */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "Total Visits", value: appointments.length, icon: History, color: "text-blue-500" },
+              { label: "Upcoming", value: appointments.filter(a => { const s = (a.status || "").toUpperCase(); return (s === "PENDING" || s === "CONFIRMED") && a.date >= new Date().toISOString().split("T")[0]; }).length, icon: CalendarCheck, color: "text-emerald-500" },
+              { label: "Completed", value: appointments.filter(a => (a.status || "").toUpperCase() === "COMPLETED").length, icon: CheckCircle2, color: "text-indigo-500" },
+            ].map(({ label, value, icon: Icon, color }) => (
+              <div key={label} className="bg-white border border-slate-100/80 rounded-2xl p-3 text-center shadow-xs">
+                <Icon className={`w-4 h-4 ${color} mx-auto mb-1`} />
+                <div className="text-xl font-black text-slate-900 leading-none">{value}</div>
+                <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">{label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-secondary/5 rounded-full blur-[120px] -z-0" />
+      {/* ── Page Content ────────────────────────────────────────────────────── */}
+      <div className="max-w-5xl mx-auto px-4 pt-5 pb-24 space-y-5">
 
-      {/* Lightbox / Announcement Details Modal */}
-      <Dialog open={!!selectedAnnouncement} onOpenChange={(open) => !open && setSelectedAnnouncement(null)}>
-        <DialogContent className="rounded-[2.5rem] p-6 sm:p-10 max-w-2xl border-none shadow-2xl overflow-hidden">
-          {selectedAnnouncement && (
-            <div className="space-y-6 pt-4 text-left">
-              {selectedAnnouncement.image_url && (
-                <div className="w-full h-64 sm:h-80 bg-slate-100 dark:bg-slate-900 rounded-3xl overflow-hidden border border-border">
-                  <img
-                    src={selectedAnnouncement.image_url}
-                    alt={selectedAnnouncement.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
+        {/* ── Active Booking Banner ───────────────────────────────────────── */}
+        {currentBooking && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/30 to-white border border-blue-200/60 p-4 shadow-xl shadow-blue-100/20">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
 
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-3 text-muted-foreground text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5 text-primary">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Announcement
+              <div className="relative z-10">
+                {/* badges row */}
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-blue-600/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                    Active Booking
+                  </span>
+                  {currentBookingTiming && (
+                    <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200/60 text-slate-600 text-[10px] font-bold font-mono">
+                      {currentBookingTiming}
+                    </span>
+                  )}
+                  <span className={cn(
+                    "px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border",
+                    statusColor(currentBooking.status).bg
+                  )}>
+                    {currentBooking.status || "PENDING"}
                   </span>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                  {selectedAnnouncement.title}
+                {/* service name */}
+                <h2 className="text-xl font-black text-slate-950 tracking-tight mb-2 flex items-center gap-2">
+                  <Stethoscope className="w-5 h-5 text-blue-600 shrink-0" />
+                  {currentBooking.service}
                 </h2>
 
-                <p className="text-sm text-slate-600 dark:text-slate-400 font-medium leading-relaxed whitespace-pre-wrap">
-                  {selectedAnnouncement.body}
-                </p>
+                {/* date + token */}
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <CalendarCheck className="w-4 h-4 text-blue-500 shrink-0" />
+                    {formatApptDateTime(currentBooking.date, currentBooking.time)}
+                  </div>
+                  {currentBooking.token && (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 text-xs font-black break-all">
+                      <span className="text-blue-500">Token #</span>{currentBooking.token}
+                    </div>
+                  )}
+                  <p className="text-[10px] font-mono text-slate-500">ID: {currentBooking.id?.slice(-8)}</p>
+                </div>
+
+                {/* Queue Progress */}
+                {currentBooking.status === 'CONFIRMED' && <QueueProgress date={currentBooking.date} />}
+
+                {/* Doctor Guidance */}
+                {(currentBooking.suggestion || currentBooking.reason || currentBooking.notes) && (
+                  <div className="mt-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                    {currentBooking.suggestion && (
+                      <div className="flex items-start gap-2 text-xs">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-black text-slate-900 uppercase tracking-wider text-[9px] block">Doctor Suggestion</span>
+                          <p className="text-slate-600 mt-0.5 font-medium leading-relaxed">{currentBooking.suggestion}</p>
+                        </div>
+                      </div>
+                    )}
+                    {(currentBooking.reason || currentBooking.notes) && (
+                      <div className="flex items-start gap-2 text-xs">
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
+                        <div>
+                          <span className="font-black text-slate-900 uppercase tracking-wider text-[9px] block">Visit Guidance</span>
+                          <p className="text-slate-600 mt-0.5 font-medium leading-relaxed">{currentBooking.reason || currentBooking.notes}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* CTA Button */}
+                <Button
+                  onClick={() => handlePrintToken(currentBooking)}
+                  className="mt-4 w-full h-12 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all"
+                >
+                  <Printer className="w-4 h-4" />
+                  Download Booking Slip
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Last Visit Banner (only when no active booking) ─────────────── */}
+        {lastVisit && !currentBooking && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 }}>
+            <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-100 p-4 shadow-xl shadow-slate-100/50">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-black uppercase tracking-wider">
+                      ⚡ Last Visit
+                    </span>
+                    {lastVisitTiming && (
+                      <span className="px-2.5 py-1 rounded-full bg-slate-55 text-slate-500 text-[10px] font-bold font-mono">
+                        {lastVisitTiming}
+                      </span>
+                    )}
+                    <span className={cn("px-2.5 py-1 rounded-full text-[10px] font-black uppercase border", statusColor(lastVisit.status).bg)}>
+                      {lastVisit.status || "COMPLETED"}
+                    </span>
+                  </div>
+                  <h2 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <Stethoscope className="w-4 h-4 text-blue-500 shrink-0" />
+                    {lastVisit.service}
+                  </h2>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 mt-1">
+                    <CalendarCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                    {formatApptDateTime(lastVisit.date, lastVisit.time)}
+                  </div>
+                  {lastVisit.token && (
+                    <div className="mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 text-xs font-black break-all">
+                      Token #{lastVisit.token}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button
+                onClick={() => handlePrintToken(lastVisit)}
+                className="w-full h-11 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all shadow-lg shadow-blue-500/10"
+              >
+                <Download className="w-4 h-4" />
+                Download Visit Slip
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Announcements Feed ──────────────────────────────────────────── */}
+        {announcements.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
+            <div className="rounded-3xl bg-white border border-slate-100 overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-4 px-4 pt-4 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-500" />
+                  <h3 className="text-sm font-black text-slate-950 tracking-tight">Clinic Updates</h3>
+                </div>
+                <Link to="/notifications" className="text-blue-600 text-xs font-bold flex items-center gap-1 hover:underline">
+                  All <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="p-3 space-y-2">
+                {announcements.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setSelectedAnnouncement(item)}
+                    className="w-full flex items-start gap-3 p-3 rounded-2xl bg-slate-50/50 hover:bg-slate-50 active:scale-[0.99] transition-all text-left border border-slate-100"
+                  >
+                    {item.image_url && (
+                      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-slate-100">
+                        <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-slate-800 truncate leading-snug">{item.title}</h4>
+                      <p className="text-[10px] text-slate-500 font-medium line-clamp-2 mt-0.5 leading-relaxed">{item.body}</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Medical Visit Logs ──────────────────────────────────────────── */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
+
+          {/* Section Header */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-blue-50 border border-blue-100">
+                <History className="w-4 h-4 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-slate-900 tracking-tight">Visit Logs</h3>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Clinical Records</p>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-white border border-slate-100 text-[10px] font-black text-slate-500 uppercase tracking-widest shadow-xs">
+              {filteredAppointments.length}/{appointments.length}
+            </span>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative mb-3">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Search treatment, date, token…"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-11 h-12 text-base bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 rounded-2xl focus:border-blue-500/50 w-full"
+              style={{ fontSize: '16px' }}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Filter Pills - horizontal scroll */}
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-none -mx-4 px-4">
+            {["All", "Upcoming", "Confirmed", "Completed", "Pending"].map((f) => (
+              <button
+                key={f}
+                onClick={() => setStatusFilter(f)}
+                className={cn(
+                  "shrink-0 px-4 py-2 rounded-full text-xs font-extrabold border transition-all active:scale-95",
+                  statusFilter === f
+                    ? "bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20"
+                    : "bg-white border-slate-100 text-slate-500 hover:bg-slate-50 shadow-xs"
+                )}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          {/* Visit Log Cards (Mobile) / Table (Desktop) */}
+          {filteredAppointments.length > 0 ? (
+            <>
+              {/* ─ Mobile Cards (shown up to md) ─ */}
+              <div className="md:hidden space-y-3">
+                {filteredAppointments.map((apt, i) => {
+                  const sc = statusColor(apt.status);
+                  return (
+                    <motion.div
+                      key={apt.id || i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: i * 0.04 }}
+                      className="rounded-3xl bg-white border border-slate-100 overflow-hidden shadow-md shadow-slate-100/50"
+                    >
+                      {/* Card Header */}
+                      <div className="flex items-start justify-between gap-3 p-4 pb-3">
+                        <div className="flex items-start gap-3 min-w-0 flex-1">
+                          <div className="p-2 rounded-xl bg-blue-50 border border-blue-100 shrink-0 mt-0.5">
+                            <Stethoscope className="w-4 h-4 text-blue-500" />
+                          </div>
+                          <div className="min-w-0">
+                            <h4 className="font-extrabold text-slate-800 text-sm leading-tight truncate">{apt.service}</h4>
+                            <p className="text-[10px] font-mono text-slate-400 mt-0.5">ID: {apt.id?.slice(-8)}</p>
+                          </div>
+                        </div>
+                        <span className={cn("px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border shrink-0", sc.bg)}>
+                          {apt.status || "PENDING"}
+                        </span>
+                      </div>
+
+                      {/* Divider */}
+                      <div className="h-px bg-slate-50 mx-4" />
+
+                      {/* Card Details */}
+                      <div className="p-4 pt-3 space-y-2.5">
+                        {/* Date & Time */}
+                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                          <CalendarCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          {formatApptDateTime(apt.date, apt.time)}
+                        </div>
+
+                        {/* Token — full width, no truncation */}
+                        {apt.token && (
+                          <div className="inline-flex items-start gap-1.5 px-3 py-2 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 text-xs font-black break-all w-full">
+                            <span className="shrink-0 text-blue-400">Token</span>
+                            <span className="break-all">#{apt.token}</span>
+                          </div>
+                        )}
+
+                        {/* Queue Progress */}
+                        {apt.status === 'CONFIRMED' && <QueueProgress date={apt.date} />}
+
+                        {/* Clinical Note */}
+                        {(apt.suggestion || apt.reason || apt.notes) && (
+                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-500 break-words">
+                            <span className="block text-[9px] uppercase tracking-wider font-black text-slate-400 mb-1">Clinical Note</span>
+                            {apt.suggestion || apt.reason || apt.notes}
+                          </div>
+                        )}
+
+                        {/* Print Button */}
+                        <Button
+                          onClick={() => handlePrintToken(apt)}
+                          className="w-full h-11 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white flex items-center justify-center gap-2 text-xs active:scale-[0.98] transition-all shadow-lg shadow-blue-500/10"
+                        >
+                          <Printer className="w-4 h-4" />
+                          Print Priority Slip
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
 
-              {selectedAnnouncement.url && (
-                <div className="pt-2 flex justify-end">
-                  <Button
-                    className="rounded-full font-bold shadow-md shadow-primary/10 gap-1.5 uppercase text-xs tracking-wider h-12 px-6"
-                    asChild
-                  >
-                    <a href={selectedAnnouncement.url} target="_blank" rel="noopener noreferrer">
-                      Explore Offer <ArrowRight className="w-4 h-4" />
-                    </a>
-                  </Button>
+              {/* ─ Desktop Table (shown at md+) ─ */}
+              <div className="hidden md:block rounded-3xl bg-white border border-slate-100 overflow-hidden shadow-md shadow-slate-100/50">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-450 bg-slate-50/50">
+                      <th className="py-4 px-5">Treatment</th>
+                      <th className="py-4 px-5">Date & Time</th>
+                      <th className="py-4 px-5">Token</th>
+                      <th className="py-4 px-5">Status</th>
+                      <th className="py-4 px-5 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredAppointments.map((apt, i) => {
+                      const sc = statusColor(apt.status);
+                      return (
+                        <tr key={apt.id || i} className="group hover:bg-slate-50/50 transition-colors">
+                          <td className="py-4 px-5">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-xl bg-blue-50 border border-blue-100 shrink-0 group-hover:bg-blue-100 transition-colors">
+                                <Stethoscope className="w-4 h-4 text-blue-500" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-extrabold text-slate-800">{apt.service}</div>
+                                {(apt.suggestion || apt.reason || apt.notes) && (
+                                  <div className="text-[10px] text-slate-500 truncate max-w-[220px] mt-0.5">
+                                    {apt.suggestion || apt.reason || apt.notes}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-5">
+                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-600 whitespace-nowrap">
+                              <CalendarCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                              {formatApptDateTime(apt.date, apt.time)}
+                            </div>
+                            {apt.status === 'CONFIRMED' && <div className="mt-1"><QueueProgress date={apt.date} /></div>}
+                          </td>
+                          <td className="py-4 px-5">
+                            {apt.token ? (
+                              <span className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-black border border-blue-100 max-w-[140px] truncate inline-block" title={`Token #${apt.token}`}>
+                                #{apt.token}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-mono text-slate-400">Regular</span>
+                            )}
+                            <p className="text-[10px] font-mono text-slate-400 mt-0.5">ID: {apt.id?.slice(-8)}</p>
+                          </td>
+                          <td className="py-4 px-5">
+                            <span className={cn("px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border", sc.bg)}>
+                              {apt.status || "PENDING"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-5 text-right">
+                            <Button
+                              onClick={() => handlePrintToken(apt)}
+                              size="sm"
+                              className="h-9 px-4 rounded-xl font-bold text-xs bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-100 hover:border-blue-600 transition-all flex items-center gap-1.5 ml-auto"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              Slip
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            /* Empty State */
+            <div className="rounded-3xl bg-white border border-slate-100 border-dashed p-10 flex flex-col items-center justify-center text-center shadow-xs">
+              <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
+                {appointments.length > 0 ? (
+                  <Filter className="w-6 h-6 text-blue-500" />
+                ) : (
+                  <CalendarCheck className="w-6 h-6 text-slate-400" />
+                )}
+              </div>
+              <h4 className="text-base font-black text-slate-800 mb-1">
+                {appointments.length > 0 ? "No Matching Logs" : "No Sessions Yet"}
+              </h4>
+              <p className="text-sm text-slate-500 font-medium mb-6 max-w-xs">
+                {appointments.length > 0
+                  ? `No logs match "${statusFilter}"${searchTerm ? ` and "${searchTerm}"` : ""}.`
+                  : "You haven't booked any clinical sessions yet. Get started today!"}
+              </p>
+              {appointments.length > 0 ? (
+                <Button
+                  onClick={() => { setSearchTerm(""); setStatusFilter("All"); }}
+                  className="rounded-full px-6 h-11 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 font-bold text-white flex items-center gap-2 text-sm active:scale-95 transition-all"
+                >
+                  <Filter className="w-4 h-4" />
+                  Reset Filters
+                </Button>
+              ) : (
+                <Button className="rounded-full px-6 h-11 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 font-bold text-white text-sm" asChild>
+                  <Link to="/book">Book Your First Session</Link>
+                </Button>
+              )}
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* ── Announcement Detail Modal ────────────────────────────────────── */}
+      <Dialog open={!!selectedAnnouncement} onOpenChange={(open) => !open && setSelectedAnnouncement(null)}>
+        <DialogContent className="rounded-2xl sm:rounded-3xl p-0 max-w-lg border border-slate-100 shadow-2xl overflow-hidden bg-white">
+          {selectedAnnouncement && (
+            <div className="text-left">
+              {selectedAnnouncement.image_url && (
+                <div className="w-full h-48 sm:h-60 overflow-hidden">
+                  <img src={selectedAnnouncement.image_url} alt={selectedAnnouncement.title} className="w-full h-full object-cover" />
                 </div>
               )}
+              <div className="p-5 sm:p-7 space-y-3">
+                <span className="inline-flex items-center gap-1 text-blue-600 text-[10px] font-black uppercase tracking-wider">
+                  <Sparkles className="w-3 h-3" /> Announcement
+                </span>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight leading-tight">{selectedAnnouncement.title}</h2>
+                <p className="text-sm text-slate-500 font-medium leading-relaxed whitespace-pre-wrap">{selectedAnnouncement.body}</p>
+                {selectedAnnouncement.url && (
+                  <a
+                    href={selectedAnnouncement.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm transition-all"
+                  >
+                    Explore <ArrowRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
-    </section>
+    </div>
   );
 };
 
+
 export default Profile;
+
+
