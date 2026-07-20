@@ -450,6 +450,74 @@ const Profile = () => {
           </motion.div>
         </div>
 
+        {/* Featured Top Last Visit Banner */}
+        {lastVisit && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-10"
+          >
+            <Card className="border-2 border-primary/30 shadow-2xl rounded-[2.5rem] bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 text-white overflow-hidden relative group p-6 sm:p-8">
+              {/* Cinematic Background Glow */}
+              <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl pointer-events-none translate-y-1/2 -translate-x-1/2" />
+
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-3 max-w-2xl">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Badge className="bg-primary text-white border-none font-black tracking-widest text-[10px] uppercase px-3 py-1 rounded-full shadow-lg shadow-primary/30">
+                      ⚡ Most Recent Visit
+                    </Badge>
+                    {lastVisitTiming && (
+                      <span className="text-xs font-bold text-slate-300 font-mono bg-white/10 px-3 py-1 rounded-full backdrop-blur-md">
+                        {lastVisitTiming}
+                      </span>
+                    )}
+                    <Badge className={cn(
+                      "text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full border-none",
+                      lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
+                      lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
+                    )}>
+                      {lastVisit.status || "COMPLETED"}
+                    </Badge>
+                  </div>
+
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
+                    <Stethoscope className="w-7 h-7 text-primary shrink-0" />
+                    {lastVisit.service}
+                  </h3>
+
+                  <div className="flex items-center gap-6 text-sm font-semibold text-slate-300 flex-wrap pt-1">
+                    <div className="flex items-center gap-2">
+                      <CalendarCheck className="w-4 h-4 text-primary" />
+                      {formatApptDateTime(lastVisit.date, lastVisit.time)}
+                    </div>
+                    {lastVisit.token && (
+                      <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg border border-primary/20">
+                        Token #{lastVisit.token}
+                      </div>
+                    )}
+                    <div className="text-xs text-slate-400 font-mono">
+                      ID: {lastVisit.id?.slice(-8)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
+                  <Button
+                    onClick={() => handlePrintToken(lastVisit)}
+                    className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center gap-2"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Download Visit Token Slip
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Left Column: User Info & Live Announcements */}
           <div className="lg:col-span-1 flex flex-col gap-6">
@@ -500,70 +568,7 @@ const Profile = () => {
               </Card>
             </motion.div>
 
-            {/* Last Clinical Visit Card */}
-            {lastVisit && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.05 }}
-                className="w-full"
-              >
-                <Card className="border border-primary/20 shadow-xl rounded-[2.5rem] bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden relative group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-                    <History className="w-24 h-24 text-primary" />
-                  </div>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-black tracking-widest text-[9px] uppercase px-3 py-1 rounded-full">
-                        Last Clinical Visit
-                      </Badge>
-                      {lastVisitTiming && (
-                        <span className="text-[10px] font-bold text-muted-foreground font-mono">
-                          {lastVisitTiming}
-                        </span>
-                      )}
-                    </div>
-                    <CardTitle className="text-xl font-extrabold text-foreground mt-3 flex items-center gap-2">
-                      <Stethoscope className="w-5 h-5 text-primary shrink-0" />
-                      {lastVisit.service}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 px-6 pb-6 pt-2">
-                    <div className="flex items-center gap-2 text-xs font-extrabold text-slate-700 dark:text-slate-200">
-                      <CalendarCheck className="w-4 h-4 text-primary" />
-                      {formatApptDateTime(lastVisit.date, lastVisit.time)}
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-2 border-t border-border/60">
-                      <div className="flex items-center gap-2">
-                        <Badge className={cn(
-                          "text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border-none",
-                          lastVisit.status === 'COMPLETED' ? "bg-emerald-500 text-white" :
-                          lastVisit.status === 'CONFIRMED' ? "bg-blue-500 text-white" : "bg-amber-500 text-white"
-                        )}>
-                          {lastVisit.status || "COMPLETED"}
-                        </Badge>
-                        {lastVisit.token && (
-                          <span className="text-[10px] font-mono font-bold text-muted-foreground">
-                            Token #{lastVisit.token}
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handlePrintToken(lastVisit)}
-                        className="h-8 px-2 text-xs font-bold text-primary hover:bg-primary/10 rounded-xl flex items-center gap-1"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        Slip
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+
 
             {/* Live Announcements Feed */}
             {announcements.length > 0 && (
