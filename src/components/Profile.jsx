@@ -21,7 +21,9 @@ import {
   Loader2,
   Printer,
   Sparkles,
-  Download
+  Download,
+  Search,
+  Filter
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -146,7 +148,7 @@ const Profile = () => {
     return "";
   }, [lastVisit]);
 
-  // Compute Current Active / Upcoming Booking
+  // Compute Current Active / Upcoming Booking (Priority: Future dates nearest first, then Today)
   const currentBooking = React.useMemo(() => {
     if (!appointments || appointments.length === 0) return null;
     const todayStr = new Date().toISOString().split('T')[0];
@@ -161,8 +163,20 @@ const Profile = () => {
     });
 
     if (active.length > 0) {
-      // Sort to get the nearest upcoming appointment
-      return [...active].sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))[0];
+      // Sort priority: Upcoming future dates (e.g. tomorrow) first, then today
+      return [...active].sort((a, b) => {
+        const dateA = a.date || '';
+        const dateB = b.date || '';
+        
+        const isFutureA = dateA > todayStr;
+        const isFutureB = dateB > todayStr;
+
+        if (isFutureA && isFutureB) return dateA.localeCompare(dateB);
+        if (isFutureA && !isFutureB) return -1;
+        if (!isFutureA && isFutureB) return 1;
+
+        return dateA.localeCompare(dateB);
+      })[0];
     }
     return null;
   }, [appointments]);
@@ -175,17 +189,57 @@ const Profile = () => {
       bookingDate.setHours(0,0,0,0);
       today.setHours(0,0,0,0);
       const diffTime = bookingDate - today;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays === 0) return "Today's Appointment";
-      if (diffDays === 1) return "Tomorrow";
-      if (diffDays > 1) return `In ${diffDays} days`;
-      if (diffDays < 0) return `${Math.abs(diffDays)} days ago`;
+      if (diffDays === 0) return "Today's Active Booking";
+      if (diffDays === 1) return "Tomorrow's Active Booking";
+      if (diffDays > 1) return `Upcoming in ${diffDays} days`;
+      if (diffDays < 0) return `Scheduled ${Math.abs(diffDays)} days ago`;
     } catch (e) {
       return "";
     }
     return "";
   }, [currentBooking]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  // Filtered Appointments
+  const filteredAppointments = React.useMemo(() => {
+    if (!appointments) return [];
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    return appointments.filter((apt) => {
+      const statusUpper = (apt.status || "").toUpperCase();
+      const serviceLower = (apt.service || "").toLowerCase();
+      const dateStr = apt.date || "";
+      const tokenStr = apt.token ? String(apt.token) : "";
+      const reasonLower = (apt.reason || apt.notes || apt.suggestion || "").toLowerCase();
+      const query = searchTerm.toLowerCase().trim();
+
+      // Search match check
+      const matchesSearch =
+        !query ||
+        serviceLower.includes(query) ||
+        dateStr.includes(query) ||
+        statusUpper.includes(query.toUpperCase()) ||
+        tokenStr.includes(query) ||
+        reasonLower.includes(query);
+
+      if (!matchesSearch) return false;
+
+      // Status filter check
+      if (statusFilter === "All") return true;
+      if (statusFilter === "Upcoming") {
+        return (statusUpper === "CONFIRMED" || statusUpper === "PENDING" || dateStr >= todayStr) && statusUpper !== "COMPLETED" && statusUpper !== "CANCELLED";
+      }
+      if (statusFilter === "Confirmed") return statusUpper === "CONFIRMED";
+      if (statusFilter === "Completed") return statusUpper === "COMPLETED";
+      if (statusFilter === "Pending") return statusUpper === "PENDING";
+
+      return true;
+    });
+  }, [appointments, searchTerm, statusFilter]);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -551,6 +605,30 @@ const Profile = () => {
                           <QueueProgress date={currentBooking.date} />
                         </div>
                       )}
+
+                      {/* Doctor Suggestion & Clinical Guidance Notes */}
+                      {(currentBooking.suggestion || currentBooking.reason || currentBooking.notes) && (
+                        <div className="mt-3 p-4 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md space-y-2">
+                          {currentBooking.suggestion && (
+                            <div className="flex items-start gap-2.5 text-xs text-emerald-200">
+                              <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-extrabold text-white uppercase tracking-wider text-[10px] block mb-0.5">Doctor Suggestion:</span>
+                                <p className="font-medium leading-relaxed text-slate-200">{currentBooking.suggestion}</p>
+                              </div>
+                            </div>
+                          )}
+                          {(currentBooking.reason || currentBooking.notes) && (
+                            <div className="flex items-start gap-2.5 text-xs text-slate-300">
+                              <FileText className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-extrabold text-white uppercase tracking-wider text-[10px] block mb-0.5">Clinical Reason / Visit Guidance Notes (Public):</span>
+                                <p className="font-medium leading-relaxed text-slate-200">{currentBooking.reason || currentBooking.notes}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
@@ -567,8 +645,8 @@ const Profile = () => {
               </motion.div>
             )}
 
-            {/* Last Clinical Visit Banner */}
-            {lastVisit && (lastVisit.id !== currentBooking?.id) && (
+            {/* Last Clinical Visit Banner (only shown if no active booking) */}
+            {lastVisit && !currentBooking && (lastVisit.id !== currentBooking?.id) && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -741,19 +819,65 @@ const Profile = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="flex items-center gap-4 mb-8">
-                <div className="bg-primary p-3 rounded-2xl shadow-xl shadow-primary/20">
-                  <History className="w-5 h-5 text-white" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary p-3 rounded-2xl shadow-xl shadow-primary/20">
+                    <History className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-extrabold text-foreground tracking-tighter">Medical Visit Logs</h3>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Personal Clinical Records</p>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-extrabold text-foreground tracking-tighter">Medical Visit Logs</h3>
-                <Badge variant="outline" className="rounded-full bg-white ml-2 text-slate-500 font-bold py-1 px-4 border-slate-200 uppercase tracking-widest text-[9px]">
-                  {appointments.length} Total Logs
+                <Badge variant="outline" className="rounded-full bg-white self-start sm:self-auto text-slate-500 font-bold py-1 px-4 border-slate-200 uppercase tracking-widest text-[9px]">
+                  {filteredAppointments.length} of {appointments.length} Logs
                 </Badge>
               </div>
 
-              {appointments.length > 0 ? (
+              {/* Search & Status Filter Bar */}
+              <div className="bg-card border border-border p-4 rounded-3xl mb-6 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search by treatment, date, status, or token..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-10 rounded-2xl border-slate-200 text-xs font-semibold focus:ring-primary shadow-xs"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                  {["All", "Upcoming", "Confirmed", "Completed", "Pending"].map((filter) => (
+                    <Button
+                      key={filter}
+                      size="sm"
+                      variant={statusFilter === filter ? "default" : "outline"}
+                      onClick={() => setStatusFilter(filter)}
+                      className={cn(
+                        "rounded-xl h-9 text-[11px] font-extrabold px-3 transition-all shrink-0",
+                        statusFilter === filter
+                          ? "bg-primary text-white shadow-md shadow-primary/20 border-none"
+                          : "border-slate-200 text-slate-600 hover:bg-slate-100"
+                      )}
+                    >
+                      {filter}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredAppointments.length > 0 ? (
                 <div className="space-y-4">
-                  {appointments.map((apt, index) => (
+                  {filteredAppointments.map((apt, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: 20 }}

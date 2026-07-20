@@ -21,8 +21,13 @@ const AmbientBackground = () => {
 
     window.addEventListener('resize', handleResize);
 
-    // Medical particles configuration (35 floating medical crosses & health sparkles)
-    const particleCount = 40;
+    // Standard Heart Path2D SVG definition (24x24 viewBox)
+    const heartPath = new Path2D(
+      "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+    );
+
+    // Medical particles configuration (30 ultra-subtle, slow floating medical crosses & sparkles)
+    const particleCount = 30;
     const particles = [];
 
     const medicalColors = [
@@ -37,13 +42,13 @@ const AmbientBackground = () => {
         x: Math.random() * width,
         y: Math.random() * height,
         type: Math.random() > 0.4 ? 'cross' : 'sparkle', // 60% Medical Crosses (+), 40% Sparkles
-        size: Math.random() * 10 + 8,                     // Size 8px to 18px
-        speedY: Math.random() * 1.0 + 0.5,                 // Downward speed
-        swaySpeed: Math.random() * 0.015 + 0.005,
-        swayAmount: Math.random() * 1.2 + 0.4,
+        size: Math.random() * 8 + 8,                      // Size 8px to 16px
+        speedY: Math.random() * 0.4 + 0.2,                // Super slow, gentle downward drift (0.2 to 0.6 px/s)
+        swaySpeed: Math.random() * 0.01 + 0.003,
+        swayAmount: Math.random() * 1.0 + 0.3,
         rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.01,
-        opacity: Math.random() * 0.16 + 0.10,             // Subtle, non-distracting (0.10 to 0.26)
+        rotationSpeed: (Math.random() - 0.5) * 0.005,
+        opacity: Math.random() * 0.08 + 0.04,             // Whisper-soft opacity (0.04 to 0.12)
         colorTemplate: medicalColors[Math.floor(Math.random() * medicalColors.length)],
         phase: Math.random() * Math.PI * 2,
       });
@@ -56,21 +61,15 @@ const AmbientBackground = () => {
       ctx.rotate(rotation);
       const color = colorTemplate.replace('opacity', opacity.toFixed(2));
       ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 4;
 
       const armWidth = size * 0.28;
       const armLength = size;
-
-      // Rounded bar corners for medical icon aesthetic
       const radius = armWidth / 3;
 
-      // Horizontal bar
       ctx.beginPath();
       ctx.roundRect(-armLength / 2, -armWidth / 2, armLength, armWidth, radius);
       ctx.fill();
 
-      // Vertical bar
       ctx.beginPath();
       ctx.roundRect(-armWidth / 2, -armLength / 2, armWidth, armLength, radius);
       ctx.fill();
@@ -84,8 +83,6 @@ const AmbientBackground = () => {
       ctx.translate(x, y);
       const color = colorTemplate.replace('opacity', opacity.toFixed(2));
       ctx.fillStyle = color;
-      ctx.shadowColor = color;
-      ctx.shadowBlur = 5;
 
       ctx.beginPath();
       ctx.arc(0, 0, size / 3.5, 0, Math.PI * 2);
@@ -104,7 +101,7 @@ const AmbientBackground = () => {
 
         // Side-to-side sway
         p.phase += p.swaySpeed;
-        const currentX = p.x + Math.sin(p.phase) * p.swayAmount * 10;
+        const currentX = p.x + Math.sin(p.phase) * p.swayAmount * 8;
 
         // Reset to top when falling past bottom
         if (p.y > height + 25) {
@@ -133,7 +130,7 @@ const AmbientBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[9999] w-full h-full opacity-80"
+      className="fixed inset-0 pointer-events-none z-[9999] w-full h-full opacity-70"
     />
   );
 };
