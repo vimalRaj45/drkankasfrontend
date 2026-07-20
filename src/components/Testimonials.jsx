@@ -75,35 +75,16 @@ const Testimonials = () => {
   }, [showFeedbackModal, step]);
 
   useEffect(() => {
-    // Ensure Common Ninja re-triggers and initializes correctly
-    const initCommonNinja = () => {
-      if (window.CommonNinja) {
-        if (typeof window.CommonNinja.init === 'function') {
-          window.CommonNinja.init();
-        } else if (typeof window.CommonNinja.reload === 'function') {
-          window.CommonNinja.reload('46e44528-7b7e-4e9d-9070-79d0dffba4d4');
-        }
-      }
-    };
-
-    let script = document.querySelector('script[src*="commonninja.js"]');
-    if (script) {
-      if (window.CommonNinja) {
-        initCommonNinja();
-      } else {
-        script.addEventListener('load', initCommonNinja);
-      }
-    } else {
-      script = document.createElement("script");
-      script.src = "https://cdn.commonninja.com/sdk/latest/commonninja.js?widgetIds=46e44528-7b7e-4e9d-9070-79d0dffba4d4";
-      script.defer = true;
-      script.onload = initCommonNinja;
-      document.body.appendChild(script);
-    }
+    // Load SociableKIT Google Reviews widget script dynamically
+    const script = document.createElement("script");
+    script.src = "https://widgets.sociablekit.com/google-reviews/widget.js";
+    script.defer = true;
+    document.body.appendChild(script);
 
     return () => {
-      if (script) {
-        script.removeEventListener('load', initCommonNinja);
+      // Cleanup script on unmount
+      if (script && document.body.contains(script)) {
+        document.body.removeChild(script);
       }
     };
   }, []);
@@ -282,19 +263,11 @@ const Testimonials = () => {
           </motion.div>
         </div>
 
-        {/* Common Ninja Integration - Follows Action Grid */}
+        {/* Google Reviews Integration via SociableKIT widget */}
         <div className="mb-20 sm:mb-32 relative">
           <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-[2.5rem] sm:rounded-[4rem] blur-3xl opacity-20 pointer-events-none" />
-          <div className="relative bg-slate-50 dark:bg-slate-900/60 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3.5rem] p-3 sm:p-12 shadow-xl min-h-[500px] sm:min-h-[650px] overflow-hidden">
-             <iframe 
-               src="https://commonninja.site/7dd46ef0-d2df-48d2-8f8d-e45995ff3e45" 
-               width="100%" 
-               height="100%" 
-               frameBorder="0" 
-               scrolling="auto"
-               className="w-full min-h-[500px] sm:min-h-[650px] border-none"
-               title="Google Reviews"
-             ></iframe>
+          <div className="relative bg-slate-50 dark:bg-slate-900/60 backdrop-blur-3xl border border-slate-200 dark:border-white/5 rounded-[2rem] sm:rounded-[3.5rem] p-4 sm:p-12 shadow-xl overflow-hidden min-h-[400px]">
+             <div className="sk-ww-google-reviews" data-embed-id="25698751"></div>
           </div>
         </div>
 
