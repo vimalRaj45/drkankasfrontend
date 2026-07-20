@@ -26,94 +26,72 @@ const AmbientBackground = () => {
       "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
     );
 
-    // Medical particles configuration (30 ultra-subtle, slow floating medical crosses & sparkles)
-    const particleCount = 30;
-    const particles = [];
+    // Green Hearts configuration (35 beating green hearts 💚)
+    const heartCount = 35;
+    const hearts = [];
 
-    const medicalColors = [
-      'rgba(13, 148, 136, opacity)',  // Clinical Teal Primary
-      'rgba(37, 99, 235, opacity)',   // Ocean Blue
-      'rgba(14, 165, 233, opacity)',  // Soft Sky Blue
-      'rgba(99, 102, 241, opacity)',  // Soft Indigo
+    const greenColors = [
+      'rgba(16, 185, 129, opacity)',  // Clinical Emerald Green
+      'rgba(34, 197, 94, opacity)',   // Bright Jade Green
+      'rgba(13, 148, 136, opacity)',  // Medical Teal-Green
+      'rgba(5, 150, 105, opacity)',   // Soft Mint Health Green
     ];
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
+    for (let i = 0; i < heartCount; i++) {
+      hearts.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        type: Math.random() > 0.4 ? 'cross' : 'sparkle', // 60% Medical Crosses (+), 40% Sparkles
-        size: Math.random() * 8 + 8,                      // Size 8px to 16px
-        speedY: Math.random() * 0.4 + 0.2,                // Super slow, gentle downward drift (0.2 to 0.6 px/s)
-        swaySpeed: Math.random() * 0.01 + 0.003,
-        swayAmount: Math.random() * 1.0 + 0.3,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.005,
-        opacity: Math.random() * 0.08 + 0.04,             // Whisper-soft opacity (0.04 to 0.12)
-        colorTemplate: medicalColors[Math.floor(Math.random() * medicalColors.length)],
+        size: Math.random() * 10 + 11,            // Size between 11px and 21px
+        speedY: Math.random() * 0.4 + 0.4,        // Pleasant downward drift speed (0.4 to 0.8 px/s)
+        swaySpeed: Math.random() * 0.012 + 0.005, // Smooth sway speed
+        beatSpeed: Math.random() * 0.04 + 0.03,   // Lively heartbeat pulse speed
+        swayAmount: Math.random() * 1.2 + 0.4,    // Sway amplitude
+        opacity: Math.random() * 0.14 + 0.14,     // Balanced, clear opacity (0.14 to 0.28)
+        colorTemplate: greenColors[Math.floor(Math.random() * greenColors.length)],
         phase: Math.random() * Math.PI * 2,
+        beatPhase: Math.random() * Math.PI * 2,
       });
     }
 
-    // Draw Medical Cross (+)
-    const drawMedicalCross = (ctx, x, y, size, rotation, opacity, colorTemplate) => {
+    // Draw Beating Green Heart using Path2D
+    const drawGreenHeart = (ctx, x, y, size, opacity, pulseScale, colorTemplate) => {
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(rotation);
-      const color = colorTemplate.replace('opacity', opacity.toFixed(2));
-      ctx.fillStyle = color;
+      const scale = (size / 24) * pulseScale;
+      ctx.scale(scale, scale);
+      ctx.translate(-12, -12); // Center scale origin for heartbeat effect
 
-      const armWidth = size * 0.28;
-      const armLength = size;
-      const radius = armWidth / 3;
-
-      ctx.beginPath();
-      ctx.roundRect(-armLength / 2, -armWidth / 2, armLength, armWidth, radius);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.roundRect(-armWidth / 2, -armLength / 2, armWidth, armLength, radius);
-      ctx.fill();
-
-      ctx.restore();
-    };
-
-    // Draw Health Sparkle Dot
-    const drawSparkle = (ctx, x, y, size, opacity, colorTemplate) => {
-      ctx.save();
-      ctx.translate(x, y);
-      const color = colorTemplate.replace('opacity', opacity.toFixed(2));
-      ctx.fillStyle = color;
-
-      ctx.beginPath();
-      ctx.arc(0, 0, size / 3.5, 0, Math.PI * 2);
-      ctx.fill();
+      const fillColor = colorTemplate.replace('opacity', opacity.toFixed(2));
+      ctx.fillStyle = fillColor;
+      ctx.shadowColor = fillColor;
+      ctx.shadowBlur = 6;
+      ctx.fill(heartPath);
       ctx.restore();
     };
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Animate & draw medical particles
-      particles.forEach((p) => {
-        // Downward drift
-        p.y += p.speedY;
-        p.rotation += p.rotationSpeed;
+      // Animate and draw Beating Green Hearts smoothly over top of the page
+      hearts.forEach((heart) => {
+        // Fall down smoothly
+        heart.y += heart.speedY;
 
-        // Side-to-side sway
-        p.phase += p.swaySpeed;
-        const currentX = p.x + Math.sin(p.phase) * p.swayAmount * 8;
+        // Sway gently side to side
+        heart.phase += heart.swaySpeed;
+        const currentX = heart.x + Math.sin(heart.phase) * heart.swayAmount * 10;
+
+        // Heartbeat pulse animation
+        heart.beatPhase += heart.beatSpeed;
+        const pulseScale = 1 + Math.sin(heart.beatPhase * 3) * 0.15;
 
         // Reset to top when falling past bottom
-        if (p.y > height + 25) {
-          p.y = -25;
-          p.x = Math.random() * width;
+        if (heart.y > height + 30) {
+          heart.y = -30;
+          heart.x = Math.random() * width;
         }
 
-        if (p.type === 'cross') {
-          drawMedicalCross(ctx, currentX, p.y, p.size, p.rotation, p.opacity, p.colorTemplate);
-        } else {
-          drawSparkle(ctx, currentX, p.y, p.size, p.opacity, p.colorTemplate);
-        }
+        drawGreenHeart(ctx, currentX, heart.y, heart.size, heart.opacity, pulseScale, heart.colorTemplate);
       });
 
       animationFrameId = requestAnimationFrame(render);
@@ -130,7 +108,7 @@ const AmbientBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[9999] w-full h-full opacity-70"
+      className="fixed inset-0 pointer-events-none z-[9999] w-full h-full opacity-85"
     />
   );
 };

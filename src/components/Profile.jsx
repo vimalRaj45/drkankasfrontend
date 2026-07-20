@@ -631,10 +631,10 @@ const Profile = () => {
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
+                    <div className="flex items-center gap-3 self-stretch sm:self-start lg:self-center shrink-0 w-full sm:w-auto">
                       <Button
                         onClick={() => handlePrintToken(currentBooking)}
-                        className="h-12 px-6 rounded-2xl font-extrabold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 flex items-center gap-2"
+                        className="h-12 px-6 rounded-2xl font-extrabold bg-emerald-500 hover:bg-emerald-600 text-white shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm"
                       >
                         <Printer className="w-4 h-4" />
                         Print Booking Slip
@@ -697,10 +697,10 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 self-start lg:self-center shrink-0">
+                    <div className="flex items-center gap-3 self-stretch sm:self-start lg:self-center shrink-0 w-full sm:w-auto">
                       <Button
                         onClick={() => handlePrintToken(lastVisit)}
-                        className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center gap-2"
+                        className="h-12 px-6 rounded-2xl font-extrabold bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm"
                       >
                         <Printer className="w-4 h-4" />
                         Download Visit Token Slip
@@ -835,15 +835,15 @@ const Profile = () => {
               </div>
 
               {/* Search & Status Filter Bar */}
-              <div className="bg-card border border-border p-4 rounded-3xl mb-6 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4">
-                <div className="relative flex-1">
+              <div className="bg-card border border-border p-3 sm:p-4 rounded-3xl mb-6 shadow-sm space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between gap-4 overflow-hidden">
+                <div className="relative flex-1 w-full">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="text"
                     placeholder="Search by treatment, date, status, or token..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-10 rounded-2xl border-slate-200 text-xs font-semibold focus:ring-primary shadow-xs"
+                    className="pl-10 h-10 rounded-2xl border-slate-200 text-xs font-semibold focus:ring-primary shadow-xs w-full"
                   />
                   {searchTerm && (
                     <button
@@ -855,7 +855,7 @@ const Profile = () => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none w-full sm:w-auto shrink-0">
                   {["All", "Upcoming", "Confirmed", "Completed", "Pending"].map((filter) => (
                     <Button
                       key={filter}
@@ -905,6 +905,11 @@ const Profile = () => {
                                   </Badge>
                                 )}
                               </div>
+                              {apt.status === 'CONFIRMED' && (
+                                <div className="mt-2">
+                                  <QueueProgress date={apt.date} />
+                                </div>
+                              )}
                             </div>
                           </div>
 
