@@ -23,7 +23,8 @@ import {
   Sparkles,
   Download,
   Search,
-  Filter
+  Filter,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { toast } from "react-hot-toast";
-import { getUserAppointments, API_URL, checkUser, getNotifications } from '../services/api';
+import { getUserAppointments, API_URL, checkUser, getNotifications, requestReschedule } from '../services/api';
 import { Dialog, DialogContent } from "../components/ui/dialog";
 import { jsPDF } from "jspdf";
 
@@ -106,6 +107,44 @@ const Profile = () => {
 
   const [announcements, setAnnouncements] = useState([]);
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [rescheduleText, setRescheduleText] = useState("");
+  const [submittingReschedule, setSubmittingReschedule] = useState(false);
+
+  const handleRescheduleSubmit = async () => {
+    if (!selectedBooking) return;
+    if (!rescheduleText.trim()) {
+      toast.error("Please enter your reschedule message or details.");
+      return;
+    }
+    setSubmittingReschedule(true);
+    try {
+      const res = await requestReschedule(selectedBooking.id, user.id, rescheduleText.trim());
+      if (res.success || res.status === 'success') {
+        toast.success("Reschedule request submitted successfully!");
+        
+        // Update local state
+        const updatedApts = appointments.map(apt => {
+          if (apt.id === selectedBooking.id) {
+            return { ...apt, reschedule_request: rescheduleText.trim(), status: 'PENDING' };
+          }
+          return apt;
+        });
+        setAppointments(updatedApts);
+        localStorage.setItem('clinic_appointments', JSON.stringify(updatedApts));
+        
+        // Update dialog state
+        setSelectedBooking(prev => ({ ...prev, reschedule_request: rescheduleText.trim(), status: 'PENDING' }));
+      } else {
+        toast.error(res.message || "Failed to submit reschedule request.");
+      }
+    } catch (err) {
+      toast.error("Failed to connect to reschedule endpoint.");
+    } finally {
+      setSubmittingReschedule(false);
+    }
+  };
 
   // Compute Last Clinical Visit
   const lastVisit = React.useMemo(() => {
@@ -624,7 +663,10 @@ const Profile = () => {
         {/* ── Active Booking Banner ───────────────────────────────────────── */}
         {currentBooking && (
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/30 to-white border border-blue-200/60 p-4 shadow-xl shadow-blue-100/20">
+            <div 
+              onClick={() => { setSelectedBooking(currentBooking); setRescheduleText(currentBooking.reschedule_request || ""); }}
+              className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-50 via-indigo-50/30 to-white border border-blue-200/60 p-4 shadow-xl shadow-blue-100/20 cursor-pointer hover:shadow-2xl hover:border-blue-400 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] group/card"
+            >
               <div className="absolute top-0 right-0 w-40 h-40 bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
 
               <div className="relative z-10">
@@ -644,6 +686,14 @@ const Profile = () => {
                     statusColor(currentBooking.status).bg
                   )}>
                     {currentBooking.status || "PENDING"}
+                  </span>
+                  {currentBooking.reschedule_request && (
+                    <span className="px-2.5 py-1 rounded-full bg-amber-55 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                      ⚠️ Reschedule Requested
+                    </span>
+                  )}
+                  <span className="px-2.5 py-1 rounded-full bg-indigo-55 border border-indigo-150 text-indigo-600 text-[10px] font-extrabold group-hover/card:bg-indigo-600 group-hover/card:text-white group-hover/card:border-indigo-600 transition-all duration-300">
+                    🔍 View details & reschedule
                   </span>
                 </div>
 
@@ -696,7 +746,7 @@ const Profile = () => {
 
                 {/* CTA Button */}
                 <Button
-                  onClick={() => handlePrintToken(currentBooking)}
+                  onClick={(e) => { e.stopPropagation(); handlePrintToken(currentBooking); }}
                   className="mt-4 w-full h-12 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 text-sm active:scale-[0.98] transition-all"
                 >
                   <Printer className="w-4 h-4" />
@@ -1055,6 +1105,148 @@ const Profile = () => {
                     Explore <ArrowRight className="w-4 h-4" />
                   </a>
                 )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Booking Details & Reschedule Modal ────────────────────────────── */}
+      <Dialog open={!!selectedBooking} onOpenChange={(open) => !open && setSelectedBooking(null)}>
+        <DialogContent className="rounded-[2rem] p-0 w-[95vw] sm:w-full max-w-lg border border-slate-200 shadow-2xl overflow-hidden bg-white">
+          {selectedBooking && (
+            <div className="text-left font-sans">
+              {/* Header section with gradient */}
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-6 text-white relative">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 text-white text-[9px] font-black uppercase tracking-wider mb-2">
+                  Booking Details
+                </span>
+                <h3 className="text-xl font-black tracking-tight leading-tight">{selectedBooking.service}</h3>
+                <p className="text-blue-100 text-xs font-semibold mt-1 font-mono">PID: {selectedBooking.id?.slice(-8)}</p>
+                <button 
+                  onClick={() => setSelectedBooking(null)}
+                  className="absolute top-4 right-4 text-white/80 hover:text-white text-lg font-bold outline-none"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                {/* Appointment Information Card */}
+                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Appointment Slot</span>
+                    <p className="text-xs font-extrabold text-slate-800 flex items-center gap-1">
+                      <CalendarCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      {formatApptDateTime(selectedBooking.date, selectedBooking.time)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Status</span>
+                    <div>
+                      <span className={cn(
+                        "inline-block px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border",
+                        statusColor(selectedBooking.status).bg
+                      )}>
+                        {selectedBooking.status || "PENDING"}
+                      </span>
+                    </div>
+                  </div>
+                  {selectedBooking.token && (
+                    <div className="col-span-2 border-t border-slate-200/50 pt-2.5 mt-1">
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Token Number</span>
+                      <p className="text-xs font-black text-blue-600">#{selectedBooking.token}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Patient Information */}
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">Patient Name & Phone</span>
+                  <p className="text-xs font-extrabold text-slate-800">{selectedBooking.name || user.name}</p>
+                  <p className="text-xs font-mono font-bold text-slate-500">+91 {selectedBooking.phone || user.phone}</p>
+                </div>
+
+                {/* Messages & Guidance */}
+                <div className="space-y-3 pt-2 border-t border-slate-100">
+                  {/* Patient message */}
+                  <div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Your Problem Message (Public Note)</span>
+                    <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 font-medium italic leading-relaxed">
+                      {selectedBooking.message || "No problem message provided."}
+                    </p>
+                  </div>
+
+                  {/* Doctor suggestion */}
+                  {selectedBooking.suggestion && (
+                    <div>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Doctor Suggestion / Re-plan</span>
+                      <p className="text-xs text-blue-700 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50 font-bold leading-relaxed flex items-start gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600 mt-0.5 shrink-0" />
+                        {selectedBooking.suggestion}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Visit guidance */}
+                  {selectedBooking.cancel_reason && (
+                    <div>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Visit Guidance / Clinical Reason</span>
+                      <p className="text-xs text-indigo-700 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/50 font-semibold leading-relaxed flex items-start gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-indigo-600 mt-0.5 shrink-0" />
+                        {selectedBooking.cancel_reason}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Reschedule Request Form / Existing Request */}
+                {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED') && (
+                  <div className="pt-4 border-t border-slate-100 space-y-3">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">Need to Reschedule?</span>
+                    
+                    {selectedBooking.reschedule_request && (
+                      <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl">
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-amber-700 block mb-1">Your Reschedule Request:</span>
+                        <p className="text-xs font-semibold text-amber-900 italic">"{selectedBooking.reschedule_request}"</p>
+                        <span className="text-[8px] text-amber-600 block mt-1 font-medium">Status: Pending review by clinic admin.</span>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
+                        {selectedBooking.reschedule_request ? "Update Reschedule Request Message" : "Write Message / Reschedule Request"}
+                      </Label>
+                      <textarea
+                        value={rescheduleText}
+                        onChange={(e) => setRescheduleText(e.target.value)}
+                        placeholder="Explain your reschedule preference (e.g. Please reschedule me to next Saturday 5:30 PM because...)"
+                        className="w-full min-h-[70px] rounded-xl border border-slate-200 bg-slate-50/50 p-3 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs font-semibold outline-none transition-all resize-none text-slate-800 placeholder:text-slate-400"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={handleRescheduleSubmit}
+                      disabled={submittingReschedule}
+                      className="w-full h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all"
+                    >
+                      {submittingReschedule ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                      {selectedBooking.reschedule_request ? "Update Request" : "Send Reschedule Request"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Print button at bottom */}
+                <div className="pt-2">
+                  <Button
+                    onClick={() => handlePrintToken(selectedBooking)}
+                    className="w-full h-11 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-slate-500" />
+                    Download Booking Slip PDF
+                  </Button>
+                </div>
               </div>
             </div>
           )}

@@ -80,7 +80,7 @@ export const getAppointments = async (page = 1, limit = 10) => {
   }
 };
 
-export const updateStatus = async (appointmentId, status, adminToken = "dr_kanaks", reason = "", suggestedDate = "", notes = "") => {
+export const updateStatus = async (appointmentId, status, adminToken = "dr_kanaks", reason = "", suggestedDate = "", notes = "", date = "", time = "") => {
   try {
     const response = await fetch(`${API_URL}/update-status`, {
       method: "POST",
@@ -91,7 +91,9 @@ export const updateStatus = async (appointmentId, status, adminToken = "dr_kanak
         admin_token: adminToken,
         cancel_reason: reason,
         suggestion: suggestedDate,
-        consultation_notes: notes
+        consultation_notes: notes,
+        date: date || undefined,
+        time: time || undefined
       })
     });
     const data = await response.json();
@@ -101,6 +103,28 @@ export const updateStatus = async (appointmentId, status, adminToken = "dr_kanak
     };
   } catch (error) {
     console.error("Error updating status:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const requestReschedule = async (appointmentId, secretKey, rescheduleRequest) => {
+  try {
+    const response = await fetch(`${API_URL}/request-reschedule`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        appointment_id: appointmentId,
+        secret_key: secretKey,
+        reschedule_request: rescheduleRequest
+      })
+    });
+    const data = await response.json();
+    return {
+      success: data.status === "success",
+      message: data.message
+    };
+  } catch (error) {
+    console.error("Error requesting reschedule:", error);
     return { success: false, error: error.message };
   }
 };

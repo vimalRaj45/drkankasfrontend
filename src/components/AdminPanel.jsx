@@ -197,6 +197,8 @@ const AdminPanel = () => {
   const [editReason, setEditReason] = useState("");
   const [editSuggestion, setEditSuggestion] = useState("");
   const [editNotes, setEditNotes] = useState("");
+  const [editDate, setEditDate] = useState("");
+  const [editTime, setEditTime] = useState("");
   const [isSavingPatientInfo, setIsSavingPatientInfo] = useState(false);
 
   const [viewType, setViewType] = useState("grid");
@@ -233,14 +235,16 @@ const AdminPanel = () => {
       setEditReason(selectedPatient.cancel_reason || "");
       setEditSuggestion(selectedPatient.suggestion || "");
       setEditNotes(selectedPatient.consultation_notes || "");
+      setEditDate(selectedPatient.date || "");
+      setEditTime(selectedPatient.time || "");
     }
   }, [selectedPatient]);
-
+ 
   const handleSavePatientInfo = async () => {
     if (!selectedPatient) return;
     setIsSavingPatientInfo(true);
     try {
-      const res = await updateStatus(selectedPatient.id, editStatus, "dr_kanaks", editReason, editSuggestion, editNotes);
+      const res = await updateStatus(selectedPatient.id, editStatus, "dr_kanaks", editReason, editSuggestion, editNotes, editDate, editTime);
       if (res.success || res.status === 'success') {
         toast.success("Patient clinical records updated successfully!");
         setIsPatientModalOpen(false);
@@ -990,6 +994,11 @@ const AdminPanel = () => {
                           >
                             {apt.name}
                           </div>
+                          {apt.reschedule_request && (
+                            <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 border-amber-200 text-[9px] font-bold tracking-wider uppercase py-0.5 px-2 rounded-md mt-1 block w-fit">
+                              ⚠️ Reschedule Requested
+                            </Badge>
+                          )}
                           <div className="text-[10px] text-muted-foreground font-mono mt-1">
                             PID: {apt.id.slice(-8)} &middot; +91 {apt.phone}
                           </div>
@@ -1059,7 +1068,14 @@ const AdminPanel = () => {
                             onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
                           >
                             <div>
-                              <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">PID: {apt.id.slice(-8)}</div>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <div className="text-[9px] font-mono text-muted-foreground uppercase tracking-widest">PID: {apt.id.slice(-8)}</div>
+                                {apt.reschedule_request && (
+                                  <span className="bg-amber-100 text-amber-800 border border-amber-250 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md leading-none animate-pulse">
+                                    Reschedule Req
+                                  </span>
+                                )}
+                              </div>
                               <h5 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors mt-0.5">{apt.name}</h5>
                             </div>
 
@@ -1190,7 +1206,14 @@ const AdminPanel = () => {
                       onClick={() => { setSelectedPatient(apt); setIsPatientModalOpen(true); }}
                     >
                       <div>
-                        <Badge className="bg-blue-50 text-blue-600 border border-blue-100 mb-2 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg">PID: {apt.id.slice(-8)}</Badge>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <Badge className="bg-blue-50 text-blue-600 border border-blue-100 text-[9px] font-mono tracking-widest uppercase py-1 px-3 rounded-lg">PID: {apt.id.slice(-8)}</Badge>
+                          {apt.reschedule_request && (
+                            <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border border-amber-200 text-[9px] font-bold uppercase py-1 px-3 rounded-lg animate-pulse">
+                              ⚠️ Reschedule Requested
+                            </Badge>
+                          )}
+                        </div>
                         <CardTitle className="text-xl font-extrabold text-blue-600 underline leading-none group-hover:text-blue-700 transition-colors">{apt.name}</CardTitle>
                       </div>
                     </CardHeader>
@@ -1464,6 +1487,13 @@ const AdminPanel = () => {
               <div className="space-y-4 md:border-l border-slate-100 dark:border-slate-800 md:pl-8 pt-6 md:pt-0">
                 <h4 className="font-extrabold text-sm uppercase tracking-wider text-primary">Doctor Clinical Actions</h4>
                 
+                {selectedPatient.reschedule_request && (
+                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-amber-700 block mb-1">⚠️ Patient Reschedule Request</span>
+                    <p className="text-xs font-semibold text-amber-900 italic">"{selectedPatient.reschedule_request}"</p>
+                  </div>
+                )}
+                
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Update Status</Label>
@@ -1485,6 +1515,28 @@ const AdminPanel = () => {
                       onChange={(e) => setEditSuggestion(e.target.value)}
                       placeholder="e.g. Next Mon"
                       className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Date</Label>
+                    <Input
+                      type="date"
+                      value={editDate}
+                      onChange={(e) => setEditDate(e.target.value)}
+                      className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Time</Label>
+                    <Input
+                      type="text"
+                      value={editTime}
+                      onChange={(e) => setEditTime(e.target.value)}
+                      placeholder="e.g. 04:00 PM or 16:30"
+                      className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
                     />
                   </div>
                 </div>
