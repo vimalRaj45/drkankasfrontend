@@ -1519,27 +1519,29 @@ const AdminPanel = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Date</Label>
-                    <Input
-                      type="date"
-                      value={editDate}
-                      onChange={(e) => setEditDate(e.target.value)}
-                      className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
-                    />
+                {(editStatus === 'CANCELLED' || selectedPatient.reschedule_request) && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Date</Label>
+                      <Input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Time</Label>
+                      <Input
+                        type="text"
+                        value={editTime}
+                        onChange={(e) => setEditTime(e.target.value)}
+                        placeholder="e.g. 04:00 PM or 16:30"
+                        className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Time</Label>
-                    <Input
-                      type="text"
-                      value={editTime}
-                      onChange={(e) => setEditTime(e.target.value)}
-                      placeholder="e.g. 04:00 PM or 16:30"
-                      className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
-                    />
-                  </div>
-                </div>
+                )}
 
                 <div>
                   <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Clinical Reason / Visit Guidance Notes (Public)</Label>
