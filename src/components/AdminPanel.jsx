@@ -1552,7 +1552,7 @@ const AdminPanel = () => {
                   </div>
                 </div>
 
-                {(editStatus === 'CANCELLED' || selectedPatient.reschedule_request) && (
+                {(editStatus === 'CANCELLED' || editStatus === 'RESCHEDULED' || selectedPatient.reschedule_request) && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Date</Label>
