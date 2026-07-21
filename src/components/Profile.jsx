@@ -120,6 +120,7 @@ const Profile = () => {
     }
     setSubmittingReschedule(true);
     try {
+
       const res = await requestReschedule(selectedBooking.id, user.id, rescheduleText.trim());
       if (res.success || res.status === 'success') {
         toast.success("Reschedule request submitted successfully!");
@@ -695,7 +696,7 @@ const Profile = () => {
                     </span>
                   )}
                   <span className="px-2.5 py-1 rounded-full bg-indigo-55 border border-indigo-150 text-indigo-600 text-[10px] font-extrabold group-hover/card:bg-indigo-600 group-hover/card:text-white group-hover/card:border-indigo-600 transition-all duration-300">
-                    🔍 View details & reschedule
+                    🔍 View details & call to reschedule
                   </span>
                 </div>
 
@@ -1208,39 +1209,18 @@ const Profile = () => {
                   )}
                 </div>
 
-                {/* Reschedule Request Form / Existing Request */}
-                {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED') && (
+                {/* Call Clinic to Reschedule */}
+                {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'CONFIRMED' || selectedBooking.status === 'RESCHEDULED') && (
                   <div className="pt-4 border-t border-slate-100 space-y-3">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">Need to Reschedule?</span>
                     
-                    {selectedBooking.reschedule_request && (
-                      <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl">
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-amber-700 block mb-1">Your Reschedule Request:</span>
-                        <p className="text-xs font-semibold text-amber-900 italic">"{selectedBooking.reschedule_request}"</p>
-                        <span className="text-[8px] text-amber-600 block mt-1 font-medium">Status: Pending review by clinic admin.</span>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label className="text-[9px] font-bold uppercase tracking-widest text-slate-400 block">
-                        {selectedBooking.reschedule_request ? "Update Reschedule Request Message" : "Write Message / Reschedule Request"}
-                      </Label>
-                      <textarea
-                        value={rescheduleText}
-                        onChange={(e) => setRescheduleText(e.target.value)}
-                        placeholder="Explain your reschedule preference (e.g. Please reschedule me to next Saturday 5:30 PM because...)"
-                        className="w-full min-h-[70px] rounded-xl border border-slate-200 bg-slate-50/50 p-3 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs font-semibold outline-none transition-all resize-none text-slate-800 placeholder:text-slate-400"
-                      />
-                    </div>
-
-                    <Button
-                      onClick={handleRescheduleSubmit}
-                      disabled={submittingReschedule}
-                      className="w-full h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all"
+                    <a
+                      href="tel:+919750451176"
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-blue-500/10 active:scale-[0.98] transition-all"
                     >
-                      {submittingReschedule ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                      {selectedBooking.reschedule_request ? "Update Request" : "Send Reschedule Request"}
-                    </Button>
+                      <Phone className="w-4 h-4 text-white" />
+                      Call Clinic to Reschedule (+91 97504 51176)
+                    </a>
                   </div>
                 )}
 
