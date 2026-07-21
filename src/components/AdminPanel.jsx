@@ -1460,7 +1460,7 @@ const AdminPanel = () => {
         </DialogContent>
       </Dialog>
       {/* Patient Profile/Details Modal */}
-      <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
+      <Dialog open={isPatientModalOpen} onOpenChange={(open) => { setIsPatientModalOpen(open); if (!open) setSelectedPatient(null); }}>
         <DialogContent className="rounded-[2.5rem] p-5 sm:p-10 w-[95vw] sm:w-full max-w-4xl max-h-[90vh] overflow-y-auto border-none shadow-2xl bg-card">
           <DialogHeader>
             <DialogTitle className="text-2xl font-extrabold text-foreground mb-2">Patient Profile Details</DialogTitle>
