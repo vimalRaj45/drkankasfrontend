@@ -407,7 +407,7 @@ const Profile = () => {
       doc.setTextColor(148, 163, 184);
       doc.text("Thank you for choosing Dr. Kanak's Clinic.", 40, 133, { align: "center" });
       doc.text("Please show this digital priority slip at the front desk.", 40, 137, { align: "center" });
-      doc.text(`Contact Support: +91 ${apt.phone || "N/A"}`, 40, 141, { align: "center" });
+      doc.text("Contact Support: +91 97504 51176", 40, 141, { align: "center" });
 
       doc.save(`Priority_Slip_PID_${docId}.pdf`);
       toast.success("Priority slip PDF downloaded successfully!");
