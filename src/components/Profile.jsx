@@ -127,7 +127,7 @@ const Profile = () => {
         // Update local state
         const updatedApts = appointments.map(apt => {
           if (apt.id === selectedBooking.id) {
-            return { ...apt, reschedule_request: rescheduleText.trim(), status: 'PENDING' };
+            return { ...apt, reschedule_request: rescheduleText.trim() };
           }
           return apt;
         });
@@ -135,7 +135,7 @@ const Profile = () => {
         localStorage.setItem('clinic_appointments', JSON.stringify(updatedApts));
         
         // Update dialog state
-        setSelectedBooking(prev => ({ ...prev, reschedule_request: rescheduleText.trim(), status: 'PENDING' }));
+        setSelectedBooking(prev => ({ ...prev, reschedule_request: rescheduleText.trim() }));
       } else {
         toast.error(res.message || "Failed to submit reschedule request.");
       }
@@ -196,7 +196,7 @@ const Profile = () => {
     const active = appointments.filter(a => {
       const statusUpper = (a.status || '').toUpperCase();
       if (statusUpper === 'COMPLETED' || statusUpper === 'CANCELLED') return false;
-      const isPendingOrConfirmed = statusUpper === 'PENDING' || statusUpper === 'CONFIRMED';
+      const isPendingOrConfirmed = statusUpper === 'PENDING' || statusUpper === 'CONFIRMED' || statusUpper === 'RESCHEDULED';
       const isFutureOrToday = a.date && a.date >= todayStr;
       return isPendingOrConfirmed || isFutureOrToday;
     });
@@ -270,11 +270,12 @@ const Profile = () => {
       // Status filter check
       if (statusFilter === "All") return true;
       if (statusFilter === "Upcoming") {
-        return (statusUpper === "CONFIRMED" || statusUpper === "PENDING" || dateStr >= todayStr) && statusUpper !== "COMPLETED" && statusUpper !== "CANCELLED";
+        return (statusUpper === "CONFIRMED" || statusUpper === "PENDING" || statusUpper === "RESCHEDULED" || dateStr >= todayStr) && statusUpper !== "COMPLETED" && statusUpper !== "CANCELLED";
       }
       if (statusFilter === "Confirmed") return statusUpper === "CONFIRMED";
       if (statusFilter === "Completed") return statusUpper === "COMPLETED";
       if (statusFilter === "Pending") return statusUpper === "PENDING";
+      if (statusFilter === "Rescheduled") return statusUpper === "RESCHEDULED";
 
       return true;
     });
@@ -586,6 +587,7 @@ const Profile = () => {
     if (st === "CONFIRMED") return { bg: "bg-blue-50 text-blue-600 border-blue-100", dot: "bg-blue-500" };
     if (st === "COMPLETED") return { bg: "bg-emerald-50 text-emerald-600 border-emerald-100", dot: "bg-emerald-500" };
     if (st === "CANCELLED") return { bg: "bg-red-50 text-red-600 border-red-100", dot: "bg-red-500" };
+    if (st === "RESCHEDULED") return { bg: "bg-indigo-50 text-indigo-600 border-indigo-100", dot: "bg-indigo-500" };
     return { bg: "bg-amber-50 text-amber-600 border-amber-100", dot: "bg-amber-500" };
   };
 
@@ -644,7 +646,7 @@ const Profile = () => {
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: "Total Visits", value: appointments.length, icon: History, color: "text-blue-500" },
-              { label: "Upcoming", value: appointments.filter(a => { const s = (a.status || "").toUpperCase(); return (s === "PENDING" || s === "CONFIRMED") && a.date >= new Date().toISOString().split("T")[0]; }).length, icon: CalendarCheck, color: "text-emerald-500" },
+              { label: "Upcoming", value: appointments.filter(a => { const s = (a.status || "").toUpperCase(); return (s === "PENDING" || s === "CONFIRMED" || s === "RESCHEDULED") && a.date >= new Date().toISOString().split("T")[0]; }).length, icon: CalendarCheck, color: "text-emerald-500" },
               { label: "Completed", value: appointments.filter(a => (a.status || "").toUpperCase() === "COMPLETED").length, icon: CheckCircle2, color: "text-indigo-500" },
             ].map(({ label, value, icon: Icon, color }) => (
               <div key={label} className="bg-white border border-slate-100/80 rounded-2xl p-3 text-center shadow-xs">
@@ -881,7 +883,7 @@ const Profile = () => {
 
           {/* Filter Pills - horizontal scroll */}
           <div className="flex gap-2 overflow-x-auto pb-1 mb-4 scrollbar-none -mx-4 px-4">
-            {["All", "Upcoming", "Confirmed", "Completed", "Pending"].map((f) => (
+            {["All", "Upcoming", "Confirmed", "Completed", "Pending", "Rescheduled"].map((f) => (
               <button
                 key={f}
                 onClick={() => setStatusFilter(f)}
@@ -910,7 +912,8 @@ const Profile = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: i * 0.04 }}
-                      className="rounded-3xl bg-white border border-slate-100 overflow-hidden shadow-md shadow-slate-100/50"
+                      onClick={() => { setSelectedBooking(apt); setRescheduleText(apt.reschedule_request || ""); }}
+                      className="rounded-3xl bg-white border border-slate-100 overflow-hidden shadow-md shadow-slate-100/50 cursor-pointer hover:border-blue-300 hover:shadow-lg active:scale-[0.99] transition-all"
                     >
                       {/* Card Header */}
                       <div className="flex items-start justify-between gap-3 p-4 pb-3">
@@ -960,7 +963,7 @@ const Profile = () => {
 
                         {/* Print Button */}
                         <Button
-                          onClick={() => handlePrintToken(apt)}
+                          onClick={(e) => { e.stopPropagation(); handlePrintToken(apt); }}
                           className="w-full h-11 rounded-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white flex items-center justify-center gap-2 text-xs active:scale-[0.98] transition-all shadow-lg shadow-blue-500/10"
                         >
                           <Printer className="w-4 h-4" />
@@ -988,7 +991,11 @@ const Profile = () => {
                     {filteredAppointments.map((apt, i) => {
                       const sc = statusColor(apt.status);
                       return (
-                        <tr key={apt.id || i} className="group hover:bg-slate-50/50 transition-colors">
+                        <tr 
+                          key={apt.id || i} 
+                          onClick={() => { setSelectedBooking(apt); setRescheduleText(apt.reschedule_request || ""); }}
+                          className="group hover:bg-blue-50/30 cursor-pointer transition-colors"
+                        >
                           <td className="py-4 px-5">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-xl bg-blue-50 border border-blue-100 shrink-0 group-hover:bg-blue-100 transition-colors">
@@ -1028,7 +1035,7 @@ const Profile = () => {
                           </td>
                           <td className="py-4 px-5 text-right">
                             <Button
-                              onClick={() => handlePrintToken(apt)}
+                              onClick={(e) => { e.stopPropagation(); handlePrintToken(apt); }}
                               size="sm"
                               className="h-9 px-4 rounded-xl font-bold text-xs bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-100 hover:border-blue-600 transition-all flex items-center gap-1.5 ml-auto"
                             >

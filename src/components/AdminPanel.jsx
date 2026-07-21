@@ -67,6 +67,26 @@ import { Label } from "@/components/ui/label";
 import { getAppointments, updateStatus, broadcastPush, uploadImage, getNotifications, updateNotification, deleteNotification, getSetting, saveSetting, adminSendOtp, adminVerifyOtp, getAdminFeedback, deleteAdminFeedback } from '../services/api';
 import { useNavigate } from "react-router-dom";
 
+const convertTo24h = (timeStr) => {
+  if (!timeStr) return "";
+  timeStr = timeStr.trim();
+  // Check if already in HH:MM:SS or HH:MM format
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeStr)) {
+    return timeStr.substring(0, 5); // Return HH:MM
+  }
+  // Try to parse AM/PM format
+  const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (match) {
+    let hours = parseInt(match[1]);
+    const minutes = match[2];
+    const ampm = match[3].toUpperCase();
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
+    return `${String(hours).padStart(2, "0")}:${minutes}`;
+  }
+  return timeStr;
+};
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState([]);
@@ -91,7 +111,10 @@ const AdminPanel = () => {
     return {
       total: appointments.length,
       pending: appointments.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length,
-      confirmed: appointments.filter(a => (a.status || '').toUpperCase() === 'CONFIRMED').length,
+      confirmed: appointments.filter(a => {
+        const s = (a.status || '').toUpperCase();
+        return s === 'CONFIRMED' || s === 'RESCHEDULED';
+      }).length,
       completed: appointments.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length,
       cancelled: appointments.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
     };
@@ -111,7 +134,10 @@ const AdminPanel = () => {
     return {
       total: todayApts.length,
       pending: todayApts.filter(a => (a.status || 'PENDING').toUpperCase() === 'PENDING').length,
-      confirmed: todayApts.filter(a => (a.status || '').toUpperCase() === 'CONFIRMED').length,
+      confirmed: todayApts.filter(a => {
+        const s = (a.status || '').toUpperCase();
+        return s === 'CONFIRMED' || s === 'RESCHEDULED';
+      }).length,
       completed: todayApts.filter(a => (a.status || '').toUpperCase() === 'COMPLETED').length,
       cancelled: todayApts.filter(a => (a.status || '').toUpperCase() === 'CANCELLED').length,
     };
@@ -235,8 +261,8 @@ const AdminPanel = () => {
       setEditReason(selectedPatient.cancel_reason || "");
       setEditSuggestion(selectedPatient.suggestion || "");
       setEditNotes(selectedPatient.consultation_notes || "");
-      setEditDate(selectedPatient.date || "");
-      setEditTime(selectedPatient.time || "");
+      setEditDate(selectedPatient.date ? selectedPatient.date.split('T')[0] : "");
+      setEditTime(selectedPatient.time ? convertTo24h(selectedPatient.time) : "");
     }
   }, [selectedPatient]);
  
@@ -917,6 +943,7 @@ const AdminPanel = () => {
                 <option value="All">All Statuses</option>
                 <option value="PENDING">PENDING</option>
                 <option value="CONFIRMED">CONFIRMED</option>
+                <option value="RESCHEDULED">RESCHEDULED</option>
                 <option value="CANCELLED">CANCELLED</option>
                 <option value="COMPLETED">COMPLETED</option>
               </select>
@@ -1020,6 +1047,7 @@ const AdminPanel = () => {
                           >
                             <option value="PENDING">PENDING</option>
                             <option value="CONFIRMED">CONFIRMED</option>
+                            <option value="RESCHEDULED">RESCHEDULED</option>
                             <option value="CANCELLED">CANCELLED</option>
                             <option value="COMPLETED">COMPLETED</option>
                           </select>
@@ -1032,10 +1060,11 @@ const AdminPanel = () => {
             </div>
           ) : viewType === "kanban" ? (
             /* KANBAN BOARD VIEW */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 items-start">
               {[
                 { id: "PENDING", title: "Pending Request" },
                 { id: "CONFIRMED", title: "Confirmed Slot" },
+                { id: "RESCHEDULED", title: "Rescheduled Slot" },
                 { id: "CANCELLED", title: "Cancelled Out" },
                 { id: "COMPLETED", title: "Completed Visit" }
               ].map((col) => {
@@ -1048,6 +1077,7 @@ const AdminPanel = () => {
                         <span className={cn("w-2 h-2 rounded-full", 
                           col.id === 'PENDING' ? 'bg-amber-400' :
                           col.id === 'CONFIRMED' ? 'bg-green-400' :
+                          col.id === 'RESCHEDULED' ? 'bg-indigo-400' :
                           col.id === 'CANCELLED' ? 'bg-red-400' : 'bg-blue-400'
                         )} />
                         <h4 className="font-extrabold text-sm text-foreground tracking-tight">{col.title}</h4>
@@ -1099,6 +1129,7 @@ const AdminPanel = () => {
                               >
                                 <option value="PENDING">PENDING</option>
                                 <option value="CONFIRMED">CONFIRMED</option>
+                                <option value="RESCHEDULED">RESCHEDULED</option>
                                 <option value="CANCELLED">CANCELLED</option>
                                 <option value="COMPLETED">COMPLETED</option>
                               </select>
@@ -1257,6 +1288,7 @@ const AdminPanel = () => {
                       >
                         <option value="PENDING">PENDING</option>
                         <option value="CONFIRMED">CONFIRMED</option>
+                        <option value="RESCHEDULED">RESCHEDULED</option>
                         <option value="CANCELLED">CANCELLED</option>
                         <option value="COMPLETED">COMPLETED</option>
                       </select>
@@ -1504,6 +1536,7 @@ const AdminPanel = () => {
                     >
                       <option value="PENDING">PENDING</option>
                       <option value="CONFIRMED">CONFIRMED</option>
+                      <option value="RESCHEDULED">RESCHEDULED</option>
                       <option value="CANCELLED">CANCELLED</option>
                       <option value="COMPLETED">COMPLETED</option>
                     </select>
@@ -1533,11 +1566,10 @@ const AdminPanel = () => {
                     <div>
                       <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground block mb-1.5">Reschedule Time</Label>
                       <Input
-                        type="text"
+                        type="time"
                         value={editTime}
                         onChange={(e) => setEditTime(e.target.value)}
-                        placeholder="e.g. 04:00 PM or 16:30"
-                        className="h-12 rounded-xl border-border bg-muted/30 pl-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
+                        className="h-12 rounded-xl border-border bg-muted/30 px-3 focus:bg-background focus:ring-primary shadow-sm text-xs font-bold text-foreground"
                       />
                     </div>
                   </div>

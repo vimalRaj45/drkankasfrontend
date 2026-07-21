@@ -8,7 +8,6 @@ self.addEventListener('push', function(event) {
     body: data.body || 'Your appointment has been updated.',
     icon: data.icon || '/icon-192.png', 
     badge: data.badge || '/badge.png',
-    image: data.image || '/follicle.jpg', // Optional large preview image
     vibrate: [100, 50, 100],
     data: {
       url: data.url || 'https://drkanaks.com/profile',
@@ -35,6 +34,7 @@ self.addEventListener('notificationclick', function(event) {
     targetUrl = 'https://drkanaks.com/book';
   }
 
+  // Ensure absolute URL
   const urlToOpen = new URL(targetUrl, self.location.origin).href;
 
   const promiseChain = clients.matchAll({
@@ -43,17 +43,22 @@ self.addEventListener('notificationclick', function(event) {
   }).then((windowClients) => {
     let matchingClient = null;
 
+    // Professional window matching: match any client from the same origin
+    const targetOrigin = new URL(urlToOpen).origin;
     for (let i = 0; i < windowClients.length; i++) {
         const windowClient = windowClients[i];
-        if (windowClient.url === urlToOpen) {
+        const clientOrigin = new URL(windowClient.url).origin;
+        if (clientOrigin === targetOrigin) {
             matchingClient = windowClient;
             break;
         }
     }
 
     if (matchingClient) {
-        return matchingClient.focus();
+        // Navigate the existing tab to the correct sub-route and focus it
+        return matchingClient.navigate(urlToOpen).then(client => client.focus());
     } else {
+        // If no tab is open, open a new window
         return clients.openWindow(urlToOpen);
     }
   });
@@ -61,7 +66,7 @@ self.addEventListener('notificationclick', function(event) {
   event.waitUntil(promiseChain);
 });
 
-// Required for PWA: A valid service worker must have a fetch event handler. Wait, for strict PWA wrapping as an App instead of a shortcut, we're returning an active network fetch.
+// Required for PWA: A valid service worker must have a fetch event handler.
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     fetch(event.request).catch(function() {
