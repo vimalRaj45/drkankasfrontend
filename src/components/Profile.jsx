@@ -690,11 +690,7 @@ const Profile = () => {
                   )}>
                     {currentBooking.status || "PENDING"}
                   </span>
-                  {currentBooking.reschedule_request && (
-                    <span className="px-2.5 py-1 rounded-full bg-amber-55 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-wider animate-pulse">
-                      ⚠️ Reschedule Requested
-                    </span>
-                  )}
+
                   <span className="px-2.5 py-1 rounded-full bg-indigo-55 border border-indigo-150 text-indigo-600 text-[10px] font-extrabold group-hover/card:bg-indigo-600 group-hover/card:text-white group-hover/card:border-indigo-600 transition-all duration-300">
                     🔍 View details & call to reschedule
                   </span>
